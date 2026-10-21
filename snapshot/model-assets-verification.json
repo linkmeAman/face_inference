@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "asset_count": 16,
+  "profile": "all",
+  "existing_assets_sha256": "verified",
+  "prepared_sface_offline_rebuild": "exact recorded SHA-256 reproduced",
+  "corrupt_existing_asset": "refused without overwrite",
+  "network_restore_tested": false,
+  "git_model_assets": "already tracked; private runtime/configuration not tracked",
+  "model_weights_changed": false
+}

@@ -33,6 +33,13 @@ runtime runs YuNet/SFace. Models/runtime assets are already included, with no CD
 The separately preserved Python ONNX/PAD inference service is still available
 through `run_inference.py` and its original requirements when needed.
 
+For every model, exact local paths, installation, offline use and missing-file recovery,
+see [MODEL_SETUP.md](MODEL_SETUP.md). Verify all 16 model/runtime assets with:
+
+```bash
+python3 tools/model_assets.py verify
+```
+
 ## What is configurable
 
 * Create arbitrary collections and people through the UI or JSON API. IDs can be
@@ -54,6 +61,8 @@ approved collections. Face quality and recognition do not establish liveness.
 | File | Purpose |
 | --- | --- |
 | [STANDALONE_GUIDE.md](STANDALONE_GUIDE.md) | Configuration, API, embedding into another app, evidence/export and verification |
+| [MODEL_SETUP.md](MODEL_SETUP.md) | All models/runtime assets, local installation, checksum verification, recovery and Git instructions |
+| [MODEL_ALTERNATIVES.md](MODEL_ALTERNATIVES.md) | Recorded model alternatives, additional candidates, tradeoffs, sources and migration requirements |
 | [standalone/CONTRACT.md](standalone/CONTRACT.md) | API, schema, lifecycle and original test matrix |
 | `standalone/service.py`, `math.py` | PHP-free enrollment, aggregation, duplicate and unanimous matching logic |
 | `standalone/storage.py`, `schema.sql` | Authenticated encryption and SQLite persistence/transactions |

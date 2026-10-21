@@ -1,8 +1,8 @@
 [
   {
     "path": ".gitignore",
-    "bytes": 145,
-    "sha256": "1eba588de973796b07ab918a93c4b4b33911c24caea7479d7361d611d520040d"
+    "bytes": 220,
+    "sha256": "1b00b612e43fe4f5df60866d71bd88388d59d1e7a9a7d2895d981c77ad47e2e7"
   },
   {
     "path": "DATASETS.md",
@@ -10,9 +10,19 @@
     "sha256": "7bcf9393a94f1a0195b6c11aa23aceaa1bdf84786a9174b9d8304542df68d96d"
   },
   {
+    "path": "MODEL_ALTERNATIVES.md",
+    "bytes": 10334,
+    "sha256": "6fead1ee921f49369bd52a8689a9e8084bd1e7e7a91422b2c991adb2d89cd8a9"
+  },
+  {
+    "path": "MODEL_SETUP.md",
+    "bytes": 10330,
+    "sha256": "e055c600d5baa972a1f8b63c76e3015c84604f7756431af223a6faa57e9f55b4"
+  },
+  {
     "path": "README.md",
-    "bytes": 3562,
-    "sha256": "350f7f556e45230cc98b0418ebcd54d2f474e5cf731dcfa223f06afeabc24292"
+    "bytes": 4088,
+    "sha256": "edcac2f5699a6f9bddc2272a17d7c2e7dae37f382f8a7b3bfc8f0deac2f1478f"
   },
   {
     "path": "REUSE_GUIDE.md",
@@ -3320,6 +3330,11 @@
     "sha256": "6a8dd798de23782923c78c20ebc4ea2f5a20b44a71b02af19f654612ff298038"
   },
   {
+    "path": "snapshot/model-assets-verification.json",
+    "bytes": 387,
+    "sha256": "bb49a2d1f63f8de3f0c695bcb97212e65c26bc89d3ce923a511bcb688463926c"
+  },
+  {
     "path": "snapshot/nonsecret-settings.json",
     "bytes": 2687,
     "sha256": "0dac468bc914a4e5e3759cf4e0048f9b6f030c0b420cce2eb4928e04ed1b4c56"
@@ -4408,6 +4423,11 @@
     "path": "tests/face-test-env/run.sh",
     "bytes": 2213,
     "sha256": "67fcc4cf461baa5e2f41e84cf4aa778ad367ee16e2565a877a45af686ab47f1c"
+  },
+  {
+    "path": "tools/model_assets.py",
+    "bytes": 11028,
+    "sha256": "6400d5ea8a2c2e264fcdc66c2137851893ed6b2c39397946f2a51bcb997130d6"
   },
   {
     "path": "tools/setup_face_test_databases.php",

@@ -9,3 +9,6 @@ playwright-report/
 
 # Independent Python/SQLite private runtime
 .standalone/
+
+# Optional local model environments; keep model binaries tracked.
+.venv*/
