@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Face workspace</title><link rel="stylesheet" href="/style.css"><script type="module" src="/app.mjs"></script></head>
+<body><main>
+<header><span class="eyebrow">Standalone face service</span><h1>Face workspace</h1><p>Enroll and recognize people in your own collections.</p></header>
+<section id="connection"><h2>Connect</h2><label for="token">API token</label><div class="row"><input id="token" type="password" autocomplete="off" placeholder="Private token from your terminal"><button id="connect">Connect</button></div><p class="hint">Get your token with <code>python3 run.py token</code>. It stays in this tab’s memory.</p></section>
+<p id="notice" class="notice" hidden></p>
+<div id="workspace" hidden>
+<section><h2>Collection</h2><div class="row"><select id="collection" aria-label="Choose collection"></select><button id="refresh" class="secondary">Refresh</button></div><details><summary>Create a collection</summary><div class="fields"><label>Collection ID<input id="collection-id" placeholder="team-one"></label><label>Name<input id="collection-name" placeholder="Team one"></label><button id="add-collection">Create collection</button></div></details></section>
+<section><div class="section-heading"><h2>People</h2><button id="recognize">Start recognition</button></div><div class="fields"><label>Person ID<input id="person-id" placeholder="person-001"></label><label>Name<input id="person-name" placeholder="Display name"></label><button id="add-person" class="secondary">Add / update person</button></div><label class="consent"><input id="consent" type="checkbox">I have consent to capture and store the selected person’s face for this purpose.</label><div class="table-wrap"><table><thead><tr><th>Person</th><th>ID</th><th>Face status</th><th>Actions</th></tr></thead><tbody id="people"></tbody></table></div><p id="empty" class="hint">Create a collection and add a person to begin.</p></section>
+</div>
+<section id="camera-panel" hidden><div class="section-heading"><h2 id="camera-title">Camera</h2><div class="row"><button id="switch-camera" class="secondary">Switch camera</button><button id="stop-camera" class="secondary">Stop</button></div></div><div class="camera"><video id="video" autoplay muted playsinline></video><canvas id="overlay"></canvas></div><progress id="progress" max="1" value="0"></progress><p id="camera-status" role="status">Starting camera</p></section>
+<p id="result" role="status" aria-live="polite"></p><button id="retry" hidden>Retry save</button>
+<footer>Recognition returns an identity decision for your application. This workspace does not mark attendance or trigger an external action.</footer>
+</main></body></html>

@@ -1,0 +1,17 @@
+{
+  "package": "@mediapipe/tasks-vision",
+  "version": "0.10.34",
+  "npm_integrity": "sha512-KFGyhDsjJ+9WUMcMfjTOpcEp3LJNS3KwC7BfvKrCYELn/7G/5kmwnU7z6Spps+iWQoTGL8xW8i68r65OTa3DwA==",
+  "package_archive_sha256": "074761536391855d89edbc6d8e811de0dee99cba8c2b6b5c0167250f11755979",
+  "model_source": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/latest/face_landmarker.task",
+  "files_sha256": {
+    "vision_bundle.js": "8752b2d5cae22bb369ecf9f0a1a6737d4c5fddc8d1cf8b4b16178ae698494077",
+    "wasm/vision_wasm_internal.js": "368e048e33c9ca97222797a16bdf9461ea755c10b0e7c6efcf3cc548a73925fb",
+    "wasm/vision_wasm_internal.wasm": "75a31eb26e007d6d72ba654da9a91b529dc5e309f52fa0ef529e6b574f92ce89",
+    "wasm/vision_wasm_module_internal.js": "0ed17894e8d84bf97f3b721dfb85fe9023f8dcbceaad7dd4463eb56a0c81416c",
+    "wasm/vision_wasm_module_internal.wasm": "c7855da28628611c173fbd674a01a71d6194e50ebc57951cdedc231fe6e566c3",
+    "wasm/vision_wasm_nosimd_internal.js": "fa063c9645c278e526151c42affe43f51512ace147f6fde2ef05b9533b77e8a9",
+    "wasm/vision_wasm_nosimd_internal.wasm": "d0106a8656bc429b28528f2547b775a6eb7196c191cfd75fd9fc830a81bddb80",
+    "face_landmarker.task": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff"
+  }
+}

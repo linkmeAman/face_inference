@@ -1,0 +1,89 @@
+{
+  "contract_version": "v1",
+  "transport": {
+    "method": "POST",
+    "path": "/routes/v1/face-attendance.php",
+    "operation_parameter": "operation",
+    "https_required": true,
+    "maximum_frame_bytes": 1000000
+  },
+  "authentication": {
+    "type": "application_session",
+    "required_headers": ["uid", "bid", "token", "device"],
+    "branch_authoritative": true,
+    "server_time_authoritative": true
+  },
+  "commit_modes": ["TEACHER_REVIEW", "AUTO_PRESENT"],
+  "pad_status": "DEFERRED",
+  "effects": ["SELECT_PRESENT", "ATTENDANCE_RECORDED", "ALREADY_PRESENT", "NONE"],
+  "decisions": ["ACCEPT", "REVIEW", "REJECT"],
+  "operations": {
+    "start": {
+      "content_type": "application/json",
+      "required": ["session_id", "branch_id", "batch_id", "attendance_date", "attendance_session_id", "selected_time", "event_type"],
+      "success_state": "STARTED",
+      "returns": ["scan_id", "scan_token", "roster_version", "expires_in", "provider", "commit_mode", "pad_status"]
+    },
+    "attempt": {
+      "content_types": ["application/json", "multipart/form-data"],
+      "required": ["session_id", "scan_id", "scan_token", "client_attempt_id", "frames"],
+      "client_attempt_id": {"maximum_length": 191, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+      "frame_count": {"minimum": 1, "maximum": 3},
+      "idempotency_field": "client_attempt_id",
+      "success_state": "RECORDED",
+      "returns": ["decision", "effect", "member_id", "contact_id", "attendance_state", "duplicate", "pad_status"]
+    },
+    "status": {
+      "content_type": "application/json",
+      "required": ["session_id", "scan_id", "scan_token"],
+      "returns": ["state", "roster_version", "attempt_count", "selected", "expires_at", "provider", "commit_mode", "pad_status"]
+    },
+    "complete": {
+      "content_type": "application/json",
+      "required": ["session_id", "scan_id", "scan_token"],
+      "success_state": "COMPLETED",
+      "returns": ["matched", "manual", "missing", "review", "attendance_written", "absence_written"]
+    },
+    "cancel": {
+      "content_type": "application/json",
+      "required": ["session_id", "scan_id", "scan_token"],
+      "success_state": "CANCELLED",
+      "returns": ["attendance_untouched"]
+    },
+    "reset-test-data": {
+      "content_type": "application/json",
+      "required": ["session_id", "confirmation"],
+      "confirmation": "RESET FACE ATTENDANCE TEST DATA",
+      "authorization": "authenticated user with Attendance permission",
+      "success_state": "RESET",
+      "returns": ["deleted"],
+      "deletes": ["face-sourced attendance_event", "recognition_attempt", "attendance_scan_roster", "attendance_scan", "face-sourced attendance"],
+      "preserves": ["manual attendance", "face_template", "face_model_template", "face_experiment_log", "face_experiment_purge_ledger"],
+      "rejections": ["RESET_CONFIRMATION_REQUIRED", "ATTENDANCE_ACCESS", "ACTIVE_FACE_SCAN", "RESET_BUSY"]
+    },
+    "enroll": {
+      "content_type": "multipart/form-data",
+      "required": ["session_id", "branch_id", "member_id", "teacher_confirmed_member", "notice_version", "purpose", "frames"],
+      "frame_count": {"minimum": 7, "maximum": 10},
+      "success_state": "ACTIVE",
+      "returns": ["member_id", "contact_id", "template_count", "model_version_id"]
+    },
+    "revoke": {
+      "content_type": "application/json",
+      "required": ["session_id", "branch_id", "member_id"],
+      "success_states": ["REVOKED", "NOT_ENROLLED"],
+      "returns": ["member_id", "revoked_templates", "cache_invalidation_required"]
+    }
+  },
+  "invariants": [
+    "The server freezes and searches only the authorized roster.",
+    "Shadow mode: only ACCEPT with effect SELECT_PRESENT may select a register row.",
+    "Live-write mode: only ACCEPT with effect ATTENDANCE_RECORDED may record present attendance through AttendanceDomainService.",
+    "REVIEW, REJECT, capture failures, cancellations, and completion never write attendance or absence.",
+    "A repeated accepted child returns ALREADY_PRESENT without another attendance row or membership deduction.",
+    "Templates are compared only under the scan's model_version_id.",
+    "Raw frames and embeddings are never returned, logged, or persisted by clients."
+  ],
+  "retryable_reasons": ["INFERENCE_BUSY", "INFERENCE_OFFLINE", "INFERENCE_TIMEOUT", "SCAN_BUSY"],
+  "terminal_reasons": ["METHOD_NOT_ALLOWED", "SESSION_REQUIRED", "ATTENDANCE_ACCESS", "BRANCH_ACCESS", "DATE_POLICY", "INVALID_SESSION", "SCAN_ACCESS", "SCAN_OWNER", "SCAN_EXPIRED", "SCAN_CANCELLED", "SCAN_COMPLETED", "IDEMPOTENCY_CONFLICT", "MODEL_VERSION_INACTIVE", "PROVIDER_MODEL_MISMATCH", "FACE_SCHEMA_NOT_READY", "SCAN_START_FAILED"]
+}

@@ -1,0 +1,10 @@
+{
+  "name": "ccc-browser-face", "private": true,
+  "scripts": {
+    "face:assets": "python3 scripts/prepare_browser_face.py",
+    "test:face": "node --test tests/browser-face/*.test.mjs",
+    "test:face:browser": "playwright test -c tests/browser-face/playwright.config.cjs"
+  },
+  "dependencies": {"onnxruntime-web": "1.24.3"},
+  "devDependencies": {"@playwright/test": "1.58.2"}
+}

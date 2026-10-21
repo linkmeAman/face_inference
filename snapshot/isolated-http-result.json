@@ -1,0 +1,12 @@
+{
+  "status": "PASS",
+  "isolated_http_port": 16639,
+  "models_ready": true,
+  "unauthenticated_model_info": 401,
+  "authenticated_model_info": 200,
+  "synthetic_detection_faces": 1,
+  "real_encoder_dimension": 128,
+  "real_encoder_unit_norm": true,
+  "database_writes": false,
+  "scope": "Synthetic image, private HTTP boundary and original Python models; no live accuracy claim"
+}

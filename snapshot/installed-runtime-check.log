@@ -1,0 +1,3 @@
+PASS: Runtime verified. Bundle: opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3
+[ WARN:0@0.019] global net_impl_backend.cpp:345 setPreferableTarget Targets are not supported by the new graph engine for now
+{"status": "ready", "model_version": "opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3-opencv-preprocess-v2", "preprocessing_version": "sface-opencv-aligncrop-rgb-raw-v2", "independent_port": 6121, "experiment_logging": false, "model_health": {"model_ready": true, "model_version": "opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3-opencv-preprocess-v2", "pad_model_ready": true, "pad_calibration_approved": true}}

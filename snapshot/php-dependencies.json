@@ -1,0 +1,1125 @@
+{
+  "scope": "Static resolvable literal include references only; injected test strings and runtime-CWD includes may be host references",
+  "references": [
+    {
+      "source": "classes/clients/FaceInferenceClient.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/clients/FaceInferenceClient.php",
+      "target": "classes/contracts/FaceRecognitionProvider.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/cron.face_session_cleanup.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/cron.face_session_cleanup.php",
+      "target": "controllers/telemetry.php",
+      "bundled": false
+    },
+    {
+      "source": "classes/dbconnection.class.php",
+      "target": "classes/services/ModuleFlowConnection.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/providers/FaceRecognitionProviderFactory.php",
+      "target": "classes/clients/FaceInferenceClient.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/querybuilder.class.php",
+      "target": "classes/services/ModuleFlowSql.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/AttendanceDomainService.php",
+      "target": "classes/services/AttendanceLedger.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceAudit.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFacePilot.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFacePolicy.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceRolloutAdmin.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceRolloutAdmin.php",
+      "target": "classes/services/BrowserFaceAudit.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/AttendanceDomainService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/BrowserFaceMath.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/BrowserFaceAudit.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceService.php",
+      "target": "classes/services/BrowserFaceTestAttendance.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceTestAttendance.php",
+      "target": "classes/services/BrowserFacePilot.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/BrowserFaceTestAttendance.php",
+      "target": "classes/services/AttendanceDomainService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/FaceErrorLogger.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/contracts/FaceRecognitionProvider.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/AttendanceDomainService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/FaceSelectionGate.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceAttendanceApiService.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceEnrollmentService.php",
+      "target": "classes/services/FaceErrorLogger.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/FaceModelTemplateRepository.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleAttendanceEntry.php",
+      "target": "classes/services/AttendanceDomainService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleEmployeeService.php",
+      "target": "classes/services/ModuleRolePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/services/ModuleFollowupService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/services/ModuleObjectPolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/services/ModuleInvoicePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/services/ModulePaymentPolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFlowRuntime.php",
+      "target": "classes/services/AttendanceLedger.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModuleFollowupService.php",
+      "target": "controllers/sms_via_module.php",
+      "bundled": false
+    },
+    {
+      "source": "classes/services/ModuleFollowupService.php",
+      "target": "controllers/followup.php",
+      "bundled": false
+    },
+    {
+      "source": "classes/services/ModuleInvoicePolicy.php",
+      "target": "classes/services/ModuleFollowupService.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/services/ModulePermissionService.php",
+      "target": "classes/services/ModuleRolePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/session.class.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/session.class.php",
+      "target": "inc/defaults.php",
+      "bundled": true
+    },
+    {
+      "source": "classes/session.class.php",
+      "target": "controllers/userAuthentication.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "classes/querybuilder.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "classes/check_user_subscription.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "classes/services/AttendanceDomainService.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "inc/defaults.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/attendance.php",
+      "target": "controllers/notification.php",
+      "bundled": false
+    },
+    {
+      "source": "controllers/browserFace.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/browserFace.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/browserFace.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/browserFace.php",
+      "target": "classes/services/BrowserFacePilot.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/services/FaceAttendanceApiService.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/services/FaceErrorLogger.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/clients/FaceInferenceClient.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "classes/providers/FaceRecognitionProviderFactory.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceAttendance.php",
+      "target": "inc/defaults.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/services/FaceErrorLogger.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/clients/FaceInferenceClient.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/providers/FaceRecognitionProviderFactory.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceEnrollment.php",
+      "target": "inc/defaults.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceExperimentStatus.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceExperimentStatus.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/faceExperimentStatus.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/mailer.class.php",
+      "bundled": false
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/smsgateway.class.php",
+      "bundled": false
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "inc/defaults.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/services/ModuleCredentials.php",
+      "bundled": true
+    },
+    {
+      "source": "controllers/userAuthentication.php",
+      "target": "classes/services/ModuleCredentials.php",
+      "bundled": true
+    },
+    {
+      "source": "evaluation/backend_match_probe.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/attendance.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/attendance.php",
+      "target": "classes/services/FaceSelectionGate.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/attendance.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/attendance.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/attendance.php",
+      "target": "classes/services/BrowserFacePilot.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "pf/inc/config.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "classes/services/BrowserFaceRolloutAdmin.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "pf/inc/top.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-attendance-settings.php",
+      "target": "pf/inc/side.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-calibration.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-experiment-status.php",
+      "target": "pf/inc/check_session.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config-load.php",
+      "target": "pf/inc/check_session.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config-load.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config-save.php",
+      "target": "pf/inc/check_session.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config-save.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config.php",
+      "target": "pf/inc/check_session.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/face-pilot-config.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "pf/inc/config.php",
+      "target": "pf/inc/check_session.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/attendanceRoute.php",
+      "target": "inc/headers.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/attendanceRoute.php",
+      "target": "controllers/attendance.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/attendanceRoute.php",
+      "target": "classes/services/ModuleFlowRuntime.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/attendanceRoute.php",
+      "target": "classes/services/AttendanceLedger.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/browserFaceRoute.php",
+      "target": "controllers/browserFace.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceAttendanceRoute.php",
+      "target": "inc/headers.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceAttendanceRoute.php",
+      "target": "controllers/faceAttendance.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceEnrollmentRoute.php",
+      "target": "inc/headers.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceEnrollmentRoute.php",
+      "target": "controllers/faceEnrollment.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceExperimentStatusRoute.php",
+      "target": "inc/headers.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/faceExperimentStatusRoute.php",
+      "target": "controllers/faceExperimentStatus.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/v1/face-attendance.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/v1/face-attendance.php",
+      "target": "controllers/faceAttendance.php",
+      "bundled": true
+    },
+    {
+      "source": "routes/v1/face-attendance.php",
+      "target": "controllers/faceEnrollment.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_admin.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_admin.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_admin.php",
+      "target": "classes/services/BrowserFaceEvidenceExclusion.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_admin.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_admin.php",
+      "target": "classes/session.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_apply_lifecycle.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_apply_lifecycle.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_pilot.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_pilot.php",
+      "target": "classes/services/BrowserFacePilot.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/browser_face_pilot.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/disable_face_selection.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/disable_face_selection.php",
+      "target": "classes/contracts/FaceRecognitionProvider.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/disable_face_selection.php",
+      "target": "classes/services/FaceSelectionGate.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/disable_face_selection.php",
+      "target": "classes/clients/FaceInferenceClient.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/disable_face_selection.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/face_enrollment_reset_20261003.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_assurance_v2.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_experiment_logger.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_identity_v3.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_preview_column.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_retake_v5.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_retake_v5.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_safety_v4.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_safety_v4.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_selection_control.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/migrate_face_study_evidence.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "scripts/purge_face_experiment_log.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-API-09-safe-outcomes.php",
+      "target": "classes/services/FaceAttendanceApiService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-API-12-attempt-recovery.php",
+      "target": "tests/attendance/helpers/face-api-recovery-fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-API-13-guided-template-roster.php",
+      "target": "tests/attendance/helpers/face-api-recovery-fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-07-safe-retake-assurance.php",
+      "target": "tests/attendance/FACE-ENR-06-two-burst-assurance.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-07-safe-retake-assurance.php",
+      "target": "classes/cron.face_session_cleanup.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-08-reference-consistency.php",
+      "target": "tests/attendance/FACE-ENR-06-two-burst-assurance.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-09-guided-enrollment.php",
+      "target": "tests/attendance/FACE-ENR-06-two-burst-assurance.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-10-candidate-selection.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-11-selection-persistence.php",
+      "target": "tests/attendance/FACE-ENR-06-two-burst-assurance.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-12-adaptive-evidence.php",
+      "target": "classes/services/FaceAttendanceConfig.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-12-adaptive-evidence.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-ENR-13-early-identity.php",
+      "target": "classes/services/FaceEnrollmentService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-INFRA-04-readiness-classification.php",
+      "target": "tests/attendance/helpers/face-api-recovery-fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-INFRA-04-readiness-classification.php",
+      "target": "classes/clients/FaceInferenceClient.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-PAD-01-liveness-gate.php",
+      "target": "classes/services/FaceAttendanceApiService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/faceEnrollment.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/faceEnrollment.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/faceEnrollment.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/faceEnrollment.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/faceEnrollment.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/querybuilder.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/classes/session.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/controllers/report.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/FACE-PREVIEW-01-stream-endpoint.php",
+      "target": "tests/inc/defaults.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/attendance/helpers/face-api-recovery-fixture.php",
+      "target": "classes/services/FaceAttendanceApiService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/attendance/helpers/face-api-recovery-fixture.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/batch-attendance/flow.php",
+      "target": "tests/batch-attendance/fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/batch-attendance/flow.php",
+      "target": "tests/batch-attendance/lib.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/batch-attendance/router.php",
+      "target": "tests/batch-attendance/classes/dbconnection.class.php",
+      "bundled": false
+    },
+    {
+      "source": "tests/batch-attendance/seed.php",
+      "target": "tests/batch-attendance/fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/batch-attendance/seed.php",
+      "target": "classes/services/ModuleCurrencySchema.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/authorization.php",
+      "target": "controllers/browserFace.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/automatic.php",
+      "target": "tests/browser-face/field-release.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/backend.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/backend.php",
+      "target": "classes/services/BrowserFaceService.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/backend.php",
+      "target": "tests/browser-face/attendance-fixture.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/backend.php",
+      "target": "scripts/browser_face_admin.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/create-integration-fixture.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/create-integration-fixture.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/create-pilot-fixture.php",
+      "target": "scripts/browser_face_pilot.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/exclusion.php",
+      "target": "tests/browser-face/lifecycle.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/exclusion.php",
+      "target": "classes/services/BrowserFaceEvidenceExclusion.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/field-release.php",
+      "target": "tests/browser-face/review.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/field-release.php",
+      "target": "controllers/browserFace.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/lifecycle.php",
+      "target": "tests/browser-face/backend.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/migration.php",
+      "target": "classes/dbconnection.class.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/migration.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/pilot.php",
+      "target": "scripts/browser_face_pilot.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/policy.php",
+      "target": "classes/services/BrowserFacePolicy.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/portrait-access.php",
+      "target": "controllers/faceEnrollment.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/review.php",
+      "target": "tests/browser-face/rollout.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/rollout-admin.php",
+      "target": "classes/services/BrowserFaceRolloutAdmin.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/rollout.php",
+      "target": "tests/browser-face/lifecycle.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/rollout.php",
+      "target": "scripts/browser_face_admin.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/router.php",
+      "target": "controllers/browserFace.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/test-punch.php",
+      "target": "tests/browser-face/testing.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/test-punch.php",
+      "target": "scripts/browser_face_pilot.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/testing-policy.php",
+      "target": "tests/browser-face/policy.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/testing.php",
+      "target": "tests/browser-face/automatic.php",
+      "bundled": true
+    },
+    {
+      "source": "tests/browser-face/testing.php",
+      "target": "classes/services/BrowserFaceEvidenceExclusion.php",
+      "bundled": true
+    }
+  ]
+}

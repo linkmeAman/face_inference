@@ -1,0 +1,112 @@
+[
+  {
+    "sample_id": "FLD-006",
+    "label": "genuine",
+    "score": 0.895,
+    "margin": 0.26,
+    "latency_ms": 16,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Tablet-Classroom-10in",
+    "lighting": "Low-Light-Ambient",
+    "condition": "tilt_25deg"
+  },
+  {
+    "sample_id": "FLD-007",
+    "label": "genuine",
+    "score": 0.908,
+    "margin": 0.275,
+    "latency_ms": 14,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Camera-USB-External",
+    "lighting": "Backlit-Window",
+    "condition": "frontal"
+  },
+  {
+    "sample_id": "FLD-008",
+    "label": "genuine",
+    "score": 0.953,
+    "margin": 0.38,
+    "latency_ms": 9,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Webcam-HD-Integrated",
+    "lighting": "Overhead-Fluorescent",
+    "condition": "distance_0.5m"
+  },
+  {
+    "sample_id": "FLD-009",
+    "label": "genuine",
+    "score": 0.935,
+    "margin": 0.34,
+    "latency_ms": 12,
+    "venue": "Studio-A-MainHall",
+    "device": "Tablet-Classroom-10in",
+    "lighting": "Daylight-Natural",
+    "condition": "glasses_on"
+  },
+  {
+    "sample_id": "FLD-010",
+    "label": "genuine",
+    "score": 0.919,
+    "margin": 0.295,
+    "latency_ms": 14,
+    "venue": "Studio-A-MainHall",
+    "device": "Camera-USB-External",
+    "lighting": "Backlit-Window",
+    "condition": "tilt_15deg"
+  },
+  {
+    "sample_id": "FLD-016",
+    "label": "impostor",
+    "score": 0.267,
+    "margin": 0.038,
+    "latency_ms": 13,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Tablet-Classroom-10in",
+    "lighting": "Low-Light-Ambient",
+    "condition": "look_alike_peer"
+  },
+  {
+    "sample_id": "FLD-017",
+    "label": "impostor",
+    "score": 0.195,
+    "margin": 0.022,
+    "latency_ms": 10,
+    "venue": "Studio-A-MainHall",
+    "device": "Webcam-HD-Integrated",
+    "lighting": "Overhead-Fluorescent",
+    "condition": "cross_cohort"
+  },
+  {
+    "sample_id": "FLD-018",
+    "label": "impostor",
+    "score": 0.231,
+    "margin": 0.03,
+    "latency_ms": 12,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Camera-USB-External",
+    "lighting": "Daylight-Natural",
+    "condition": "different_age"
+  },
+  {
+    "sample_id": "FLD-019",
+    "label": "impostor",
+    "score": 0.358,
+    "margin": 0.065,
+    "latency_ms": 15,
+    "venue": "Studio-A-MainHall",
+    "device": "Tablet-Classroom-10in",
+    "lighting": "Backlit-Window",
+    "condition": "look_alike_peer"
+  },
+  {
+    "sample_id": "FLD-020",
+    "label": "impostor",
+    "score": 0.18,
+    "margin": 0.018,
+    "latency_ms": 9,
+    "venue": "Studio-B-SideClassroom",
+    "device": "Webcam-HD-Integrated",
+    "lighting": "Low-Light-Ambient",
+    "condition": "cross_cohort"
+  }
+]

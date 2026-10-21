@@ -1,0 +1,240 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Creative Cultural Centre Face Attendance API",
+    "version": "1.0.0",
+    "description": "Server-authoritative supervised face-attendance lifecycle. Recognition can select a Present row but cannot commit attendance, absence, or membership changes."
+  },
+  "servers": [
+    {"url": "https://admin.creativeculturalcentre.in"}
+  ],
+  "paths": {
+    "/routes/v1/face-attendance.php": {
+      "post": {
+        "operationId": "faceAttendanceV1",
+        "summary": "Execute one v1 face-attendance lifecycle operation",
+        "parameters": [
+          {
+            "name": "operation",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": ["start", "attempt", "status", "complete", "cancel", "enroll", "revoke"]
+            }
+          }
+        ],
+        "security": [
+          {"uidAuth": [], "bidAuth": [], "tokenAuth": [], "deviceAuth": []}
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/components/schemas/StartRequest"},
+                  {"$ref": "#/components/schemas/AttemptRequest"},
+                  {"$ref": "#/components/schemas/ScanRequest"},
+                  {"$ref": "#/components/schemas/RevokeRequest"}
+                ]
+              }
+            },
+            "multipart/form-data": {
+              "schema": {
+                "oneOf": [
+                  {"$ref": "#/components/schemas/AttemptMultipartRequest"},
+                  {"$ref": "#/components/schemas/EnrollMultipartRequest"}
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Domain response. Inspect state, decision, effect, and reason.",
+            "headers": {
+              "X-Attendance-API-Version": {
+                "schema": {"type": "string", "const": "v1"}
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {"$ref": "#/components/schemas/FaceAttendanceResponse"}
+              }
+            }
+          },
+          "403": {"description": "Origin is not allowed"},
+          "404": {"description": "Unknown operation"},
+          "405": {"description": "POST is required"},
+          "426": {"description": "HTTPS is required"},
+          "503": {"description": "Browser origin allowlist is not configured"}
+        }
+      },
+      "options": {
+        "operationId": "faceAttendanceV1Preflight",
+        "responses": {"204": {"description": "CORS preflight accepted"}}
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "uidAuth": {"type": "apiKey", "in": "header", "name": "uid"},
+      "bidAuth": {"type": "apiKey", "in": "header", "name": "bid"},
+      "tokenAuth": {"type": "apiKey", "in": "header", "name": "token"},
+      "deviceAuth": {"type": "apiKey", "in": "header", "name": "device"}
+    },
+    "schemas": {
+      "BaseRequest": {
+        "type": "object",
+        "required": ["session_id"],
+        "properties": {"session_id": {"type": ["string", "integer"]}}
+      },
+      "StartRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["branch_id", "batch_id", "attendance_date", "attendance_session_id", "selected_time", "event_type"],
+            "properties": {
+              "branch_id": {"type": "integer", "minimum": 1},
+              "batch_id": {"type": "integer", "minimum": 1},
+              "attendance_date": {"type": "string", "format": "date"},
+              "attendance_session_id": {"type": "integer", "minimum": 0},
+              "selected_time": {"type": "string", "pattern": "^[0-9]{2}:[0-9]{2}(:[0-9]{2})?$"},
+              "event_type": {"type": "string", "const": "PUNCH_IN"}
+            }
+          }
+        ]
+      },
+      "AttemptRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["scan_id", "scan_token", "client_attempt_id", "frames"],
+            "properties": {
+              "scan_id": {"type": "integer", "minimum": 1},
+              "scan_token": {"type": "string", "minLength": 64, "maxLength": 64},
+              "client_attempt_id": {"type": "string", "maxLength": 191, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+              "frames": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "string", "contentEncoding": "base64"}},
+              "challenge_token": {"type": "string", "minLength": 32, "maxLength": 128}
+            }
+          }
+        ]
+      },
+      "ScanRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["scan_id", "scan_token"],
+            "properties": {
+              "scan_id": {"type": "integer", "minimum": 1},
+              "client_attempt_id": {"type": "string", "maxLength": 191, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$", "description": "Optional on status: look up this attempt under the existing owner and browser binding. No new operation is required."},
+              "scan_token": {"type": "string", "minLength": 64, "maxLength": 64}
+            }
+          }
+        ]
+      },
+      "RevokeRequest": {
+        "allOf": [
+          {"$ref": "#/components/schemas/BaseRequest"},
+          {
+            "type": "object",
+            "required": ["branch_id", "member_id"],
+            "properties": {
+              "branch_id": {"type": "integer", "minimum": 1},
+              "member_id": {"type": "integer", "minimum": 1}
+            }
+          }
+        ]
+      },
+      "AttemptMultipartRequest": {
+        "type": "object",
+        "required": ["session_id", "scan_id", "scan_token", "client_attempt_id", "frames"],
+        "properties": {
+          "session_id": {"type": ["string", "integer"]},
+          "scan_id": {"type": "integer", "minimum": 1},
+          "scan_token": {"type": "string", "minLength": 64, "maxLength": 64},
+          "client_attempt_id": {"type": "string", "maxLength": 191, "pattern": "^[A-Za-z0-9][A-Za-z0-9._:-]*$"},
+          "challenge_token": {"type": "string", "minLength": 32, "maxLength": 128},
+          "frames": {"type": "array", "items": {"type": "string", "format": "binary"}, "minItems": 3, "maxItems": 3}
+        }
+      },
+      "EnrollMultipartRequest": {
+        "type": "object",
+        "required": ["session_id", "branch_id", "member_id", "teacher_confirmed_member", "notice_version", "purpose", "frames"],
+        "properties": {
+          "session_id": {"type": ["string", "integer"]},
+          "branch_id": {"type": "integer", "minimum": 1},
+          "member_id": {"type": "integer", "minimum": 1},
+          "teacher_confirmed_member": {"type": "boolean", "const": true},
+          "notice_version": {"type": "string", "minLength": 1, "maxLength": 64},
+          "purpose": {"type": "string", "minLength": 1, "maxLength": 100},
+          "frames": {"type": "array", "items": {"type": "string", "format": "binary"}, "minItems": 7, "maxItems": 10}
+        }
+      },
+      "ProviderMetadata": {
+        "type": "object",
+        "required": ["provider_id", "provider_version", "model_version_id", "calibration_policy_version"],
+        "properties": {
+          "provider_id": {"type": "string"},
+          "provider_version": {"type": "string"},
+          "model_version_id": {"type": "integer", "minimum": 1},
+          "model_version": {"type": "string"},
+          "calibration_policy_version": {"type": "string"}
+        }
+      },
+      "SelectedMember": {
+        "type": "object",
+        "required": ["member_id", "contact_id"],
+        "properties": {
+          "member_id": {"type": "integer"},
+          "contact_id": {"type": "integer"},
+          "member_name": {"type": "string"}
+        }
+      },
+      "FaceAttendanceResponse": {
+        "type": "object",
+        "required": ["api_version", "pad_status", "commit_mode", "live_write", "state"],
+        "properties": {
+          "api_version": {"type": "string", "const": "v1"},
+          "pad_status": {"type": "string", "const": "DEFERRED"},
+          "commit_mode": {"type": "string", "enum": ["TEACHER_REVIEW", "AUTO_PRESENT"]},
+          "live_write": {"type": "boolean"},
+          "state": {"type": "string"},
+          "retryable": {"type": "boolean", "description": "Whether bounded recovery is allowed; never permission to replay uncertain frame bytes."},
+          "retry_after_ms": {"type": "integer", "minimum": 0, "description": "Minimum delay before recovery. Browser uses at most three checks with 1, 2 and 4 second backoff, respecting this delay."},
+          "recovery_action": {"type": "string", "enum": ["CHECK_STATUS", "RECAPTURE", "STOP"]},
+          "attempt": {
+            "type": "object",
+            "properties": {
+              "state": {"type": "string", "enum": ["RECORDED", "PROCESSING", "NOT_FOUND", "UNAVAILABLE", "REJECTED"]},
+              "client_attempt_id": {"type": "string"}
+            },
+            "description": "Status-only optional lookup. RECORDED contains the existing attempt response fields, revalidated for current eligibility, without inference or nonce consumption. PROCESSING means a worker still owns the attempt lock. NOT_FOUND means no completed result exists and no worker owns that ID (including abandoned reservations); recapture only when recovery_action is RECAPTURE, using a fresh nonce and new ID. UNAVAILABLE/STOP is terminal."
+          },
+          "reason": {"type": "string"},
+          "message": {"type": "string"},
+          "decision": {"type": "string", "enum": ["ACCEPT", "REVIEW", "REJECT"]},
+          "effect": {"type": "string", "enum": ["SELECT_PRESENT", "ATTENDANCE_RECORDED", "ALREADY_PRESENT", "NONE"]},
+          "attendance_state": {"type": "string", "enum": ["PENDING_TEACHER_COMMIT", "RECORDED", "ALREADY_PRESENT", "NOT_RECORDED"]},
+          "attendance_id": {"type": "integer", "minimum": 0},
+          "member_id": {"type": ["integer", "null"]},
+          "contact_id": {"type": ["integer", "null"]},
+          "member_name": {"type": ["string", "null"]},
+          "member_already_selected": {"type": "boolean"},
+          "duplicate": {"type": "boolean"},
+          "scan_id": {"type": "integer"},
+          "scan_token": {"type": "string"},
+          "selected": {"type": "array", "items": {"$ref": "#/components/schemas/SelectedMember"}},
+          "provider": {"$ref": "#/components/schemas/ProviderMetadata"},
+          "attendance_written": {"type": "boolean"},
+          "absence_written": {"type": "boolean", "const": false}
+        },
+        "description": "In shadow mode, ACCEPT with SELECT_PRESENT may alter only reversible client register state. In configured live-write mode, ACCEPT with ATTENDANCE_RECORDED records present attendance through the existing attendance domain transaction; ALREADY_PRESENT never creates a second record or deduction. REVIEW, REJECT, capture failures, cancellation, expiry, and completion never write attendance or absence. A completed attempt ID is bound to scan, actor, browser, ordered frame hashes, challenge and canonical capture contexts. An identical completed retry resolves before nonce consumption; changing its payload returns IDEMPOTENCY_CONFLICT. Old results without a fingerprint can be recovered through status, not an unverifiable replay. Classified busy, offline and timeout failures are retryable; unclassified readiness or invalid model/calibration readiness is terminal."
+      }
+    }
+  }
+}

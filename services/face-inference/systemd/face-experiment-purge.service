@@ -1,0 +1,8 @@
+[Unit]
+Description=CCC face experiment retention purge
+
+[Service]
+Type=oneshot
+User=ccc-face-inference
+Group=ccc-face-inference
+ExecStart=/usr/bin/php /var/www/admin.creativeculturalcentre.in/scripts/purge_face_experiment_log.php --database=ccc_database --apply

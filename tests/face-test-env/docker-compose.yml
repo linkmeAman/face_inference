@@ -1,0 +1,20 @@
+services:
+  mysql-face-test:
+    image: mysql:8.4
+    container_name: ccc-face-attendance-test-mysql
+    restart: "no"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${FACE_TEST_MYSQL_ROOT_PASSWORD}
+    ports:
+      - "${FACE_TEST_DB_PORT}:3306"
+    volumes:
+      - face_test_mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p$${MYSQL_ROOT_PASSWORD} --silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  face_test_mysql_data:

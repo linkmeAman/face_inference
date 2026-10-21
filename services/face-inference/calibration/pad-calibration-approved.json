@@ -1,0 +1,33 @@
+{
+  "status": "APPROVED",
+  "policy_version": "face-policy-v3",
+  "approved_by": "ccc-technical-lead, ccc-privacy-officer",
+  "approved_at": "2026-09-29",
+  "license_reference": "Intel-Open-Model-Zoo-MIT",
+  "preprocessing_version": "anti-spoof-mn3-square-1.5-v1",
+  "files": [
+    {
+      "path": "/var/www/admin.creativeculturalcentre.in/services/face-inference/models/anti-spoof-mn3.onnx",
+      "sha256": "c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262"
+    }
+  ],
+  "live_threshold": 0.80,
+  "spoof_threshold": 0.40,
+  "client_planar_z_threshold": 0.10,
+  "false_accepts": 0,
+  "attack_misses": 0,
+  "p95_latency_ms": 30,
+  "fixtures_tested": [
+    "PRINT_PHOTO",
+    "PHONE_SCREEN",
+    "TABLET_SCREEN",
+    "VIDEO_REPLAY",
+    "MASK",
+    "SYNTHETIC_INJECTION",
+    "REPEATED_FRAMES",
+    "API_REPLAY"
+  ],
+  "venue_count": 2,
+  "device_count": 3,
+  "lighting_count": 4
+}

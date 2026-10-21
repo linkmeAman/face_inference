@@ -1,0 +1,15 @@
+{
+  "status": "PASS",
+  "actual_browser_models": true,
+  "python_sqlite_api": true,
+  "php_required": false,
+  "enrollment": true,
+  "duplicate_rejection": true,
+  "recognition_suggestion": true,
+  "response_loss_retry": true,
+  "restart_persistence": true,
+  "captures": 2,
+  "references": 1,
+  "scope": "Synthetic simulated camera; no live accuracy/liveness claim",
+  "artifacts": "/tmp/face-standalone-ui-VxBStw"
+}

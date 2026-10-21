@@ -1,0 +1,63 @@
+{
+    "version": "browser-face-rollout-v1",
+    "enabled": true,
+    "default_mode": "SHADOW",
+    "scopes": [
+        {
+            "database": "ccc_database",
+            "branch_id": 5,
+            "batch_id": 0,
+            "mode": "SHADOW",
+            "approved_by": "admin:3",
+            "approved_at": "2026-10-15T13:56:39+00:00",
+            "change_id": "2bb87cee148032e7",
+            "expires_at": "2031-10-14T13:56:39+00:00"
+        },
+        {
+            "database": "ccc_database",
+            "branch_id": 4,
+            "batch_id": 0,
+            "mode": "SHADOW",
+            "approved_by": "admin:3",
+            "approved_at": "2026-10-15T13:56:39+00:00",
+            "change_id": "2bb87cee148032e7",
+            "expires_at": "2031-10-14T13:56:39+00:00"
+        },
+        {
+            "database": "ccc_database",
+            "branch_id": 2,
+            "batch_id": 0,
+            "mode": "SHADOW",
+            "approved_by": "admin:3",
+            "approved_at": "2026-10-15T13:56:39+00:00",
+            "change_id": "2bb87cee148032e7",
+            "expires_at": "2031-10-14T13:56:39+00:00"
+        },
+        {
+            "database": "ccc_database",
+            "branch_id": 1,
+            "batch_id": 0,
+            "mode": "SHADOW",
+            "approved_by": "admin:3",
+            "approved_at": "2026-10-15T13:56:39+00:00",
+            "change_id": "2bb87cee148032e7",
+            "expires_at": "2031-10-14T13:56:39+00:00"
+        }
+    ],
+    "testing_evaluation": {
+        "enabled": true,
+        "database": "ccc_database",
+        "branch_id": 2,
+        "expires_at": "2026-10-16T12:40:59.911282+00:00",
+        "report_path": "/var/lib/creativeculturalcentre/browser-face-testing-report-20261011.json",
+        "report_sha256": "ff981235539848599bc13917caa2a95585653ed34f66844b28ecb9fb9b1fae63",
+        "purpose": "NON_WRITING_TEST_RECOGNITION",
+        "production_approved": false
+    },
+    "last_change": {
+        "at": "2026-10-15T13:56:39+00:00",
+        "by": "admin:3",
+        "request_id": "2bb87cee148032e7",
+        "action": "set"
+    }
+}

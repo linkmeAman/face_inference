@@ -1,0 +1,1 @@
+{"status": "ready", "config": "/var/www/face_inference/.standalone/config.json", "database": "/var/www/face_inference/.standalone/faces.sqlite3", "mode": "EVALUATION", "php_required": false, "model_version": "sface-int8bq-fb143eea"}

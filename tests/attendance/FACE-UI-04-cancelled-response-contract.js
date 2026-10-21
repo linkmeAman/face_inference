@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+const fs=require('fs');const controller=fs.readFileSync('pf/js/controllers/batchAttendanceController.js','utf8');const start=controller.indexOf('function cancelFaceScan()');const end=controller.indexOf('function resetFaceDetectionUi()',start);const block=controller.slice(start,end);
+if(!block.includes('clearFaceStartRetry();')||!block.includes('discardFaceSelections();')||!block.includes("$scope.attendanceStage = 'READY'")||!block.includes('No scan changes were kept')){console.error('FAIL cancellation must clear retries, discard face selections, and return READY');process.exit(1);}console.log('PASS FACE-UI-04 cancel rollback contract');

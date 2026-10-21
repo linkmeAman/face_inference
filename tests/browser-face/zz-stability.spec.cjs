@@ -1,0 +1,30 @@
+const {test,expect}=require('@playwright/test');
+test.use({permissions:['camera'],launchOptions:{args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream','--use-file-for-fake-video-capture=/tmp/ccc-public-camera.y4m']}});
+test('real-model scanner recovers worker, ended track and background without duplicate domain writes',async({page,context})=>{
+ page.on('dialog',dialog=>dialog.accept());
+ const login=await context.request.post('/fixture-login',{headers:{'X-Test-Key':process.env.FACE_BROWSER_TEST_KEY}});expect(login.ok()).toBe(true);
+ await page.goto('/tests/browser-face/embedded.php');await expect(page.locator('#enroll-1')).toBeVisible();
+ let before;const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ await page.locator('#session').selectOption('8');await page.locator('#scan').click();
+ await expect.poll(()=>page.evaluate(()=>testFlow.lastMarked?.length || 0),{timeout:20000}).toBe(5);
+ before ||= await(await context.request.get('/fixture-counts')).json();
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.waitForDeparture)).toBe(true);
+ await page.evaluate(()=>{window.originalStream=testFlow.capture.stream;window.originalWorker=testFlow.capture.worker;originalWorker.terminate();});
+ // A terminated worker does not fire onerror; missing observations must recover.
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.worker && testFlow.capture.worker!==originalWorker && testFlow.capture.engineReady),{timeout:25000}).toBe(true);
+ expect(await page.evaluate(()=>testFlow.capture.stream===originalStream)).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.waitForDeparture),{timeout:20000}).toBe(true);
+ await page.evaluate(()=>testFlow.capture.stream.getTracks()[0].stop());
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.stream && testFlow.capture.stream!==originalStream && testFlow.capture.engineReady),{timeout:15000}).toBe(true);
+ expect(await page.evaluate(()=>testFlow.state.busy)).toBe(true);
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.waitForDeparture),{timeout:20000}).toBe(true);
+ await page.evaluate(()=>{window.fixtureHidden=true;Object.defineProperty(document,'hidden',{configurable:true,get:()=>fixtureHidden});document.dispatchEvent(new Event('visibilitychange'));});
+ await page.waitForTimeout(1500);expect(await page.evaluate(()=>testFlow.state.open && testFlow.capture.paused)).toBe(true);
+ await page.evaluate(()=>{fixtureHidden=false;document.dispatchEvent(new Event('visibilitychange'));});
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.active && !testFlow.capture.paused && testFlow.capture.waitForDeparture),{timeout:20000}).toBe(true);
+ const after=await(await context.request.get('/fixture-counts')).json();expect(after).toEqual(before);
+ await page.locator('#session').selectOption('7');await expect(page.locator('.browser-face-panel')).toBeHidden();
+ expect(await page.evaluate(()=>testFlow.capture.worker===null && testFlow.capture.stream===null && !testFlow.capture.busy && testFlow.capture.frameCallback===null)).toBe(true);
+ await page.locator('#scan').click();await expect.poll(()=>page.evaluate(()=>testFlow.lastMarked?.length || 0),{timeout:20000}).toBe(5);expect(await page.evaluate(()=>testFlow.context.session_id)).toBe(7);
+ await page.getByRole('button',{name:'Close',exact:true}).click();expect(await(await context.request.get('/fixture-counts')).json()).toEqual(before);expect(errors).toEqual([]);
+});

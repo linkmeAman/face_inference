@@ -1,0 +1,206 @@
+> The PHP-free standalone application is now the default. See [STANDALONE_GUIDE.md](STANDALONE_GUIDE.md). The method map below preserves the original system and its CCC integration for reference.
+
+# Reproduce the current enrollment and recognition methods
+
+## 1. Choose the existing pipeline that matches your use
+
+| Pipeline | Entry and processing | Template compatibility |
+| --- | --- | --- |
+| Current ordinary attendance UI | `pf/attendance.php` → `attendance.mjs` → `EmbeddedFaceFlow` → `AutomaticCapture` → browser YuNet/SFace worker → PHP matching/storage | `sface-int8bq-fb143eea` / `yunet640-similarity5-rgb255-v1`, 128 dimensions |
+| Preserved Python and guided enrollment path | Face controllers → `FaceInferenceClient` → private Python `app.main`/`InferenceService`/`OnnxFaceMatcher`; older tracker and MediaPipe worker supply capture geometry | `opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3-opencv-preprocess-v2` / `sface-opencv-aligncrop-rgb-raw-v2`, 128 dimensions |
+
+Both use the same original YuNet/SFace weights. Their preprocessing/versioned
+protocols and enrollment policy are distinct. Do not mix stored vectors, model IDs,
+calibration or endpoint payloads between them. Keep the browser flow for the same
+current automatic UX. The older guided system remains in this bundle as source
+and a separately runnable private inference service.
+
+## 2. Frontend method map
+
+| File | Methods / purpose to retain |
+| --- | --- |
+| `pf/js/browser-face/attendance.mjs` | `installAttendanceFace(scope, options)`: current Angular attendance context, row actions and saved-result updates |
+| `pf/js/browser-face/embedded.mjs` | `EmbeddedFaceFlow`: `initialize`, `open`, `createCapture`, `batch`, `submit`, `apply`, `retry`, `close`, `dispose`, `switchCamera`; owns camera/API lifecycle and prevents stale completion |
+| `pf/js/browser-face/capture.mjs` | `AutomaticCapture`: `start`, `tick`, `observe`, `recover`, `switchCamera`, `stop`; observation spacing, collection, tracking, retries and media cleanup |
+| `pf/js/browser-face/worker.mjs` | `init` and `process`, worker messages `init`/`frame` and `ready`/`observation`/`error`; actual WASM model execution |
+| `pf/js/browser-face/core.mjs` | `normalize`, `cosine`, `aggregate`, `similarityTransform`, `alignRGB`, `quality`, `decodeYuNet`, guide selection and display-coordinate transforms |
+| `pf/js/browser-face/api.mjs` | `FaceApi.get/post/decode`, same-origin credentials, CSRF, bounded requests and idempotent retry |
+| `pf/js/browser-face/continuity.mjs` | Continuity rules, invalidation on interruption or an abrupt tracked-box transition |
+| `pf/js/browser-face/facing.mjs` | Facing-mode resolution using settings/capabilities/device labels and mobile fallback |
+| `pf/js/browser-face/messages.mjs` | Stable API-to-operator messages and separate pending/duplicate/recapture/success states |
+| `pf/inc/browser-face-panel.php`, `pf/css/browser-face*.css` | Actual panel controls and styling; attendance.php also contains inline camera/UI styling |
+| `pf/js/controllers/batchAttendanceController.js` | Existing attendance host, selection and controller boot integration |
+| `pf/js/faceEnrollmentTracker.js`, `faceEnrollmentLandmarker.worker.js`, `controllers/faceAttendanceController.js` | Preserved older guided/tracking workflow; MediaPipe resources in `pf/vendor/face-landmarker/0.10.34/` |
+
+For a separate UI, mount your own video/canvas and use this existing interface:
+
+```javascript
+import {EmbeddedFaceFlow} from './pf/js/browser-face/embedded.mjs';
+const flow = new EmbeddedFaceFlow(video, canvas, {
+  csrf: pageIssuedCsrf,
+  url: '/your-face-api',
+  change: state => renderFaceState(state),
+  result: (savedResult, context) => refreshConfirmedRecord(savedResult, context)
+});
+await flow.open({mode: 'enroll', person_id, consent: true,
+  batch_id, date, session_id, time});
+// Use mode:'attendance' and the authorized session context for recognition.
+// Call await flow.close() on cancellation and flow.dispose() on unmount.
+```
+
+The adapter must implement the existing action/payload/response contract in
+`docs/api/browser-face.md`; a different URL alone does not supply a backend.
+Serve `.mjs` as JavaScript and `.wasm` as `application/wasm` over HTTPS or localhost.
+Preserve `pf/js/browser-face/` and `pf/vendor/browser-face/` relative locations.
+The worker resolves model/runtime URLs relative to its own module. The `.mjs?v=...`
+release query strings and attendance.php preloads are part of the copied release.
+
+## 3. Exact browser processing and tweaks
+
+`pf/js/browser-face/contract.json` is the numerical source of truth:
+
+* YuNet input: 640 square, aspect ratio retained, black padding at right/bottom,
+  raw BGR float32 NCHW, confidence 0.85, NMS IoU 0.3, strides 8/16/32.
+* Guide selection uses the actual displayed camera window in original unmirrored
+  source coordinates. It does not mask model pixels. Multiple suitable faces pause
+  collection. Faces smaller than 80 pixels are rejected.
+* Alignment uses five landmarks, similarity transform and 112 square RGB raw
+  float32 NCHW (scale 1, mean 0). Target points are exactly
+  `[38.2946,51.6963]`, `[73.5318,51.5014]`, `[56.0252,71.7366]`,
+  `[41.5493,92.3655]`, `[70.7299,92.2041]`.
+* `alignRGB` matches OpenCV's 1/32-pixel interpolation convention with zero border
+  and rounded sampled pixels. Avoid replacing it with a generic canvas crop.
+* Brightness 40–220, Laplacian variance at least 35, clipped fraction below 0.4;
+  clipping counts grayscale values below 5 or above 250 on the aligned face.
+* Collect five usable observations, spaced at least 350 ms, with at least three
+  needed after aggregation. Capture timeout is 30 seconds. Keep bounded work;
+  the worker closes transferred bitmaps and disposes ONNX tensors.
+* SFace `fc1` output is L2-normalized to a finite 128-vector.
+* Aggregation normalizes observations, finds a medoid with median cosine distance,
+  rejects deviations above median + 3 × max(MAD, 1e-6), requires the minimum,
+  averages retained observations and normalizes again. PHP recomputes it.
+* Front-camera preview and overlay are mirrored; the model frame is unmirrored.
+  Rear/front/unknown-facing behavior and portrait geometry have regression tests.
+* Five-observation continuity clears partial samples on disappearance/interruption
+  or geometric handoff. Similarity to a prior arrival is not identity permission.
+* Keep generation/epoch checks and ignore errors from a terminated worker; stop
+  media tracks, timers and pending processing on close. Preserve submitted request
+  identity through response loss. A saved record remains saved if refresh fails.
+* ORT Web is pinned to 1.24.3, single-thread WASM, same-origin assets. The preparation
+  script removes stale SFace initializer input declarations without changing weights.
+  The prepared recognizer hash therefore differs from the original ONNX hash.
+
+## 4. Authoritative decisions and storage
+
+`BrowserFaceService` validates the authenticated person/session, vector dimensions,
+finite unit norm, capture/model/preprocessing versions, observation count and
+recomputed aggregate. Use `BrowserFaceMath` for aggregation parity and
+`matchObservations` for the current unanimous/unique identity rule.
+
+Enrollment checks duplicates centrally after aggregation, under the existing tenant
+lock/transaction. PENDING candidates are persistent, encrypted and conflict-checked;
+only compatible, consented and unexpired candidates in an authorized scope become
+ACTIVE. Repeated captures do not overwrite the original training reference. An
+independent validation observation is not an active enrollment.
+
+Recognition requires every observation to match exactly one eligible ACTIVE identity
+above the approved attendance threshold, with unanimous winners. Unknown, ambiguous,
+ineligible and conflicting batches stay unmarked. A server-held scan freezes the
+authorized roster. The browser cannot choose a database, identity threshold or actor.
+
+`BrowserFacePolicy` binds matching to contract versions and a hash-verified approved
+evaluation report. `BrowserFaceRolloutAdmin`/`BrowserFaceAudit` enforce exact branch
+and batch rollout, expiry and history. SHADOW collects suggestions and requires
+explicit review; authorized LIVE calls `AttendanceDomainService` automatically.
+Testing/pilot modes remain scoped, expiring and separately guarded.
+
+`FaceEmbeddingCipher` in `FaceEnrollmentService.php` and the model template repository
+implement encrypted vectors and key IDs. New reuse needs its own stable key and
+identity store. Never copy an old key ID while generating a different key for old
+ciphertext. Existing API request journaling and attendance ledger protect retries and
+membership deductions. Preserve them when reusing the CCC persistence implementation.
+
+For a non-attendance purpose, adapt the confirmed-match callback to your own action;
+keep the enrollment/quality/duplicate/identity decisions and its idempotency intact.
+
+## 5. Python service and preserved guided flow
+
+| Module | Role |
+| --- | --- |
+| `app/main.py`, `schemas.py` | Bounded private HTTP routes, token auth, payloads, errors and concurrency |
+| `app/service.py` | Scan TTL/rosters, attempts, enrollment/reference encoding, challenge and replay policy |
+| `app/matcher.py` | Model orchestration, template support, holdout/reference checks, matching decisions |
+| `app/detector.py`, `encoder.py` | YuNet, five-point OpenCV-compatible SFace alignment and normalized embeddings |
+| `app/face_selection.py`, `quality.py` | Guide geometry, candidate selection, quality/pose/depth evidence |
+| `app/pad.py` | Anti-spoof inference, fixed centered square 1.5× face crop, 128-square preprocessing, median consensus |
+| `app/settings.py`, `calibration.py` | Version/hash-bound models, identity and PAD policy loading |
+| `app/experiment_logger.py`, `experiment_shadow.py`, `safe_logging.py` | Optional opaque evidence logging and shadow jobs; production writer credentials excluded |
+| `tools/` | Calibration, study partitioning, release evaluation, dataset management, benchmarks and health verification |
+
+Python routes: `GET /health`, `GET /model-info`, private
+`POST /internal/scans/{id}/roster`, `POST /internal/scans/{id}/attempts`,
+`DELETE /internal/scans/{id}`, `POST /internal/enrollments/encode`,
+`POST /internal/reference/encode`, `POST /v1/detect`, `POST /v1/infer`.
+See `app/main.py` and the original README for exact JSON protocols. Keep the service
+private; callers send `X-Face-Inference-Token`. Raw image encoding routes are different
+from the current browser observation API.
+
+Captured identity policy v3: accept 0.90, minimum margin 0.20, single-candidate accept
+0.95, support threshold 0.85 with two supporting templates, verified reference 0.90,
+holdout median/minimum 0.90/0.85, cross-frame consistency 0.85, duplicate review/block
+0.75/0.90. PAD live/spoof 0.80/0.40, planar Z threshold 0.10. Exact policy artifacts,
+including earlier versions, are included. Guided protocols, frame counts, enrollment
+candidate/holdout selection and retake protection remain in the source and tests.
+
+The launcher relocates only `files[].path` in calibration copies. Original artifacts
+remain byte-identical. Their file hashes and resulting recognition generation change
+for the relocated runtime; pair them with their own roster/caches and adapter rather
+than reusing production scan state. These copied approvals do not approve a new
+camera/cohort/application or make the browser flow calibrated.
+
+## 6. Host-application boundary
+
+The face subsystem depends on CCC session/Attendance authorization, server-resolved
+tenants/branches, member/contact/membership/batch/session tables, MySQL transactions,
+OpenSSL encryption, cURL for Python clients, and the existing attendance domain.
+Face-related SQL and the minimal test schema are included. They are not a full
+schema dump of CCC or a live data export.
+
+The original attendance.php shell references CCC navigation/theme/CDN scripts and
+other page features. Those are application integration points; the reusable camera
+modules need only the actual face panel elements or equivalent UI. Login helpers
+also reference CCC mailer/SMS/credential modules; use your host authentication instead
+of importing unrelated communication services. `snapshot/php-dependencies.json`
+records resolvable literal PHP includes and missing host files for review.
+
+Original systemd units, deployment guides and migration scripts contain production
+paths and historical operational commands. They are reference material; use the
+separate launcher/template for this copy. No migrations, legacy reset scripts,
+experiment timers or rollout activations are run by assembling this bundle.
+
+## 7. Verification and evaluation
+
+```bash
+python3 export_tools/verify_bundle.py
+.venv/bin/python run_inference.py --check
+PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=services/face-inference .venv/bin/python -m unittest discover -s services/face-inference/tests
+node --test tests/browser-face/*.test.mjs
+python3 -m unittest discover -s evaluation -p 'test_*.py'
+php tests/browser-face/authorization.php
+php tests/browser-face/policy.php
+php tests/browser-face/rollout-admin.php
+```
+
+For full UI/MySQL tests, first provision an isolated test database and host login
+fixtures as described in `tests/browser-face/README.md` and `tests/face-test-env/`.
+Those tests require application integration and are not executed against live data
+by the export. The public evaluator intentionally requires dataset/output outside
+its application root. `export_tools/evaluate_public.sh` stages the bundled synthetic
+subset into a private temporary directory before invoking the unchanged harness.
+
+For approved live matching collect representative consented identities and known
+unknowns over distinct dates, devices and lighting; use complete labeled batches.
+The original current policy requires independent decision/workflow validation and
+report approval. Five adjacent observations are one capture, not five independent
+accuracy trials. Browser recognition has no validated photo/video replay defense;
+quality, continuity and face outlines do not prove liveness.

@@ -1,0 +1,23 @@
+{
+  "status": "APPROVED",
+  "license_reference": "OpenCV-Zoo-MIT-Apache-2.0",
+  "approved_by": "ccc-technical-lead, ccc-privacy-officer",
+  "approved_at": "2026-09-25",
+  "policy_version": "face-policy-v2",
+  "files": [
+    {
+      "path": "/var/www/admin.creativeculturalcentre.in/services/face-inference/models/face_detection_yunet_2023mar_int8.onnx",
+      "sha256": "321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294"
+    },
+    {
+      "path": "/var/www/admin.creativeculturalcentre.in/services/face-inference/models/face_recognition_sface_2021dec_int8bq.onnx",
+      "sha256": "fb143eea07838aa532d1c95df5f69899974ea0140e1fba05e94204be13ed74ee"
+    }
+  ],
+  "revalidation_triggers": [
+    "model_weights_updated",
+    "yunet_detector_or_alignment_modified",
+    "camera_hardware_spec_changed",
+    "material_cohort_demographics_shift"
+  ]
+}

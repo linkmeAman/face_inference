@@ -1,0 +1,195 @@
+{"event":"SCAN_ROSTER_READY","timestamp":1792600156,"scan_id":"scan-challenge","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600156,"scan_id":"scan-challenge","decision":"REVIEW","liveness":"CHALLENGE"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600156,"scan_id":"scan-challenge","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"CHALLENGE","stage":"PAD","reason_code":"PASSIVE_BORDERLINE","latency_ms":0}
+{"event":"RECOGNITION_RESULT","timestamp":1792600156,"scan_id":"scan-challenge","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600156,"scan_id":"scan-challenge","reason":"CHALLENGE_INVALID"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600156,"scan_id":"scan-challenge","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600156,"scan_id":"scan-challenge","decision":"REVIEW","liveness":"CHALLENGE"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600156,"scan_id":"scan-challenge","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"CHALLENGE","stage":"PAD","reason_code":"PASSIVE_BORDERLINE","latency_ms":0}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600156,"scan_id":"scan-challenge","reason":"CHALLENGE_INVALID"}
+........./usr/lib/python3.12/unittest/case.py:589: ResourceWarning: unclosed <socket.socket fd=3, family=2, type=1, proto=0, laddr=('127.0.0.1', 32493)>
+  if method() is not None:
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-1","candidate_count":2,"ttl_seconds":300}
+{"event":"RECOGNITION_REVIEW","timestamp":1792600157,"scan_id":"scan-1","reason":"OUTSIDE_ROSTER"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-2","candidate_count":2,"ttl_seconds":300}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-5","candidate_count":2,"ttl_seconds":300}
+{"event":"SCAN_DELETED","timestamp":1792600157,"scan_id":"scan-5"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-4","candidate_count":2,"ttl_seconds":10}
+..{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-3","candidate_count":2,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-3","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":0.6,"top2_score":0.58,"margin":0.02,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-count","candidate_count":2,"ttl_seconds":300}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-count","candidate_count":2,"ttl_seconds":300}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-count","candidate_count":2,"ttl_seconds":300}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-count","candidate_count":2,"ttl_seconds":300}
+......{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-0","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-0","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-1","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-1","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-2","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-2","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-3","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-3","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-4","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-4","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-5","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-5","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-6","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-6","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-7","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-7","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-8","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-8","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-9","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-9","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-10","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-10","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-11","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-11","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-12","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-12","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-13","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-13","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-14","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-14","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-15","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-15","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-16","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-16","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-17","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-17","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-18","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-18","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-19","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-19","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-0","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-0","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-1","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-1","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-2","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-2","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-3","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-3","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-4","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-4","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-5","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-5","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-6","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-6","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-7","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-7","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-8","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-8","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-9","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-9","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-10","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-10","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-11","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-11","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-12","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-12","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-13","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-13","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-14","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-14","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-15","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-15","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-16","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-16","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-17","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-17","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-18","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-18","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-19","candidate_count":1,"ttl_seconds":300}
+{"event":"EXPERIMENT_LOGGER_FAILURE","timestamp":1792600157,"source":"PRIMARY"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-19","decision":"REVIEW","identity_decision":"REVIEW","candidate_ref":null,"top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"MATCHING","reason_code":"FIXTURE","latency_ms":0}
+.....................................{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_A","index":0,"pose":"centre","yaw":0,"pitch":0.55}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_A","index":1,"pose":"left","yaw":-0.12,"pitch":0.55}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_A","index":2,"pose":"right","yaw":0.12,"pitch":0.55}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_A","index":3,"pose":"up","yaw":0,"pitch":0.48}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_A","index":4,"pose":"down","yaw":0,"pitch":0.62}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_B","index":0,"pose":"centre","yaw":0,"pitch":0.55}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_B","index":1,"pose":"centre","yaw":0,"pitch":0.55}
+{"event":"ENROLLMENT_POSE_ACCEPTED","timestamp":1792600157,"pose_protocol":"guided-five-v1","burst":"BURST_B","index":2,"pose":"centre","yaw":0,"pitch":0.55}
+.....{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-context","candidate_count":1,"ttl_seconds":300}
+{"event":"INFERENCE_REJECTED","timestamp":1792600157,"reason":"INVALID_CAPTURE_CONTEXT","stage":"GUIDE_SELECTION","reason_code":"INVALID_CAPTURE_CONTEXT"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-planar-live","candidate_count":1,"ttl_seconds":300}
+{"event":"PLANAR_LIVENESS_WARNING","timestamp":1792600157,"planar_spoof_flag":true,"shadow_mode":false,"reason":"SPOOF_PLANAR_ATTACK"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-planar-live","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-planar-shadow","candidate_count":1,"ttl_seconds":300}
+{"event":"PLANAR_LIVENESS_WARNING","timestamp":1792600157,"planar_spoof_flag":true,"shadow_mode":true,"reason":"SPOOF_PLANAR_ATTACK"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-planar-shadow","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-planar-missing","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-planar-missing","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+.{"event":"INFERENCE_REJECTED","timestamp":1792600157,"reason":"FRAME_COUNT","stage":"MATCHING","reason_code":"FRAME_COUNT"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600157,"scan_id":"scan-http","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600157,"scan_id":"scan-http","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"SCAN_DELETED","timestamp":1792600157,"scan_id":"scan-http"}
+.........{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","liveness":"NOT_RUN"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"NOT_RUN","stage":"PAD","reason_code":"PAD_NOT_RUN","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","liveness":"UNKNOWN"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"UNKNOWN","stage":"PAD","reason_code":"PAD_CALIBRATION_OR_EVIDENCE_UNAVAILABLE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","liveness":"CHALLENGE"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"CHALLENGE","stage":"PAD","reason_code":"PASSIVE_BORDERLINE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","liveness":"UNKNOWN"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"REVIEW","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"UNKNOWN","stage":"PAD","reason_code":"PAD_CALIBRATION_OR_EVIDENCE_UNAVAILABLE","latency_ms":0}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-pad","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_LIVENESS_GATE","timestamp":1792600158,"scan_id":"scan-pad","decision":"REJECT","liveness":"SPOOF"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-pad","decision":"REJECT","identity_decision":"ACCEPT","candidate_ref":null,"top1_score":0.95,"top2_score":0.2,"margin":0.75,"template_support":0,"consensus_count":0,"liveness":"SPOOF","stage":"PAD","reason_code":"PASSIVE_SPOOF","latency_ms":0}
+.........{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-replay","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600158,"scan_id":"scan-replay","reason":"REPEATED_FRAMES"}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-replay","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600158,"scan_id":"scan-replay","reason":"REPLAYED_API_REQUEST"}
+{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-replay-new","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600158,"scan_id":"scan-replay-new","reason":"REPLAYED_API_REQUEST"}
+.{"event":"SCAN_ROSTER_READY","timestamp":1792600158,"scan_id":"scan-rate","candidate_count":1,"ttl_seconds":300}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-rate","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-rate","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"RECOGNITION_RESULT","timestamp":1792600158,"scan_id":"scan-rate","decision":"ACCEPT","identity_decision":"ACCEPT","candidate_ref":"candidate-a","top1_score":null,"top2_score":null,"margin":null,"template_support":0,"consensus_count":0,"liveness":"LIVE","stage":"MATCHING","reason_code":"UNKNOWN","latency_ms":0}
+{"event":"RECOGNITION_REJECTED","timestamp":1792600158,"scan_id":"scan-rate","reason":"ATTEMPT_RATE_LIMIT"}
+......./tmp/face_inference-export-20261021/services/face-inference/tests/test_probes.py:109: ResourceWarning: unclosed <socket.socket fd=7, family=2, type=1, proto=0, laddr=('127.0.0.1', 29527)>
+  status, headers, body = make_request(InferenceHandler, "GET", "/health", self.service, self.settings)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./tmp/face_inference-export-20261021/services/face-inference/tests/test_probes.py:91: ResourceWarning: unclosed <socket.socket fd=7, family=2, type=1, proto=0, laddr=('127.0.0.1', 25761)>
+  status, headers, body = make_request(InferenceHandler, "GET", "/livez", self.service, self.settings)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./tmp/face_inference-export-20261021/services/face-inference/tests/test_probes.py:97: ResourceWarning: unclosed <socket.socket fd=7, family=2, type=1, proto=0, laddr=('127.0.0.1', 19539)>
+  status, headers, body = make_request(InferenceHandler, "GET", "/readyz", self.service, self.settings)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+./tmp/face_inference-export-20261021/services/face-inference/tests/test_probes.py:104: ResourceWarning: unclosed <socket.socket fd=7, family=2, type=1, proto=0, laddr=('127.0.0.1', 29743)>
+  status, headers, body = make_request(InferenceHandler, "GET", "/readyz", self.service, self.settings)
+ResourceWarning: Enable tracemalloc to get the object allocation traceback
+............................{"event":"SCAN_ROSTER_READY","timestamp":1792600160,"scan_id":"scan-g17","candidate_count":1,"ttl_seconds":300}
+{"event":"SCAN_DELETED","timestamp":1792600160,"scan_id":"scan-g17"}
+.....FAIL: Model integrity check failed: MODEL_CHECKSUM_MISMATCH - detector model checksum does not match
+.FAIL: Model manifest missing at /tmp/tmpfhak3z7y/MODEL-MANIFEST.json
+.
+----------------------------------------------------------------------
+Ran 132 tests in 4.893s
+
+OK

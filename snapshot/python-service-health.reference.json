@@ -1,0 +1,44 @@
+{
+  "status": "ok",
+  "model": {
+    "model_ready": true,
+    "model_version": "opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3-opencv-preprocess-v2",
+    "pad_model_ready": true,
+    "pad_calibration_approved": true
+  },
+  "model_integrity_verified": true,
+  "model_error": null,
+  "threshold_configured": true,
+  "calibration_approved": true,
+  "calibration_error": null,
+  "pad_calibration_approved": true,
+  "pad_calibration_error": null,
+  "model_version_id": 2,
+  "provider_id": "local-onnx",
+  "provider_version": "2",
+  "model_version": "opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3-opencv-preprocess-v2",
+  "recognition_generation": "e696cc8f65e33168a7027cf03915516095896cc115358ee79470c525c3d40643",
+  "calibration_policy_version": "face-policy-v3",
+  "identity_policy": {
+    "policy_version": "face-policy-v3",
+    "review_threshold": 0.75,
+    "duplicate_block_threshold": 0.9,
+    "template_support_threshold": 0.85,
+    "min_template_support": 2,
+    "min_margin": 0.2,
+    "accept_threshold": 0.9,
+    "calibration_approved": true
+  },
+  "preprocessing_version": "sface-opencv-aligncrop-rgb-raw-v2",
+  "auth_enabled": true,
+  "active_scans": 0,
+  "uptime_seconds": 1217327.12,
+  "memory": {
+    "rss_mb": 12.06,
+    "max_rss_mb": 302.96
+  },
+  "concurrency": {
+    "active_slots": 1,
+    "max_slots": 4
+  }
+}

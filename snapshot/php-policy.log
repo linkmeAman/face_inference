@@ -1,0 +1,10 @@
+PASS report-bound approval contract
+PASS rejected incompatible approval hash
+PASS rejected incompatible approval version
+PASS rejected incompatible approval source
+PASS rejected incompatible approval counts
+PASS rejected incompatible approval threshold
+PASS rejected incompatible approval approval
+PASS rejected incompatible approval workflow
+PASS rejected aggregate-only release evidence
+PASS isolated single-identity demo cannot be promoted to production

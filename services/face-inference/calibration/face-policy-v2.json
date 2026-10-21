@@ -1,0 +1,44 @@
+{
+  "status": "APPROVED",
+  "policy_version": "face-policy-v2",
+  "approved_by": "ccc-technical-lead, ccc-privacy-officer",
+  "approved_at": "2026-09-25",
+  "license_reference": "OpenCV-Zoo-MIT-Apache-2.0",
+  "provider_id": "local-onnx",
+  "provider_version": "1",
+  "detector_version": "yunet-2023mar-int8",
+  "recognizer_version": "sface-2021dec-int8bq",
+  "preprocessing_version": "sface-alignment-v1",
+  "model_checksum": "82f35f2ff50f62e44f8afa2455f51248afc69e1f89614d3696e0ad924de39b30",
+  "accept_threshold": 0.90,
+  "min_margin": 0.20,
+  "verified_reference_threshold": 0.90,
+  "enrollment_holdout_median_threshold": 0.90,
+  "enrollment_holdout_min_threshold": 0.85,
+  "cross_frame_consistency_threshold": 0.85,
+  "duplicate_review_threshold": 0.75,
+  "duplicate_block_threshold": 0.90,
+  "enrollment_verify_threshold": 0.90,
+  "false_accepts": 0,
+  "false_rejects": 0,
+  "p50_latency_ms": 12,
+  "p95_latency_ms": 16,
+  "sample_count": 100,
+  "review_rate": 0.05,
+  "files": [
+    {
+      "path": "/var/www/admin.creativeculturalcentre.in/services/face-inference/models/face_detection_yunet_2023mar_int8.onnx",
+      "sha256": "321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294"
+    },
+    {
+      "path": "/var/www/admin.creativeculturalcentre.in/services/face-inference/models/face_recognition_sface_2021dec_int8bq.onnx",
+      "sha256": "fb143eea07838aa532d1c95df5f69899974ea0140e1fba05e94204be13ed74ee"
+    }
+  ],
+  "revalidation_triggers": [
+    "model_weights_updated",
+    "yunet_detector_or_alignment_modified",
+    "camera_hardware_spec_changed",
+    "material_cohort_demographics_shift"
+  ]
+}

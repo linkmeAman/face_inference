@@ -1,0 +1,92 @@
+<?php
+// Actual MySQL/service/journal on connection-local temporary fixtures, never real records.
+require __DIR__.'/automatic.php';
+resetLifecycle($db);$db->query('DELETE FROM attendance');$db->query('DELETE FROM attendance_event');$db->query('UPDATE invoice_item SET sessions_used=0');$db->query('UPDATE member SET status=1,park=0');
+$db->query("INSERT INTO invoice_item(id,sessions,sessions_used,start_date,end_date,batch_id) VALUES(23,0,0,'2000-01-01','2100-01-01',11)");
+$db->query("INSERT INTO invoice_invoiceitem_view(item_id,contact_id,batch_id,start_date,end_date,sessions,sessions_used) VALUES(23,103,11,'2000-01-01','2100-01-01',0,0)");
+$db->query("INSERT INTO invoice_invoiceitem_module_view SELECT * FROM invoice_invoiceitem_view WHERE contact_id=103");
+$logDir=sys_get_temp_dir().'/ccc-face-audit-'.bin2hex(random_bytes(8));mkdir($logDir,0700);$log=$logDir.'/events.jsonl';$prior=getenv('FACE_WEB_EVENT_LOG');putenv('FACE_WEB_EVENT_LOG='.$log);
+$policy=['ready'=>false,'operating_mode'=>'TEST','testing_evaluation'=>true,'TEST_DUPLICATE_THRESHOLD'=>.99,'TEST_ATTENDANCE_THRESHOLD'=>.99,'test_report_sha256'=>str_repeat('d',64),'capture_available'=>true];
+$test=new BrowserFaceService($db,$cipher,99,2,$policy);
+$context=['batch_id'=>11,'attendance_date'=>date('Y-m-d'),'session_id'=>7,'selected_time'=>'10:00:00'];
+try{
+    $cmd=captureCommand(1,$a,'test_first_capture01')+['evaluation_context'=>$context];$one=$test->run('enroll',$cmd);
+    check($one['state']==='PENDING' && $one['test_ready'] && $one['enrollment_id']>0 && $one['persistence_succeeded'],'TEST capture committed, encrypted, immediately test-ready without activation');
+    $stored=$db->query('SELECT * FROM face_web_enrollment WHERE member_id=1')->fetch_assoc();check($cipher->decrypt($stored['encrypted_template'])===$a && $stored['state']==='PENDING','actual encrypted MySQL row association and state verified');
+    $restart=new BrowserFaceService($db,$cipher,99,2,$policy);check($restart->enrollmentStatus()['persons'][0]['test_ready'],'new service instance reads persistent test-ready reference');
+    $two=$test->run('enroll',captureCommand(2,$b,'test_other_capture02')+['evaluation_context'=>$context]);$three=$test->run('enroll',captureCommand(3,$c,'test_third_capture03')+['evaluation_context'=>$context]);
+    check($two['test_ready'] && $three['test_ready'] && (int)$db->query('SELECT COUNT(*) FROM face_web_enrollment')->fetch_row()[0]===3,'three distinct deterministic test identities supported with exact member associations');
+    $original=$db->query('SELECT encrypted_template,calibration_id FROM face_web_enrollment WHERE member_id=2')->fetch_assoc();
+    $dup=$test->run('enroll',captureCommand(2,$a,'test_duplicate_fresh')+['evaluation_context'=>$context]);check($dup['state']==='REJECTED_DUPLICATE' && $dup['duplicate_visible'] && $dup['duplicate_person_name']==='Public A','fresh capture duplicate check uses compatible pending references with authorized disclosure');
+    check($db->query('SELECT encrypted_template,calibration_id FROM face_web_enrollment WHERE member_id=2')->fetch_assoc()===$original,'stale-pending fix preserves original reference while rejecting submitted duplicate');
+    check((int)$db->query("SELECT COUNT(*) FROM face_template WHERE status='ACTIVE'")->fetch_row()[0]===0,'test matching never activates pending identities');
+    $opened=$test->run('open',['batch_id'=>11,'attendance_date'=>date('Y-m-d'),'attendance_session_id'=>7,'selected_time'=>'10:00:00','idempotency_key'=>'test_open_scanner001']);
+    $request=['scan_id'=>$opened['scan_id'],'scan_token'=>$opened['scan_token'],'observations'=>[$a,$a,$a],'model_version'=>$contract['model_version'],'preprocessing_version'=>$contract['preprocessing_version'],'idempotency_key'=>'test_recognize_a001'];
+    $recognized=$test->run('attendance',$request);check($recognized['state']==='TEST_RECOGNIZED' && $recognized['person_id']===1 && $recognized['attendance_saved']===false,'TEST genuine matching identifies pending reference without attendance write');
+    foreach([[2,$b],[3,$c]] as [$id,$v]){$request['observations']=[$v,$v,$v];$request['idempotency_key']='test_recognize_id_'.$id;check($test->run('attendance',$request)['person_id']===$id,'multiple test identities match actual selected roster reference');}
+    $unknown=array_fill(0,128,0.0);$unknown[3]=1.0;$request['observations']=[$unknown,$unknown,$unknown];$request['idempotency_key']='test_unknown_request1';check($test->run('attendance',$request)['state']==='TEST_UNKNOWN','below-cutoff test face stays unknown');
+    $request['observations']=[$a,$b,$a];$request['idempotency_key']='test_conflict_request';check($test->run('attendance',$request)['reason']==='CONFLICTING_OBSERVATIONS','inconsistent identities remain rejected');
+    $encrypted=$db->query('SELECT encrypted_template FROM face_web_enrollment WHERE member_id=1')->fetch_row()[0];$update=$db->prepare('UPDATE face_web_enrollment SET encrypted_template=? WHERE member_id=2');$update->bind_param('s',$encrypted);$update->execute();$latest=$db->prepare('UPDATE face_web_calibration SET encrypted_embedding=? WHERE id=(SELECT calibration_id FROM face_web_enrollment WHERE member_id=2)');$latest->bind_param('s',$encrypted);$latest->execute();
+    $request['observations']=[$a,$a,$a];$request['idempotency_key']='test_ambiguous_req01';check($test->run('attendance',$request)['reason']==='AMBIGUOUS','overlapping member labels cannot produce guessed identity');
+    $ambiguous=$test->run('enroll',captureCommand(3,$a,'test_ambiguous_duplicate')+['evaluation_context'=>$context]);
+    check($ambiguous['state']==='REJECTED_DUPLICATE' && $ambiguous['capture_decision']==='AMBIGUOUS_DUPLICATE' && !$ambiguous['duplicate_visible'] && !isset($ambiguous['duplicate_person_name']),'multiple plausible duplicate labels never disclose an arbitrary winner');
+    check(!$ambiguous['capture_saved_as_reference'] && $ambiguous['previous_reference_preserved'],'rejection distinguishes persisted audit from unchanged saved reference');
+    $states=$test->enrollmentStatus()['persons'];$states=array_column($states,null,'member_id');
+    check($states[1]['state']==='PENDING' && $states[1]['test_gallery_conflict'] && !$states[1]['test_ready'],'database-backed overlapping reference displays needs attention, never ready');
+    check($states[3]['latest_attempt_state']==='REJECTED_DUPLICATE' && $states[3]['state']==='PENDING','latest attempt is independent of original persistent state');
+    $restore=$db->prepare('UPDATE face_web_enrollment SET encrypted_template=? WHERE member_id=2');$restore->bind_param('s',$original['encrypted_template']);$restore->execute();$latest->bind_param('s',$original['encrypted_template']);$latest->execute();
+    rejects(fn()=>$test->run('confirm',['scan_id'=>$opened['scan_id'],'scan_token'=>$opened['scan_token'],'verified'=>true,'candidates'=>[['person_id'=>1,'receipt_key'=>'test_recognize_a001']],'idempotency_key'=>'test_forbidden_confirm']),'TEST cannot use direct confirmation API to write real attendance');
+    check((int)$db->query('SELECT COUNT(*) FROM attendance')->fetch_row()[0]===0 && (int)$db->query('SELECT COUNT(*) FROM attendance_event')->fetch_row()[0]===0 && (int)$db->query('SELECT SUM(sessions_used) FROM invoice_item')->fetch_row()[0]===0,'TEST leaves attendance, events and all deductions unchanged');
+    $broken=captureCommand(1,$a,'test_safe_failure01')+['evaluation_context'=>$context];$broken['observations'][0][0]=2.0;rejects(fn()=>$test->run('enroll',$broken),'invalid capture fails before save without false success');
+    $fixed=captureCommand(1,$a,'test_safe_failure01')+['evaluation_context'=>$context];check($test->run('enroll',$fixed)['state']==='PENDING','failed transaction permits safe corrected retry');
+    $changed=array_fill(0,128,0.0);$changed[4]=1.0;
+    $beforeChange=$db->query('SELECT encrypted_template,calibration_id FROM face_web_enrollment WHERE member_id=1')->fetch_assoc();
+    $fresh=$test->run('enroll',captureCommand(1,$changed,'test_fresh_reference01')+['evaluation_context'=>$context]);check($fresh['test_ready'] && $db->query('SELECT encrypted_template,calibration_id FROM face_web_enrollment WHERE member_id=1')->fetch_assoc()===$beforeChange,'fresh authorized test capture is available without overwriting original enrollment');
+    $request['observations']=[$changed,$changed,$changed];$request['idempotency_key']='test_new_reference_scan';check($test->run('attendance',$request)['person_id']===1,'newly saved selected-member capture is used immediately for TEST only');
+    $setConflict=$db->prepare('UPDATE face_web_enrollment SET encrypted_template=? WHERE member_id=2');$bad=$beforeChange['encrypted_template'];$setConflict->bind_param('s',$bad);$setConflict->execute();
+    $request['idempotency_key']='test_disputed_label_scan';check($test->run('attendance',$request)['reason']==='GALLERY_CONFLICT','single high-scoring newer capture cannot select an identity whose original gallery is conflicted');
+    $bad=$original['encrypted_template'];$setConflict->execute();
+    $restored=$test->enrollmentStatus()['persons'];check(!array_filter($restored,fn($r)=>$r['test_gallery_conflict']),'resolving fixture conflict restores test eligibility without changing enrollment lifecycle');
+    $test->run('camera_event',['scan_id'=>$opened['scan_id'],'scan_token'=>$opened['scan_token'],'event'=>'camera_recovery','idempotency_key'=>'test_camera_recovery01']);
+    $test->run('close',['scan_id'=>$opened['scan_id'],'scan_token'=>$opened['scan_token'],'idempotency_key'=>'test_close_scanner001']);
+    // Inject a real receipt-update failure after the real domain commit. This is
+    // a constructor-approved temporary LIVE fixture, never deployed settings.
+    $db->query('ALTER TABLE face_template DROP CHECK test_rollback');
+    $fixtureLive=new BrowserFaceService($db,$cipher,99,2,['ready'=>true,'operating_mode'=>'LIVE','rollout_authorized'=>true,'ATTENDANCE_THRESHOLD'=>.99,'DUPLICATE_THRESHOLD'=>.99]);
+    $fixtureLive->run('activate_pending',['idempotency_key'=>'audit_fixture_activate1']);
+    $liveScan=$fixtureLive->run('open',['batch_id'=>11,'attendance_date'=>date('Y-m-d'),'attendance_session_id'=>7,'selected_time'=>'10:00:00','idempotency_key'=>'audit_fixture_open001']);
+    $lost=['scan_id'=>$liveScan['scan_id'],'scan_token'=>$liveScan['scan_token'],'observations'=>[$a,$a,$a],'model_version'=>$contract['model_version'],'preprocessing_version'=>$contract['preprocessing_version'],'idempotency_key'=>'audit_unknown_write1'];
+    $db->query("ALTER TABLE face_web_request ADD CONSTRAINT audit_fail_receipt CHECK(request_key<>'audit_unknown_write1' OR JSON_UNQUOTE(JSON_EXTRACT(response,'$.state'))<>'RECORDED')");
+    try{$fixtureLive->run('attendance',$lost);throw new RuntimeException('Expected saved receipt failure');}catch(mysqli_sql_exception $e){check((int)$db->query('SELECT COUNT(*) FROM attendance')->fetch_row()[0]===1,'lost receipt can follow an actual committed domain attendance write');}
+    $db->query('ALTER TABLE face_web_request DROP CHECK audit_fail_receipt');
+    $unknownLogs=array_map(fn($line)=>json_decode($line,true),file($log,FILE_IGNORE_NEW_LINES));$unknownLog=array_values(array_filter($unknownLogs,fn($e)=>$e['event']==='backend_error' && $e['request_id']==='audit_unknown_write1'))[0];
+    check($unknownLog['persistence_outcome']==='UNKNOWN_RECONCILE_IDEMPOTENCY' && !isset($unknownLog['persistence_succeeded']),'server error log never falsely declares a committed but unreconciled write failed');
+    check($fixtureLive->run('attendance',$lost)['state']==='ALREADY_MARKED','same request reconciles actual committed attendance after receipt failure');
+    check((int)$db->query('SELECT COUNT(*) FROM attendance_event')->fetch_row()[0]===1 && (int)$db->query('SELECT sessions_used FROM invoice_item WHERE id=21')->fetch_row()[0]===1,'receipt recovery never duplicates attendance event or membership deduction');
+    $entries=array_map(fn($l)=>json_decode($l,true,512,JSON_THROW_ON_ERROR),file($log,FILE_IGNORE_NEW_LINES));$events=array_column($entries,'event');
+    foreach(['enrollment_started','capture_completed','enrollment_save_attempted','enrollment_saved','enrollment_test_ready','enrollment_duplicate','enrollment_failed','scan_started','recognition_attempted','recognition_matched','recognition_unknown','recognition_ambiguous','backend_error','camera_recovery','scan_stopped'] as $event)check(in_array($event,$events,true),'actual log destination contains '.$event);
+    $savedLogs=array_filter($entries,fn($e)=>$e['event']==='enrollment_saved' && $e['request_id']==='test_first_capture01');check(count($savedLogs)===1 && array_values($savedLogs)[0]['enrollment_id']===$one['enrollment_id'],'saved request, encrypted row and structured log correlate');
+    $matchLog=array_values(array_filter($entries,fn($e)=>$e['event']==='recognition_matched' && $e['request_id']==='test_recognize_a001'))[0];check($matchLog['reference_calibration_id']===$one['calibration_id'] && strlen($matchLog['reference_gallery_sha256'])===64,'recognition audit identifies exact reference and gallery without vectors or scores');
+    $dupeLog=array_values(array_filter($entries,fn($e)=>$e['event']==='enrollment_duplicate' && $e['request_id']==='test_duplicate_fresh'))[0];check($dupeLog['capture_session']=== $dup['capture_session'] && $dupeLog['matched_member_id']===1 && $dupeLog['matched_calibration_id']>0 && $dupeLog['capture_saved_as_reference']===false,'private audit correlates actual fresh capture, matched reference and unchanged enrollment');
+    $badKeys=['embedding','observations','template','encrypted_template','token','image','device','similarity'];check(!array_filter($entries,fn($entry)=>array_intersect($badKeys,array_keys($entry))),'all operational events contain no biometric payload or auth token');
+    file_put_contents('/tmp/ccc-testing-face-20261011/log-test-samples.json',json_encode(array_values(array_filter($entries,fn($e)=>in_array($e['event'],['enrollment_saved','enrollment_duplicate','recognition_matched','enrollment_failed','camera_recovery'],true))),JSON_PRETTY_PRINT));chmod('/tmp/ccc-testing-face-20261011/log-test-samples.json',0600);
+    require_once dirname(__DIR__,2).'/classes/services/BrowserFaceEvidenceExclusion.php';
+    resetLifecycle($db);
+    $blocked->run('enroll',captureCommand(1,$a,'test_quarantine_keep01')+['evaluation_context'=>$context]);$blocked->run('enroll',captureCommand(2,$a,'test_quarantine_wrong2')+['evaluation_context'=>$context]);$blocked->run('enroll',captureCommand(3,$b,'test_quarantine_other3')+['evaluation_context'=>$context]);
+    $excluded=$db->query('SELECT calibration_id,encrypted_template FROM face_web_enrollment WHERE member_id=2')->fetch_assoc();
+    $plan=BrowserFaceEvidenceExclusion::prepare($db,2,1,[(int)$excluded['calibration_id']],'Fixture identity mapping independently confirms duplicate label two');
+    check(BrowserFaceEvidenceExclusion::change($db,$plan)==='Excluded labels; encrypted records preserved','existing reversible exclusion works for conflicted TEST gallery');
+    $status=array_column($test->enrollmentStatus()['persons'],null,'member_id');check($status[1]['test_ready'] && !$status[2]['test_ready'] && $status[2]['state']==='RECAPTURE_REQUIRED' && $status[2]['test_excluded'],'excluded Testing label is inactive and retained identity becomes test-ready');
+    $quarantineScan=$test->run('open',['batch_id'=>11,'attendance_date'=>date('Y-m-d'),'attendance_session_id'=>7,'selected_time'=>'10:00:00','idempotency_key'=>'test_quarantine_open01']);
+    $probe=['scan_id'=>$quarantineScan['scan_id'],'scan_token'=>$quarantineScan['scan_token'],'observations'=>[$a,$a,$a],'model_version'=>$contract['model_version'],'preprocessing_version'=>$contract['preprocessing_version'],'idempotency_key'=>'test_quarantine_scan01'];
+    check($test->run('attendance',$probe)['person_id']===1,'excluded label cannot influence Testing recognition');
+    $duplicate=$test->run('enroll',captureCommand(3,$a,'test_quarantine_dupe01')+['evaluation_context'=>$context]);check($duplicate['duplicate_person_id']===1 && $duplicate['capture_decision']==='DUPLICATE_MATCH','excluded label cannot influence duplicate winner');
+    check($db->query('SELECT encrypted_template FROM face_web_enrollment WHERE member_id=2')->fetch_row()[0]===$excluded['encrypted_template'],'quarantine preserves exact encrypted original');
+    check(BrowserFaceEvidenceExclusion::change($db,$plan,true)==='Restored audited labels','Testing label exclusion is reversible without recapture');
+    $probe['idempotency_key']='test_quarantine_restored';check($test->run('attendance',$probe)['reason']==='AMBIGUOUS','restoring conflict cannot silently produce an identity winner');
+    BrowserFaceEvidenceExclusion::change($db,$plan);$newPerson=$test->run('enroll',captureCommand(2,$c,'test_reset_fresh_person')+['evaluation_context'=>$context]);check($newPerson['test_ready'] && !$newPerson['test_excluded'] && $newPerson['capture_saved_as_reference'],'clean authorized recapture after reset becomes immediately test-ready');
+    rejects(fn()=>BrowserFaceEvidenceExclusion::change($db,$plan,true),'rollback safely refuses to overwrite a later newly saved face');
+    file_put_contents($log,str_repeat(' ',2*1024*1024+1));BrowserFaceAudit::write('camera_recovery',['template'=>[$a],'token'=>'private']);check(file_exists($log.'.1') && filesize($log)<1024,'bounded audit rotates oversized file and rejects unlisted payload fields');
+    clearstatcache();check((fileperms($log)&0777)===0660 && filegroup($log)===filegroup($logDir),'rotated log retains private shared-writer group permissions');
+}finally{putenv($prior===false?'FACE_WEB_EVENT_LOG':'FACE_WEB_EVENT_LOG='.$prior);foreach(glob($logDir.'/*') as $file)unlink($file);rmdir($logDir);}
+echo "Testing branch evaluation and operational logging regression complete\n";

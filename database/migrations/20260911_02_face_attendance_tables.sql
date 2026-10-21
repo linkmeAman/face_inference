@@ -1,0 +1,142 @@
+CREATE TABLE IF NOT EXISTS `face_model_version` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `model_name` VARCHAR(100) NOT NULL,
+  `detector_version` VARCHAR(100) NOT NULL,
+  `recognizer_version` VARCHAR(100) NOT NULL,
+  `preprocessing_version` VARCHAR(100) NOT NULL,
+  `embedding_dimension` INT NOT NULL,
+  `model_checksum` CHAR(64) NOT NULL,
+  `license_reference` VARCHAR(255) NOT NULL,
+  `policy_version` VARCHAR(100) NOT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  `created_by` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `retired_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_face_model_checksum_preprocessing` (`model_checksum`, `preprocessing_version`),
+  KEY `idx_face_model_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `biometric_consent` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `member_id` INT NOT NULL,
+  `guardian_contact_id` INT NULL,
+  `notice_version` VARCHAR(64) NOT NULL,
+  `purpose` VARCHAR(100) NOT NULL,
+  `consent_status` VARCHAR(20) NOT NULL,
+  `verification_method` VARCHAR(50) NOT NULL,
+  `actor_employee_id` INT NOT NULL DEFAULT 0,
+  `consented_at` DATETIME NULL,
+  `withdrawn_at` DATETIME NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `idx_biometric_consent_member` (`member_id`),
+  KEY `idx_biometric_consent_status` (`member_id`, `consent_status`),
+  CONSTRAINT `fk_biometric_consent_member` FOREIGN KEY (`member_id`) REFERENCES `member` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `face_template` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `member_id` INT NOT NULL,
+  `model_version_id` INT NOT NULL,
+  `encrypted_embedding` MEDIUMBLOB NOT NULL,
+  `encryption_key_id` VARCHAR(100) NOT NULL,
+  `embedding_dimension` INT NOT NULL,
+  `quality_summary` JSON NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `expires_at` DATETIME NULL,
+  `revoked_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_face_template_member_status` (`member_id`, `status`),
+  KEY `idx_face_template_model` (`model_version_id`),
+  CONSTRAINT `fk_face_template_member` FOREIGN KEY (`member_id`) REFERENCES `member` (`id`),
+  CONSTRAINT `fk_face_template_model` FOREIGN KEY (`model_version_id`) REFERENCES `face_model_version` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `attendance_scan` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `scan_token` CHAR(64) NOT NULL,
+  `branch_id` INT NOT NULL,
+  `batch_id` INT NOT NULL,
+  `attendance_date` DATE NOT NULL,
+  `session_id` INT NOT NULL,
+  `event_type` VARCHAR(32) NOT NULL,
+  `actor_employee_id` INT NOT NULL,
+  `roster_version` CHAR(64) NOT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+  `expires_at` DATETIME NOT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `completed_at` DATETIME NULL,
+  `cancelled_at` DATETIME NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_attendance_scan_token` (`scan_token`),
+  KEY `idx_attendance_scan_scope` (`branch_id`, `batch_id`, `attendance_date`, `session_id`),
+  KEY `idx_attendance_scan_status_expiry` (`status`, `expires_at`),
+  CONSTRAINT `fk_attendance_scan_branch` FOREIGN KEY (`branch_id`) REFERENCES `branch` (`id`),
+  CONSTRAINT `fk_attendance_scan_batch` FOREIGN KEY (`batch_id`) REFERENCES `batch` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `attendance_scan_roster` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `scan_id` BIGINT UNSIGNED NOT NULL,
+  `member_id` INT NOT NULL,
+  `candidate_ref` VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `eligibility_status` VARCHAR(20) NOT NULL,
+  `consent_status` VARCHAR(20) NOT NULL,
+  `template_count` INT NOT NULL DEFAULT 0,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_scan_roster_candidate` (`scan_id`, `candidate_ref`),
+  UNIQUE KEY `uq_scan_roster_member` (`scan_id`, `member_id`),
+  CONSTRAINT `fk_scan_roster_scan` FOREIGN KEY (`scan_id`) REFERENCES `attendance_scan` (`id`),
+  CONSTRAINT `fk_scan_roster_member` FOREIGN KEY (`member_id`) REFERENCES `member` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `recognition_attempt` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `scan_id` BIGINT UNSIGNED NOT NULL,
+  `client_attempt_id` VARCHAR(191) CHARACTER SET ascii COLLATE ascii_bin NOT NULL,
+  `candidate_ref` VARCHAR(128) CHARACTER SET ascii COLLATE ascii_bin NULL,
+  `decision` VARCHAR(10) NOT NULL,
+  `top1_score` DECIMAL(10,7) NULL,
+  `top2_score` DECIMAL(10,7) NULL,
+  `margin` DECIMAL(10,7) NULL,
+  `quality_summary` JSON NULL,
+  `liveness` VARCHAR(12) NOT NULL DEFAULT 'NOT_RUN',
+  `model_version_id` INT NULL,
+  `latency_ms` INT NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_recognition_attempt_client` (`client_attempt_id`),
+  KEY `idx_recognition_attempt_scan` (`scan_id`),
+  CONSTRAINT `fk_recognition_attempt_scan` FOREIGN KEY (`scan_id`) REFERENCES `attendance_scan` (`id`),
+  CONSTRAINT `fk_recognition_attempt_model` FOREIGN KEY (`model_version_id`) REFERENCES `face_model_version` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS `attendance_event` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `branch_id` INT NOT NULL,
+  `batch_id` INT NOT NULL,
+  `session_id` INT NOT NULL,
+  `attendance_date` DATE NOT NULL,
+  `person_type` CHAR(1) NOT NULL,
+  `person_id` INT NOT NULL,
+  `event_type` VARCHAR(32) NOT NULL,
+  `source` VARCHAR(32) NOT NULL,
+  `actor_employee_id` INT NOT NULL,
+  `attendance_id` INT NULL,
+  `scan_id` BIGINT UNSIGNED NULL,
+  `client_attempt_id` VARCHAR(191) CHARACTER SET ascii COLLATE ascii_bin NULL,
+  `occurred_at_server` DATETIME NOT NULL,
+  `occurred_at_device` DATETIME NULL,
+  `metadata` JSON NULL,
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_attendance_event_once` (`batch_id`, `session_id`, `attendance_date`, `person_type`, `person_id`, `event_type`),
+  KEY `idx_attendance_event_scope` (`branch_id`, `batch_id`, `attendance_date`, `session_id`),
+  KEY `idx_attendance_event_attempt` (`client_attempt_id`),
+  CONSTRAINT `fk_attendance_event_batch` FOREIGN KEY (`batch_id`) REFERENCES `batch` (`id`),
+  CONSTRAINT `fk_attendance_event_attendance` FOREIGN KEY (`attendance_id`) REFERENCES `attendance` (`id`),
+  CONSTRAINT `fk_attendance_event_scan` FOREIGN KEY (`scan_id`) REFERENCES `attendance_scan` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

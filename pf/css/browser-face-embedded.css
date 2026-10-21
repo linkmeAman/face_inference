@@ -1,0 +1,60 @@
+.browser-face-panel{position:fixed;inset:0;z-index:1100;background:rgba(15,23,42,.62);overflow:auto;padding:20px;padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));display:flex;align-items:center;justify-content:center;overscroll-behavior:contain}
+.browser-face-dialog{display:flex;flex-direction:column;background:#fff;padding:18px 20px 0;width:min(560px,100%);border-radius:12px;color:#0f172a;box-sizing:border-box;max-height:calc(100vh - 24px);overflow-y:auto;scrollbar-gutter:stable;box-shadow:0 20px 50px rgba(15,23,42,.3)}
+.browser-face-dialog{max-height:calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.browser-face-dialog:focus{outline:none}
+/* Camera geometry is unchanged: the circular guide and ring are positioned
+   from this box, so its aspect ratio and fit must stay as they are. */
+.browser-face-camera{position:relative;background:#000;aspect-ratio:4/3;width:100%;max-height:55vh;max-height:55dvh;overflow:hidden;border-radius:8px;flex:none}
+.browser-face-camera video,.browser-face-camera canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center}
+.browser-face-camera canvas{pointer-events:none}
+.browser-face-progress-ring{position:absolute;pointer-events:none;overflow:visible}
+.browser-face-progress-ring circle{transition:stroke-dashoffset .25s ease;stroke-linecap:round}
+@media(prefers-reduced-motion:reduce){.browser-face-progress-ring circle{transition:none}}
+
+.browser-face-header{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin:0 0 4px}
+.browser-face-dialog h3{margin:0;font-size:20px;line-height:1.3;font-weight:600;overflow-wrap:anywhere}
+.browser-face-title-name{font-weight:400;color:#334155}
+.browser-face-mode{flex:none;margin-top:2px;padding:2px 10px;border-radius:999px;background:#fef3c7;color:#854d0e;font-size:12px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
+.browser-face-mode.is-review{background:#e0f2fe;color:#075985}
+.browser-face-dialog p{margin:6px 0;font-size:15px;line-height:1.4}
+.browser-face-subtitle{color:#475569;overflow-wrap:anywhere}
+.browser-face-mode-note{color:#475569;font-size:14px!important}
+.browser-face-instruction{margin:8px 0 10px!important;text-align:center;color:#334155}
+.browser-face-context{font-weight:600;overflow-wrap:anywhere}
+/* Fixed height: changing messages never moves the camera or the buttons. */
+.browser-face-feedback{min-height:52px;margin:10px 0 2px;text-align:center;display:flex;flex-direction:column;justify-content:center}
+.browser-face-feedback p{margin:0;font-size:17px;font-weight:600;color:#0f172a}
+.browser-face-feedback p+p{font-size:14px;font-weight:500;color:#475569}
+.browser-face-feedback.is-success p:first-child{color:#15803d}
+.browser-face-feedback.is-error p:first-child{color:#b91c1c}
+.browser-face-note{text-align:center;color:#475569;font-size:14px!important}
+
+.browser-face-actions{position:sticky;bottom:0;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:8px -20px 0;padding:12px 20px;padding-bottom:max(14px,env(safe-area-inset-bottom));background:#fff;border-top:1px solid #eef2f6}
+.browser-face-actions-gap{flex:1 1 auto}
+.browser-face-dialog .btn,.browser-face-dialog summary{min-height:44px;padding:10px 16px;margin:0;border-radius:8px;font-size:15px;font-weight:600}
+.browser-face-dialog .btn:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}
+.browser-face-dialog .btn[disabled]{opacity:.55;cursor:not-allowed;box-shadow:none}
+.browser-face-dialog .btn-default[disabled]{background:#fff;color:#64748b}
+.browser-face-switch{order:0}
+.browser-face-dialog progress{width:100%;height:6px;accent-color:#475467}
+.browser-face-dialog details{margin-top:12px;font-size:14px}
+.browser-face-dialog pre{max-height:180px;overflow:auto;font-size:12px}
+
+.browser-face-panel.ng-hide,.browser-face-panel[ng-cloak]{display:none!important}
+
+.browser-face-practice-diagnostics pre{max-height:180px;overflow:auto;font-size:12px}
+.browser-face-review-list{list-style:none;padding:0;margin:8px 0}
+.browser-face-review-list li{padding:8px 0;border-bottom:1px solid #e5e7eb;overflow-wrap:anywhere}
+.browser-face-review-list label{font-size:17px;min-height:44px;display:inline-flex;align-items:center;gap:10px}
+.browser-face-review-list input{width:22px;height:22px}
+.browser-face-review-list small{display:block;color:#475467}
+.browser-face-review-actions{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+
+@media(max-width:480px){
+ .browser-face-panel{align-items:flex-end;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right))}
+ .browser-face-dialog{padding:14px 14px 0;border-radius:14px}
+ .browser-face-actions{margin:8px -14px 0;padding-left:14px;padding-right:14px}
+ .browser-face-actions .btn{flex:1 1 auto}
+ .browser-face-actions-gap{display:none}
+ .browser-face-dialog h3{font-size:18px}
+}

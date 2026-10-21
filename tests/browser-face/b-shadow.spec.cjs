@@ -1,0 +1,21 @@
+const {test,expect}=require('@playwright/test');
+test.use({permissions:['camera'],launchOptions:{args:['--use-fake-device-for-media-stream','--use-fake-ui-for-media-stream','--use-file-for-fake-video-capture=/tmp/ccc-public-camera.y4m']}});
+test('real-batch scoped shadow uses pending real-model captures and never writes attendance',async({page,context})=>{
+ page.on('dialog',dialog=>dialog.accept());
+ const login=await context.request.post('/fixture-login',{headers:{'X-Test-Key':process.env.FACE_BROWSER_TEST_KEY}});expect(login.ok()).toBe(true);const {csrf}=await login.json();
+ const before=await(await context.request.get('/fixture-counts')).json();
+ await page.goto('/tests/browser-face/embedded.php?shadow=1');await expect(page.locator('#enroll-1')).toBeVisible();await page.locator('#enroll-1').click();
+ await expect(page.locator('.browser-face-feedback p:first-child')).toContainText('Face saved · Setup pending',{timeout:20000});
+ const member=(await(await context.request.get('/fixture-shadow-api?action=options')).json()).data.persons.find(p=>Number(p.id)===1);expect(member.enrollment_state).toBe('PENDING');expect(Number(member.enrolled)).toBe(0);
+ await page.getByRole('button',{name:'Close',exact:true}).click();await page.reload();await expect(page.locator('#scan')).toBeVisible();await page.locator('#scan').click();
+ await expect(page.locator('.browser-face-feedback p:first-child')).toContainText('Public A suggested for review. Please verify.',{timeout:20000});
+ await expect.poll(()=>page.evaluate(()=>testFlow.capture.waitForDeparture)).toBe(true);
+ const state=await(await context.request.get('/fixture-shadow-counts')).json();expect(state.last.state).toBe('SHADOW_EVALUATED');expect(state.last.shadow_context.label_source).toBe('UNLABELLED_SHADOW');expect(state.last.diagnostics.candidate_count).toBe(1);expect(state.last.diagnostics.top_candidates[0][0].member_id).toBe(1);expect(state.last.diagnostics.top_candidates[0][0].similarity).toBeGreaterThan(.999);
+ expect(state.last.diagnostics.decision).toBe('THRESHOLDS_NOT_VALIDATED');expect(await(await context.request.get('/fixture-counts')).json()).toEqual(before);expect(await page.evaluate(()=>testFlow.capture.active && testFlow.state.recognized_name==='' && testFlow.state.draft.length===1 && testFlow.state.draft[0].verified===false)).toBe(true);
+ await page.waitForTimeout(2500);expect((await(await context.request.get('/fixture-shadow-counts')).json()).shadow_requests).toBe(state.shadow_requests);
+ await page.getByRole('button',{name:'Finish Scanning',exact:true}).click();await expect(page.getByRole('checkbox',{name:'Public A',exact:true})).not.toBeChecked();await page.getByRole('button',{name:'Confirm Attendance',exact:true}).click();await expect(page.locator('.browser-face-feedback p:first-child')).toHaveText('Select the members you have verified.');expect(await(await context.request.get('/fixture-counts')).json()).toEqual(before);
+ await page.getByRole('button',{name:'Back to Scanning',exact:true}).click();
+ await page.locator('#session').selectOption('8');await expect(page.locator('.browser-face-panel')).toBeHidden();await page.locator('#scan').click();await expect.poll(()=>page.evaluate(()=>testFlow.capture.waitForDeparture),{timeout:20000}).toBe(true);expect(await page.evaluate(()=>testFlow.context.session_id)).toBe(8);
+ expect(await(await context.request.get('/fixture-counts')).json()).toEqual(before);await page.getByRole('button',{name:'Close',exact:true}).click();expect(await page.evaluate(()=>testFlow.capture.worker===null && testFlow.capture.stream===null)).toBe(true);
+ await context.request.post('/fixture-pending-api?action=calibration_delete',{headers:{'X-Face-CSRF':csrf},data:{person_id:1,idempotency_key:'shadow_fixture_cleanup_'+Date.now()}});
+});

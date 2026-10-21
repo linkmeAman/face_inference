@@ -1,0 +1,73 @@
+PASS unscoped batch keeps the global SHADOW default
+PASS branch-wide DISABLED stops every batch including new ones and batch-less requests
+PASS branch-wide DISABLED wins over a batch scope
+PASS branch-wide DISABLED never crosses branches or tenants
+PASS a branch DISABLED scope without expiry never expires
+PASS branch-wide CAPTURE_ONLY sets the branch default
+PASS a batch scope overrides the branch default
+PASS a branch-wide LIVE scope is ignored (LIVE needs an exact batch)
+PASS an expired branch scope is ignored
+PASS a branch SHADOW scope can enable a branch under a DISABLED default
+PASS the global stop still beats a branch scope
+PASS a branch scope without approval is ignored
+PASS the existing rollout file is readable and its directory writable
+PASS enrollment-only change is saved and reported as saved
+PASS the change applies to exactly the selected batches
+PASS unrelated settings, default mode and unknown keys are preserved
+PASS the saved file has no world access (0660)
+PASS a history copy of the saved configuration is kept
+PASS the change is audited as face_mode_changed
+PASS history copies are bounded to the retention limit
+PASS retention keeps the newest copies and the baseline copy
+PASS audit carries administrator, previous and new setting, outcome, tenant and correlation id
+PASS a repeated request writes nothing and logs nothing
+PASS stopping a batch disables it and logs face_feature_disabled
+PASS re-enabling logs face_feature_enabled
+PASS disabling a branch stops all its batches (even future ones) and no other branch
+PASS resetting a branch returns it to the default
+PASS LIVE is refused without approved matching and nothing is written
+PASS the refusal is audited as face_rollout_rejected
+PASS LIVE is refused for a batch without active enrollments
+PASS LIVE is refused on a branch still in testing
+PASS LIVE is refused when the batch was not checked
+PASS LIVE cannot be applied to a whole branch
+PASS one blocked batch rejects the whole bulk LIVE request
+PASS LIVE is saved only when the policy confirms it is effective
+PASS the LIVE scope records the approving administrator, the report hash and a 90-day expiry
+PASS LIVE stops being effective if the approved report changes or matching is no longer ready
+PASS turning LIVE on is not logged as a rollback
+PASS switching LIVE back to SHADOW is saved and logged as face_rollout_rolled_back
+PASS stopping a LIVE batch disables it immediately and logs face_rollout_rolled_back
+PASS an unknown batch rejects the whole request
+PASS a branch the administrator cannot access is rejected
+PASS missing selection, unknown action and missing administrator are rejected
+PASS scanning without enrollment, and automatic without scanning, are refused
+PASS a malformed tenant name is rejected
+PASS another tenant's scope is left untouched
+PASS a CLI-style duplicate emergency scope disables the batch
+PASS a reset removes every duplicate scope for that batch
+PASS a form built from an older configuration cannot overwrite a newer one
+PASS a form built from the current configuration is accepted
+PASS a failed save is reported as Unable to Save, leaves the file unchanged and is audited
+PASS a saved file that does not match the request is detected and the previous settings are restored
+PASS a missing settings file is reported, never created
+PASS a corrupt settings file is reported and left alone
+PASS if the audit log is unavailable the saved change is flagged for the administrator, not hidden
+PASS stop all disables every branch immediately and logs face_rollout_rolled_back
+PASS stopping twice changes nothing
+PASS resume restores the previous scoped behaviour
+PASS the shared private audit log received both administrator events
+PASS the logged event has timestamp, release, administrator, scope, previous/new setting and correlation id
+PASS a refused LIVE request reaches the private log with its reason
+PASS administrator events contain no biometric, credential or key fields
+PASS no reasons are shown when matching is approved
+PASS a missing matching report is explained
+PASS the exact validation shortfall (people, samples, approval) is reported
+PASS the menu filter is present in the shared navigation config
+PASS administrators keep the Face Attendance menu entry
+PASS other users do not see the Face Attendance menu entry
+PASS the menu and the page apply the same administrator rule
+PASS a real administrator is shown by name
+PASS the verification session is identified and not presented as an administrator
+PASS non-administrator writers are labelled as the system
+Rollout administration regression complete

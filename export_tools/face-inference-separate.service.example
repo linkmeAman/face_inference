@@ -1,0 +1,28 @@
+[Unit]
+Description=Separate face inference reuse service
+After=network.target
+
+[Service]
+Type=simple
+# Create a dedicated user and grant read access to bundle files and write access
+# only to its runtime directory. Do not reuse the production unit name/config.
+User=face-inference-separate
+Group=face-inference-separate
+WorkingDirectory=/var/www/face_inference
+ExecStart=/var/www/face_inference/.venv/bin/python /var/www/face_inference/run_inference.py
+Restart=on-failure
+RestartSec=10
+Environment=PYTHONDONTWRITEBYTECODE=1
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/face_inference/runtime
+MemoryHigh=512M
+MemoryMax=768M
+TasksMax=64
+LimitNOFILE=1024
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

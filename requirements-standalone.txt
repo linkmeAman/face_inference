@@ -1,0 +1,3 @@
+# Python 3.10+, standard library HTTP/SQLite, browser-side ONNX Runtime assets.
+# This exact cryptography version is available in the captured host Python.
+cryptography==41.0.7

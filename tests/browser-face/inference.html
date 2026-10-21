@@ -1,0 +1,21 @@
+<!doctype html><html><head><title>Real inference test</title></head><body>
+<script type="module">
+window.runInference = async (imageUrl,guide,recognize=true) => {
+    const config = await (await fetch('/pf/js/browser-face/contract.json')).json();
+    config.diagnostics = true;
+    const worker = new Worker('/pf/js/browser-face/worker.mjs',{type:'module'});
+    const result = await new Promise((resolve,reject) => {
+        worker.onerror = error => reject(Error(error.message));
+        worker.onmessage = async ({data}) => {
+            if(data.type==='error') reject(Error(data.message));
+            if(data.type==='ready') {
+                const bitmap = await createImageBitmap(await (await fetch(imageUrl)).blob());
+                worker.postMessage({type:'frame',bitmap,epoch:1,guide,recognize},[bitmap]);
+            }
+            if(data.type==='observation') resolve(data);
+        };
+        worker.postMessage({type:'init',config});
+    }).finally(()=>worker.terminate());
+    return result;
+};
+</script></body></html>

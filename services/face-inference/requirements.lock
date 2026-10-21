@@ -1,0 +1,8 @@
+# Python 3.8-compatible private service dependencies. Keep model weights out
+# of Git. These are the newest compatible pins for the host's isolated Python
+# 3.8 runtime; upgrade only together with a newer application-local runtime.
+numpy==1.24.4
+onnxruntime==1.19.2
+opencv-contrib-python-headless==4.10.0.84
+onnx==1.16.1
+PyMySQL==1.1.1

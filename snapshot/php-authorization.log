@@ -1,0 +1,6 @@
+PASS authorization rejection 1
+PASS authorization rejection 2
+PASS authorization rejection 3
+PASS authorization rejection 4
+PASS authorization rejection 5
+PASS valid authenticated same-origin request

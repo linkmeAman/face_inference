@@ -1,0 +1,27 @@
+test_bad_origin_size_json_and_injected_thresholds (test_http.HttpTests.test_bad_origin_size_json_and_injected_thresholds) ... ok
+test_complete_php_free_enrollment_recognition_retry_delete (test_http.HttpTests.test_complete_php_free_enrollment_recognition_retry_delete) ... ok
+test_public_health_authentication_and_no_private_static_files (test_http.HttpTests.test_public_health_authentication_and_no_private_static_files) ... ok
+test_static_camera_dependencies_and_frontend_have_no_php_request (test_http.HttpTests.test_static_camera_dependencies_and_frontend_have_no_php_request) ... ok
+test_original_javascript_parity_on_exported_synthetic_vectors (test_service.MathTests.test_original_javascript_parity_on_exported_synthetic_vectors) ... ok
+test_vector_and_aggregation_rejection (test_service.MathTests.test_vector_and_aggregation_rejection) ... ok
+test_approved_activation_and_revoked_report (test_service.ServiceTests.test_approved_activation_and_revoked_report) ... ok
+test_approved_mode_fails_without_report (test_service.ServiceTests.test_approved_mode_fails_without_report) ... ok
+test_approved_policy_is_restricted_to_explicit_collections (test_service.ServiceTests.test_approved_policy_is_restricted_to_explicit_collections) ... ok
+test_collect_mode_does_not_recognize (test_service.ServiceTests.test_collect_mode_does_not_recognize) ... ok
+test_concurrent_duplicate_saves_serialize (test_service.ServiceTests.test_concurrent_duplicate_saves_serialize) ... ok
+test_duplicate_rejection_and_collection_isolation (test_service.ServiceTests.test_duplicate_rejection_and_collection_isolation) ... ok
+test_evidence_export_preserves_real_labels_source_and_reference (test_service.ServiceTests.test_evidence_export_preserves_real_labels_source_and_reference) ... ok
+test_exact_retry_changed_payload_and_capture_reuse (test_service.ServiceTests.test_exact_retry_changed_payload_and_capture_reuse) ... ok
+test_expiry_erases_ciphertext_and_prevents_recognition (test_service.ServiceTests.test_expiry_erases_ciphertext_and_prevents_recognition) ... ok
+test_observations_use_independent_dates_and_do_not_adapt_gallery (test_service.ServiceTests.test_observations_use_independent_dates_and_do_not_adapt_gallery) ... ok
+test_original_reference_is_immutable_and_conflicting_recapture_preserves_it (test_service.ServiceTests.test_original_reference_is_immutable_and_conflicting_recapture_preserves_it) ... ok
+test_pending_conflicts_never_activate_arbitrary_winner (test_service.ServiceTests.test_pending_conflicts_never_activate_arbitrary_winner) ... ok
+test_pending_default_and_evaluation_recognition (test_service.ServiceTests.test_pending_default_and_evaluation_recognition) ... ok
+test_persistence_encryption_wrong_key_and_deletion (test_service.ServiceTests.test_persistence_encryption_wrong_key_and_deletion) ... ok
+test_unknown_conflicting_ambiguous_and_eligibility (test_service.ServiceTests.test_unknown_conflicting_ambiguous_and_eligibility) ... ok
+test_validation_and_versions (test_service.ServiceTests.test_validation_and_versions) ... ok
+
+----------------------------------------------------------------------
+Ran 22 tests in 3.692s
+
+OK

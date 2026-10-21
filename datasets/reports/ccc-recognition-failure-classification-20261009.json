@@ -1,0 +1,613 @@
+{
+  "frozen_thresholds": {
+    "DUPLICATE_THRESHOLD": 0.5469521753092808,
+    "ATTENDANCE_THRESHOLD": 0.5667687778180779
+  },
+  "no_matching_or_threshold_change": true,
+  "summary": {
+    "development": {
+      "categories": {
+        "correct_top_below_threshold": 5,
+        "unknown_rejected": 20,
+        "correct": 20,
+        "ambiguous": 4,
+        "unknown_accepted": 4,
+        "wrong_top_accepted": 1
+      },
+      "attendance": {
+        "known": 30,
+        "unknown": 24,
+        "correct": 20,
+        "false_positive": 1,
+        "false_negative": 9,
+        "unknown_accepted": 4,
+        "ambiguous": 4,
+        "duplicate_trials": 30,
+        "duplicate_missed": 5,
+        "distinct_trials": 24,
+        "false_duplicate": 4,
+        "wrong_duplicate_identity": 3
+      },
+      "duplicate": {
+        "known": 30,
+        "unknown": 24,
+        "correct": 19,
+        "false_positive": 1,
+        "false_negative": 10,
+        "unknown_accepted": 4,
+        "ambiguous": 6,
+        "duplicate_trials": 30,
+        "duplicate_missed": 4,
+        "distinct_trials": 24,
+        "false_duplicate": 4,
+        "wrong_duplicate_identity": 3
+      },
+      "opencv_reference_attendance": {
+        "known": 30,
+        "unknown": 24,
+        "correct": 19,
+        "false_positive": 1,
+        "false_negative": 10,
+        "unknown_accepted": 4,
+        "ambiguous": 4,
+        "duplicate_trials": 30,
+        "duplicate_missed": 6,
+        "distinct_trials": 24,
+        "false_duplicate": 4,
+        "wrong_duplicate_identity": 3
+      },
+      "opencv_reference_duplicate": {
+        "known": 30,
+        "unknown": 24,
+        "correct": 18,
+        "false_positive": 1,
+        "false_negative": 11,
+        "unknown_accepted": 4,
+        "ambiguous": 6,
+        "duplicate_trials": 30,
+        "duplicate_missed": 5,
+        "distinct_trials": 24,
+        "false_duplicate": 4,
+        "wrong_duplicate_identity": 3
+      }
+    },
+    "heldout": {
+      "categories": {
+        "ambiguous": 4,
+        "correct_top_below_threshold": 8,
+        "correct": 18,
+        "unknown_rejected": 21,
+        "unknown_accepted": 1
+      },
+      "attendance": {
+        "known": 30,
+        "unknown": 22,
+        "correct": 18,
+        "false_positive": 0,
+        "false_negative": 12,
+        "unknown_accepted": 1,
+        "ambiguous": 5,
+        "duplicate_trials": 30,
+        "duplicate_missed": 8,
+        "distinct_trials": 22,
+        "false_duplicate": 2,
+        "wrong_duplicate_identity": 1
+      },
+      "duplicate": {
+        "known": 30,
+        "unknown": 22,
+        "correct": 17,
+        "false_positive": 0,
+        "false_negative": 13,
+        "unknown_accepted": 2,
+        "ambiguous": 6,
+        "duplicate_trials": 30,
+        "duplicate_missed": 8,
+        "distinct_trials": 22,
+        "false_duplicate": 3,
+        "wrong_duplicate_identity": 1
+      }
+    }
+  },
+  "reference_decision_changes": [
+    {
+      "file": "092.png",
+      "browser_winner": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5",
+      "reference_winner": null
+    }
+  ],
+  "failed_cases": {
+    "development": [
+      {
+        "file": "001.png",
+        "gallery_file": "000.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5161621915845007,
+        "top_file": "000.png",
+        "top_score": 0.5161621915845007,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999634528437329,
+        "opencv_feature_cosine": 0.9999642848707112,
+        "quality": {
+          "brightness": 52.42167881058657,
+          "blur": 358.57702913274306,
+          "valid": true
+        }
+      },
+      {
+        "file": "002.png",
+        "gallery_file": "000.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5129727407444222,
+        "top_file": "000.png",
+        "top_score": 0.5129727407444222,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999679779251435,
+        "opencv_feature_cosine": 0.9999666899763922,
+        "quality": {
+          "brightness": 68.89782836415766,
+          "blur": 417.2025141989063,
+          "valid": true
+        }
+      },
+      {
+        "file": "038.png",
+        "gallery_file": "036.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.6641997920837424,
+        "top_file": "036.png",
+        "top_score": 0.6641997920837424,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999693623406094,
+        "opencv_feature_cosine": 0.9999697131507487,
+        "quality": {
+          "brightness": 83.00022377232271,
+          "blur": 265.485716441565,
+          "valid": true
+        }
+      },
+      {
+        "file": "050.png",
+        "gallery_file": "048.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.526981067671489,
+        "top_file": "048.png",
+        "top_score": 0.526981067671489,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999603127455485,
+        "opencv_feature_cosine": 0.9999604500743298,
+        "quality": {
+          "brightness": 99.73931536989869,
+          "blur": 710.2564527309546,
+          "valid": true
+        }
+      },
+      {
+        "file": "060.png",
+        "gallery_file": null,
+        "category": "unknown_accepted",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "138.png",
+        "top_score": 0.7803641975661343,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": true,
+        "reference_cosine": 0.9999710588342187,
+        "opencv_feature_cosine": 0.9999719620575742,
+        "quality": {
+          "brightness": 70.99715776466776,
+          "blur": 970.3137629484637,
+          "valid": true
+        }
+      },
+      {
+        "file": "062.png",
+        "gallery_file": null,
+        "category": "unknown_accepted",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "138.png",
+        "top_score": 0.6515286309230246,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": true,
+        "reference_cosine": 0.9999772147537008,
+        "opencv_feature_cosine": 0.9999771626076955,
+        "quality": {
+          "brightness": 61.40955062181162,
+          "blur": 338.500387473149,
+          "valid": true
+        }
+      },
+      {
+        "file": "066.png",
+        "gallery_file": null,
+        "category": "unknown_accepted",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "138.png",
+        "top_score": 0.5852759609051889,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": true,
+        "reference_cosine": 0.9999646936646516,
+        "opencv_feature_cosine": 0.9999659906578786,
+        "quality": {
+          "brightness": 90.14996922831908,
+          "blur": 1535.7367361263277,
+          "valid": true
+        }
+      },
+      {
+        "file": "073.png",
+        "gallery_file": "072.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5134497776829465,
+        "top_file": "072.png",
+        "top_score": 0.5134497776829465,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999672598077873,
+        "opencv_feature_cosine": 0.9999673835962272,
+        "quality": {
+          "brightness": 84.36625342793394,
+          "blur": 614.825475948691,
+          "valid": true
+        }
+      },
+      {
+        "file": "109.png",
+        "gallery_file": "108.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 2,
+        "genuine_score": 0.6484348894589161,
+        "top_file": "036.png",
+        "top_score": 0.6681607687931005,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999677532455313,
+        "opencv_feature_cosine": 0.9999677635124719,
+        "quality": {
+          "brightness": 80.79595719069259,
+          "blur": 548.0011821465908,
+          "valid": true
+        }
+      },
+      {
+        "file": "110.png",
+        "gallery_file": "108.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.7541201242277933,
+        "top_file": "108.png",
+        "top_score": 0.7541201242277933,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999577221894617,
+        "opencv_feature_cosine": 0.9999574943886392,
+        "quality": {
+          "brightness": 59.53830715880366,
+          "blur": 170.03122409356732,
+          "valid": true
+        }
+      },
+      {
+        "file": "121.png",
+        "gallery_file": "120.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 2,
+        "genuine_score": 0.5905215157366087,
+        "top_file": "114.png",
+        "top_score": 0.5913500652614663,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999701705101538,
+        "opencv_feature_cosine": 0.9999697765238231,
+        "quality": {
+          "brightness": 61.982957350126576,
+          "blur": 642.7642659603051,
+          "valid": true
+        }
+      },
+      {
+        "file": "122.png",
+        "gallery_file": "120.png",
+        "category": "wrong_top_accepted",
+        "known": true,
+        "genuine_rank": 2,
+        "genuine_score": 0.5441206801435001,
+        "top_file": "114.png",
+        "top_score": 0.6380806362286346,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.9999668103168172,
+        "opencv_feature_cosine": 0.9999669249640155,
+        "quality": {
+          "brightness": 63.870144451531054,
+          "blur": 243.56078375622917,
+          "valid": true
+        }
+      },
+      {
+        "file": "132.png",
+        "gallery_file": null,
+        "category": "unknown_accepted",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "138.png",
+        "top_score": 0.6478216990124522,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": true,
+        "reference_cosine": 0.9999670831203542,
+        "opencv_feature_cosine": 0.9999674474638394,
+        "quality": {
+          "brightness": 72.97691406250024,
+          "blur": 1358.2460773006933,
+          "valid": true
+        }
+      },
+      {
+        "file": "139.png",
+        "gallery_file": "138.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5469521753092808,
+        "top_file": "138.png",
+        "top_score": 0.5469521753092808,
+        "accepted_candidates": 0,
+        "missed_duplicate": false,
+        "false_duplicate": false,
+        "reference_cosine": 0.999965375573141,
+        "opencv_feature_cosine": 0.9999648348777785,
+        "quality": {
+          "brightness": 73.02980795599302,
+          "blur": 1941.2364843248706,
+          "valid": true
+        }
+      }
+    ],
+    "heldout": [
+      {
+        "file": "004.png",
+        "gallery_file": "003.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 2,
+        "genuine_score": 0.5778168247083675,
+        "top_file": "015.png",
+        "top_score": 0.6069116610392074,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false
+      },
+      {
+        "file": "005.png",
+        "gallery_file": "003.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.65040824545399,
+        "top_file": "003.png",
+        "top_score": 0.65040824545399,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false
+      },
+      {
+        "file": "010.png",
+        "gallery_file": "009.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.498842817389605,
+        "top_file": "009.png",
+        "top_score": 0.498842817389605,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "040.png",
+        "gallery_file": "039.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.3857728762862888,
+        "top_file": "039.png",
+        "top_score": 0.3857728762862888,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "041.png",
+        "gallery_file": "039.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5053511239109694,
+        "top_file": "039.png",
+        "top_score": 0.5053511239109694,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "046.png",
+        "gallery_file": "045.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5399452974726984,
+        "top_file": "045.png",
+        "top_score": 0.5399452974726984,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "047.png",
+        "gallery_file": "045.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.4059476907326905,
+        "top_file": "045.png",
+        "top_score": 0.4059476907326905,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "051.png",
+        "gallery_file": null,
+        "category": "unknown_accepted",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "045.png",
+        "top_score": 0.5966493497721639,
+        "accepted_candidates": 1,
+        "missed_duplicate": false,
+        "false_duplicate": true
+      },
+      {
+        "file": "058.png",
+        "gallery_file": "057.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.48889638699442456,
+        "top_file": "057.png",
+        "top_score": 0.48889638699442456,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "065.png",
+        "gallery_file": "063.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5088476874460351,
+        "top_file": "063.png",
+        "top_score": 0.5088476874460351,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "094.png",
+        "gallery_file": "093.png",
+        "category": "correct_top_below_threshold",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.5047995564214633,
+        "top_file": "093.png",
+        "top_score": 0.5047995564214633,
+        "accepted_candidates": 0,
+        "missed_duplicate": true,
+        "false_duplicate": false
+      },
+      {
+        "file": "113.png",
+        "gallery_file": "111.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.6710553043592516,
+        "top_file": "111.png",
+        "top_score": 0.6710553043592516,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false
+      },
+      {
+        "file": "119.png",
+        "gallery_file": "117.png",
+        "category": "ambiguous",
+        "known": true,
+        "genuine_rank": 1,
+        "genuine_score": 0.6765044163002867,
+        "top_file": "117.png",
+        "top_score": 0.6765044163002867,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": false
+      },
+      {
+        "file": "123.png",
+        "gallery_file": null,
+        "category": "unknown_rejected",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "117.png",
+        "top_score": 0.7366167323515561,
+        "accepted_candidates": 2,
+        "missed_duplicate": false,
+        "false_duplicate": true
+      },
+      {
+        "file": "125.png",
+        "gallery_file": null,
+        "category": "unknown_rejected",
+        "known": false,
+        "genuine_rank": null,
+        "genuine_score": null,
+        "top_file": "117.png",
+        "top_score": 0.5510757008023072,
+        "accepted_candidates": 0,
+        "missed_duplicate": false,
+        "false_duplicate": true
+      }
+    ]
+  },
+  "limitations": [
+    "Synthetic adult views; first usable view gallery; no child or real multi-observation validation.",
+    "Heldout output classified after freeze; heldout images not inspected or used to tune."
+  ],
+  "development_rerun_exact_embedding_parity": true,
+  "reference_summary": {
+    "images": 72,
+    "usable": 70,
+    "browser_cpu_cosine_min": 0.9999410620279385,
+    "browser_official_opencv_cosine_min": 0.9999407198660402,
+    "official_alignment_mean_pixel_difference_max": 0.1093218537414966,
+    "landmark_coordinate_difference_max": 1.28704833984375
+  }
+}

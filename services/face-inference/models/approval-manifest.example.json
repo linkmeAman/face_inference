@@ -1,0 +1,17 @@
+{
+  "status": "APPROVED",
+  "license_reference": "replace-with-approved-license-record",
+  "approved_by": "replace-with-reviewer",
+  "approved_at": "YYYY-MM-DD",
+  "policy_version": "face-policy-v1",
+  "files": [
+    {
+      "path": "services/face-inference/models/yunet.onnx",
+      "sha256": "replace-with-64-character-sha256"
+    },
+    {
+      "path": "services/face-inference/models/sface.onnx",
+      "sha256": "replace-with-64-character-sha256"
+    }
+  ]
+}

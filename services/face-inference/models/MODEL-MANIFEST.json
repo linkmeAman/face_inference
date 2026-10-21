@@ -1,0 +1,30 @@
+{
+  "bundle_version": "opencv-zoo-yunet-sface-int8-omz-anti-spoof-mn3",
+  "retrieved_on": "2026-09-19",
+  "approval": {
+    "technical_use": "local-feasibility-and-shadow-mode",
+    "automatic_attendance": "not-approved",
+    "production_use": "pending-calibration-and-legal-review"
+  },
+  "detector": {
+    "file": "face_detection_yunet_2023mar_int8.onnx",
+    "source": "OpenCV Zoo",
+    "source_url": "https://huggingface.co/opencv/opencv_zoo/resolve/main/models/face_detection_yunet/face_detection_yunet_2023mar_int8.onnx",
+    "license": "MIT",
+    "sha256": "321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294"
+  },
+  "recognizer": {
+    "file": "face_recognition_sface_2021dec_int8bq.onnx",
+    "source": "OpenCV Zoo",
+    "source_url": "https://huggingface.co/opencv/opencv_zoo/resolve/main/models/face_recognition_sface/face_recognition_sface_2021dec_int8bq.onnx",
+    "license": "Apache-2.0",
+    "sha256": "fb143eea07838aa532d1c95df5f69899974ea0140e1fba05e94204be13ed74ee"
+  },
+  "pad": {
+    "file": "anti-spoof-mn3.onnx",
+    "source": "Intel Open Model Zoo",
+    "source_url": "https://storage.openvinotoolkit.org/repositories/open_model_zoo/public/2022.1/anti-spoof-mn3/anti-spoof-mn3.onnx",
+    "license": "MIT",
+    "sha256": "c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262"
+  }
+}

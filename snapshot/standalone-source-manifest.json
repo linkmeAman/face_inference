@@ -1,0 +1,89 @@
+{
+  "purpose": "New PHP-free adapter; original processing assets are unchanged",
+  "files": [
+    {
+      "path": "standalone/CONTRACT.md",
+      "sha256": "5bb65d0697662f1bcfb9768899a54fb8930749a2b11eda24391e097c6196c92f"
+    },
+    {
+      "path": "standalone/__init__.py",
+      "sha256": "48766ed32294310a286190d4e761e983f922af3c351947210ac966940321da86"
+    },
+    {
+      "path": "standalone/config.py",
+      "sha256": "97236af518cde32b77d5fb9dfe0f36ab91fb7a4a2a45e61f5e5fe30e3d763c0c"
+    },
+    {
+      "path": "standalone/math.py",
+      "sha256": "5c3430584906911fe792443c6fb0bfdce0de7913eb2f1dbd19d3f567949a40af"
+    },
+    {
+      "path": "standalone/schema.sql",
+      "sha256": "995c4763ebfdb164dce5404d8db8c029d613e76f7d9321733fa2e0dd4da6aa27"
+    },
+    {
+      "path": "standalone/server.py",
+      "sha256": "7ca435f37292017a31167755708a3ada554ea5057f2eede834cb0d6b102c828d"
+    },
+    {
+      "path": "standalone/service.py",
+      "sha256": "a01a14d4f0efedb97d88e210afb0164f624b42fef6ebaa3dfed1289ae91337a9"
+    },
+    {
+      "path": "standalone/storage.py",
+      "sha256": "7015852309d450c7375883f11ecbaa16acc8c979542673dcbba3444ca21f998f"
+    },
+    {
+      "path": "standalone/tests/browser-smoke.cjs",
+      "sha256": "d43365ea9ac664150ced843b4abffd5cec9d8252b38e26305c44e5eddad233a7"
+    },
+    {
+      "path": "standalone/tests/client.test.mjs",
+      "sha256": "770779205499e768e28fcbeef51c7f7fda36360523bd54403aa9d98382977c2f"
+    },
+    {
+      "path": "standalone/tests/make_synthetic_camera.py",
+      "sha256": "5030ae0d5de0575cd6fbf98eb83be5a5ce94eef2bb5d551a71220a3bb45c2bc9"
+    },
+    {
+      "path": "standalone/tests/test_http.py",
+      "sha256": "c36cfb53be81f7fde2021fd8b3f0515c012a90eccbf56c1551c4cf2662b6d84d"
+    },
+    {
+      "path": "standalone/tests/test_service.py",
+      "sha256": "932f6aa770f2eebbbb8fbcc40e41378640341d20756c5d3b2707cab43c902ac2"
+    },
+    {
+      "path": "standalone/web/app.mjs",
+      "sha256": "02dc90bc8c2df5eda19514d867f93ce0e2def028c39f7285ad7186f92c2fe064"
+    },
+    {
+      "path": "standalone/web/client.mjs",
+      "sha256": "8e7c303b3a9f36796bd589c43b88da200bdfb079e82ef8e23aa721c606167265"
+    },
+    {
+      "path": "standalone/web/index.html",
+      "sha256": "706359257d977c6f3a772ae06c5fd278f74b34d134c3f33d7a58e3cf7b355284"
+    },
+    {
+      "path": "standalone/web/style.css",
+      "sha256": "0f67626a09f9c75c6b261e2863192c6fd140d312f30de43c7b59bab5190add81"
+    },
+    {
+      "path": "run.py",
+      "sha256": "e09067062d43df703671f28a78a70d6e7f0a9fee0aa9e7baaec316fa23019f0e"
+    },
+    {
+      "path": "requirements-standalone.txt",
+      "sha256": "14c420a0ed19b8980f772c587181abdedd464be2a0fe5b03086a219c068cf8ac"
+    },
+    {
+      "path": "README.md",
+      "sha256": "350f7f556e45230cc98b0418ebcd54d2f474e5cf731dcfa223f06afeabc24292"
+    },
+    {
+      "path": "STANDALONE_GUIDE.md",
+      "sha256": "50e400f64a3c5e0a8b914548c6308904e1e61e0aad1b205cee44ddd6614a2119"
+    }
+  ]
+}

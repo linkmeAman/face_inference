@@ -1,0 +1,1451 @@
+{
+  "dataset": "HuMInGameLab/ControlFace10K",
+  "revision": "a03589de1a9e028b2d16fa1eb0e019a6930e817c",
+  "license": "CC-BY-4.0",
+  "source": "https://huggingface.co/datasets/HuMInGameLab/ControlFace10K/resolve/a03589de1a9e028b2d16fa1eb0e019a6930e817c/controlface10k.zip",
+  "attribution": "Kassi Nzalasse, Rishav Raj, Eli Laird, Corey Clark \u2014 SIG (2024), arXiv:2409.08345; subset selection only, images unchanged. https://creativecommons.org/licenses/by/4.0/",
+  "synthetic": true,
+  "downloaded_image_bytes_this_run": 45039155,
+  "images": [
+    {
+      "identity": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341/r0_g0_a25_o3_zhjNUK.png",
+      "file": "000.png",
+      "sha256": "71ace95071b3bc6acb4c5b7a5503c342f5943f3ce93f1ef6626c22b16153ce2e",
+      "bytes": 276481
+    },
+    {
+      "identity": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341/r0_g0_a25_o4_aImVgW.png",
+      "file": "001.png",
+      "sha256": "2717a8c24c58cc365316e30dcd2cdf51cbffe926856fb627de5004196b386607",
+      "bytes": 278696
+    },
+    {
+      "identity": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/female/25/identity-014aecae-0dcc-4141-90ea-9c1476226341/r0_g0_a25_o5_JnyoMK.png",
+      "file": "002.png",
+      "sha256": "43ad6ba5810e77e6dc62d8647b3c9118a760420a8f55bd56ba1dfa259f14c182",
+      "bytes": 285733
+    },
+    {
+      "identity": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7/r0_g0_a25_o3_aUWvAE.png",
+      "file": "003.png",
+      "sha256": "1febe4a2346755fd7660a9c1fb128e13f822aaad689707a56ed166a524d958d3",
+      "bytes": 292055
+    },
+    {
+      "identity": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7/r0_g0_a25_o4_rDdKoW.png",
+      "file": "004.png",
+      "sha256": "706ab86b78c578b45688c7faad22f8bafe2f3bd39f5573975ef5829468b9f296",
+      "bytes": 294815
+    },
+    {
+      "identity": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7",
+      "stratum": "ControlFace10k/African/female/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/female/25/identity-02d0621c-eccf-4dae-a0df-bd4f6a5c56f7/r0_g0_a25_o5_WlimDw.png",
+      "file": "005.png",
+      "sha256": "6bdf8d7bd37abf90d920a2d5a3ac4629abc666bbf3e1c9796a0d08fd6bd7fdb9",
+      "bytes": 301415
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42/r0_g0_a50_o3_BAHIYD.png",
+      "file": "006.png",
+      "sha256": "3528ce9659714bf2e4eca819077c2f071b09181911c97e8be38569cda86f875e",
+      "bytes": 344590
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42/r0_g0_a50_o4_OcriIf.png",
+      "file": "007.png",
+      "sha256": "d2244b50cdbcd95e49287ef596e414bac7d050348910ddeb139f7c1cbea399bb",
+      "bytes": 339760
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/female/50/identity-01a96609-1eaf-49fa-913a-c9eaaa03fe42/r0_g0_a50_o5_lbohup.png",
+      "file": "008.png",
+      "sha256": "f2833242b15c91dbce1537ca265c41b876acd226f0770965d4de4bf97f4f6fc4",
+      "bytes": 342078
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d/r0_g0_a50_o3_uyveKd.png",
+      "file": "009.png",
+      "sha256": "4a7d5ad90891ecf9ecfbe982e0138c84d6d3cfcd3f05d00b5e2aa85d2bde1621",
+      "bytes": 309955
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d/r0_g0_a50_o4_Qpouvj.png",
+      "file": "010.png",
+      "sha256": "b286238193761c36827f9dd774b92202f0298ecd6d5a53a69fc78e7442f2d092",
+      "bytes": 326243
+    },
+    {
+      "identity": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d",
+      "stratum": "ControlFace10k/African/female/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/female/50/identity-036703fa-fc88-4e5a-9e32-6b0843e9147d/r0_g0_a50_o5_ATlUlv.png",
+      "file": "011.png",
+      "sha256": "ddc772536b758a5c80b8d0d3511760bc66d4fcd622d2f553a1e24fbeba4c819a",
+      "bytes": 322889
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104/r0_g0_a65_o3_yqIpjr.png",
+      "file": "012.png",
+      "sha256": "dd49af53c743abdd5d7b99b8b795fbbfa974201e7e3f8b7a21b756d7f24f2b96",
+      "bytes": 360624
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104/r0_g0_a65_o4_ChJWju.png",
+      "file": "013.png",
+      "sha256": "cd259fd2db80cc6f09e90e6ba515c72131550c3d3ecd9c7618163c3206be0f54",
+      "bytes": 377916
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/female/65/identity-009f8511-e800-4f1e-b08b-626d9c732104/r0_g0_a65_o5_YJALje.png",
+      "file": "014.png",
+      "sha256": "779390489a66772c2962680abe480bcfccf0d7030ef326d874a77f5a144225ea",
+      "bytes": 371599
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb/r0_g0_a65_o3_DHxnCQ.png",
+      "file": "015.png",
+      "sha256": "1dab9c2949ee40dd2bed800bdb866adb5c688609f434bedd38048053f2056806",
+      "bytes": 289766
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb/r0_g0_a65_o4_rphDMQ.png",
+      "file": "016.png",
+      "sha256": "f7ad8dcd4131a171ddf02fd4f3f8c28b4b56c8e8cbce8cb1ba3767b9d9a81d40",
+      "bytes": 294085
+    },
+    {
+      "identity": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb",
+      "stratum": "ControlFace10k/African/female/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/female/65/identity-07aacdf1-2c78-4d87-8f14-00508c2303fb/r0_g0_a65_o5_yVAVCV.png",
+      "file": "017.png",
+      "sha256": "35557f07c63160e323d441b195820a12addab6c4ad4d17252a1b4cca3163899d",
+      "bytes": 280202
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe/r0_g1_a25_o3_qgpSTc.png",
+      "file": "018.png",
+      "sha256": "60c3022285e954e4660aff237f81d2cbbc21d02cf8d3f50e093418f0e35c24d4",
+      "bytes": 293427
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe/r0_g1_a25_o4_tEpYAK.png",
+      "file": "019.png",
+      "sha256": "1ce5d5cfb3179c6f83d2b52a46d89b44cf7377b4d1ba1c4facf573ebddc40f2c",
+      "bytes": 297387
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/male/25/identity-017692b5-1486-4e06-846f-37a5c5249afe/r0_g1_a25_o5_GaPmdN.png",
+      "file": "020.png",
+      "sha256": "015b478d6562f6ed42b60cdb5e12696042e59b51f8e2ab78888a757486369aa3",
+      "bytes": 303746
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89/r0_g1_a25_o3_HbmwHM.png",
+      "file": "021.png",
+      "sha256": "09a7fb2fc61aadc7f3ab11408b0b801cfe474ae3cb132dbaefa4ecad635b5bc4",
+      "bytes": 257531
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89/r0_g1_a25_o4_ALMGBK.png",
+      "file": "022.png",
+      "sha256": "00d0cf6e6857c9baddffea04de4e1f5b9db53370587646dfc7144f954469ce73",
+      "bytes": 261723
+    },
+    {
+      "identity": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89",
+      "stratum": "ControlFace10k/African/male/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/male/25/identity-01fc1aaf-385d-4c25-9476-764a68549d89/r0_g1_a25_o5_fsjHJJ.png",
+      "file": "023.png",
+      "sha256": "28af7f7690d14ca3d1b48766c91c6006af1daf2c8069137eb719d6aacd126109",
+      "bytes": 271107
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec/r0_g1_a50_o3_sGivAL.png",
+      "file": "024.png",
+      "sha256": "16fe6a7db79c01f49ac25771ede6147f41e6bbab454e64a6c522276eabdd926a",
+      "bytes": 271938
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec/r0_g1_a50_o4_rEPkik.png",
+      "file": "025.png",
+      "sha256": "ba8096a6a0376ed1652328d56f995b15268ffc847728ed4bd6f4f1361b9acc7b",
+      "bytes": 282068
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/male/50/identity-01829971-1cef-4330-939b-f127d4353dec/r0_g1_a50_o5_YdGGas.png",
+      "file": "026.png",
+      "sha256": "cbec276ced4a179b38841b072983fc1de429136b4fe75740c5de4b542019bb96",
+      "bytes": 288681
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325/r0_g1_a50_o3_OEhShQ.png",
+      "file": "027.png",
+      "sha256": "c9cf32fa787ba165605d1fdc2edf321549c2abc04362a3816397bd43d6c5d91b",
+      "bytes": 301572
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325/r0_g1_a50_o4_ucXqEV.png",
+      "file": "028.png",
+      "sha256": "521a7f56c1244631d4476bf8b1372d9ee31e9a3fed23b6bb29080ec97bea4c46",
+      "bytes": 297975
+    },
+    {
+      "identity": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325",
+      "stratum": "ControlFace10k/African/male/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/male/50/identity-02e49071-67f1-4466-92df-11fc05c0d325/r0_g1_a50_o5_YEqeMj.png",
+      "file": "029.png",
+      "sha256": "1d0899c57cd9804a0d85e3c3264720ff0c3376a7a42b4c97a1d88f9e40802a9d",
+      "bytes": 311160
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e/r0_g1_a65_o3_dyBrdF.png",
+      "file": "030.png",
+      "sha256": "4d694925e1723e1eea3f43551108b3a55d5a46cee02b2f78c11f00ff35cce9b0",
+      "bytes": 303470
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e/r0_g1_a65_o4_AzHxlJ.png",
+      "file": "031.png",
+      "sha256": "18954d4ea12b818d97d3c7769fd6767a79ba729fa49501f3f19559c0a59d2031",
+      "bytes": 306627
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/African/male/65/identity-001ae446-b164-45ab-9281-93fc1a9beb5e/r0_g1_a65_o5_uLHZiw.png",
+      "file": "032.png",
+      "sha256": "cc709b794b557f1f42664e51ec036c0ca79c67205bed6498aa126446c7da2d42",
+      "bytes": 317209
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955/r0_g1_a65_o3_NVYRTO.png",
+      "file": "033.png",
+      "sha256": "58316fc32d30079e9c7daf513f356fd93648d8840027aea2285b13855f5c7e1b",
+      "bytes": 335799
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955/r0_g1_a65_o4_gdByZC.png",
+      "file": "034.png",
+      "sha256": "f21baf38d5e2079aa45aa27c6d8caa3d7625d34eecdce5f3efa132981cfb55a4",
+      "bytes": 308449
+    },
+    {
+      "identity": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955",
+      "stratum": "ControlFace10k/African/male/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/African/male/65/identity-022e4504-7cb2-4a8c-b392-694f11df3955/r0_g1_a65_o5_DIceQG.png",
+      "file": "035.png",
+      "sha256": "4b6209a7a9553f0698f250f3410e09dc21eeb9e33eb260dd50b13404b990694c",
+      "bytes": 277830
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827/r1_g0_a25_o3_WzYNRr.png",
+      "file": "036.png",
+      "sha256": "06bc698f591da8dc93d5093194da58c037e8fe463454cd46e181e5975a6a4e71",
+      "bytes": 298389
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827/r1_g0_a25_o4_iNqiNO.png",
+      "file": "037.png",
+      "sha256": "657e53b1ee69f0162413f25cebb1fb2079942ea99e111312994ffdc08e08d126",
+      "bytes": 298567
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/25/identity-0044851e-4bc4-4cb9-9763-33b5d3b83827/r1_g0_a25_o5_RffIPG.png",
+      "file": "038.png",
+      "sha256": "b0b90e98310b65860328cabc2a191d96dd3f039c1e2865cd13d612708fce6f34",
+      "bytes": 301490
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b/r1_g0_a25_o3_rqqcRe.png",
+      "file": "039.png",
+      "sha256": "03b28e37499f1bdca2d03eba1b88d04c8b2918ff38a7882b4711c701dce2e010",
+      "bytes": 280146
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b/r1_g0_a25_o4_vUTWYV.png",
+      "file": "040.png",
+      "sha256": "9c573a60b967cbe57e69abe9d3f63a3688be6b43c149c97e3327797cbf6fbbb0",
+      "bytes": 279248
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b",
+      "stratum": "ControlFace10k/Asian/female/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/25/identity-018435e7-c9ae-4d7d-873a-bb476bd30d7b/r1_g0_a25_o5_HYaENk.png",
+      "file": "041.png",
+      "sha256": "b3628b72dbf7499fa00ed704cd49594768f7b9388b3fe64bd96dd81a793f0eac",
+      "bytes": 283381
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff/r1_g0_a50_o3_iWGSxc.png",
+      "file": "042.png",
+      "sha256": "cff05abdce4735b9e2212d83cafd2c0a6355ff298ec9d5b147b9ec9e2ae53ac7",
+      "bytes": 320646
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff/r1_g0_a50_o4_FZjkDF.png",
+      "file": "043.png",
+      "sha256": "197505affbea982fbd599f17782d0c432e4cadedfb487f76eb477a81438123af",
+      "bytes": 307706
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/50/identity-03b038a3-c6e7-4f6c-82b9-30edc8a73dff/r1_g0_a50_o5_rUGHnh.png",
+      "file": "044.png",
+      "sha256": "415341456cb14aa00525893beeeffd6d2b12bf817c532b378c3db7bad5812f18",
+      "bytes": 319805
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12/r1_g0_a50_o3_OAcfcV.png",
+      "file": "045.png",
+      "sha256": "5ef283a04cc9908e8f9af6f79a9623d570e7d5a08c593d17ad466fc36c1ad350",
+      "bytes": 302554
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12/r1_g0_a50_o4_zBYtIX.png",
+      "file": "046.png",
+      "sha256": "e8ed046c2bac664587d2555585e276229902e2c72879ce759acd05aa60969886",
+      "bytes": 307951
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12",
+      "stratum": "ControlFace10k/Asian/female/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/50/identity-04a4002c-892d-4280-bc89-17e2da256c12/r1_g0_a50_o5_gwkCoR.png",
+      "file": "047.png",
+      "sha256": "162e960997eef1f31da888f0ec8ad753acde85dc1e32599e234276d25838e02f",
+      "bytes": 307346
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c/r1_g0_a65_o3_fVhcpQ.png",
+      "file": "048.png",
+      "sha256": "288c21a939384170986f719d141dafa6afed46dd33b61ba5ecb3917a228fe313",
+      "bytes": 290157
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c/r1_g0_a65_o4_VZPaSo.png",
+      "file": "049.png",
+      "sha256": "01e1dd75ddc9b36a31f9e960c52e99cb3b85d04a6b4f060babc392f50c760332",
+      "bytes": 300073
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/65/identity-019ed158-4c72-45c8-9fe2-c61b76126f3c/r1_g0_a65_o5_xofOOT.png",
+      "file": "050.png",
+      "sha256": "7cf8079116e61d68b229b320d69a6a0d11f16a4504ae67659f03f961f4c188dc",
+      "bytes": 303544
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1/r1_g0_a65_o3_bRdtEB.png",
+      "file": "051.png",
+      "sha256": "5527ebcf1847f1f2c786b3b9d6705fb67c563a4a8059bb73a1f2e6ce7e1ed05a",
+      "bytes": 326352
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1/r1_g0_a65_o4_AaPYKo.png",
+      "file": "052.png",
+      "sha256": "132fa9522de2a065b72974435a150fd9fd0de755a074430dd7a007925976cac5",
+      "bytes": 339740
+    },
+    {
+      "identity": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1",
+      "stratum": "ControlFace10k/Asian/female/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/female/65/identity-062a95af-09a3-41bb-9716-dd8ff075b7e1/r1_g0_a65_o5_Zzxouh.png",
+      "file": "053.png",
+      "sha256": "a539abb544ff4ede267ca24bfcd08ffb23915630ff11259d94419c5d42f3e9e6",
+      "bytes": 332493
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8/r1_g1_a25_o3_LJUBMP.png",
+      "file": "054.png",
+      "sha256": "40b124243fa27e4cbd407d1ed35b34f8294e98afc9ff47a3305b0b046ca8bd56",
+      "bytes": 322693
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8/r1_g1_a25_o4_QmYJCw.png",
+      "file": "055.png",
+      "sha256": "df54abfb0eeb0a4d0825b6584803e69e6ff41ddffd33ae4d2615e8e9424e138f",
+      "bytes": 311579
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/25/identity-01b2c01f-5531-45ef-a403-4e00157606f8/r1_g1_a25_o5_fcxLfP.png",
+      "file": "056.png",
+      "sha256": "92b75bdb9496618ba60d7bd43d16fda3440fee239a85a2a1e870fc784a7f4535",
+      "bytes": 319717
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f/r1_g1_a25_o3_wnwqUH.png",
+      "file": "057.png",
+      "sha256": "d579cad02be90f9a05bb58d08174324008e5c30d4d20e5f54d4adb312c066c37",
+      "bytes": 299335
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f/r1_g1_a25_o4_IDHjEu.png",
+      "file": "058.png",
+      "sha256": "b61bf939c9613b14d78441cbbaf08a7fcb0a5a393a468fa33c8c8fc5cc2d262a",
+      "bytes": 286799
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f",
+      "stratum": "ControlFace10k/Asian/male/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/25/identity-04fdfde5-40cc-488c-bf4a-6e6aee0dca6f/r1_g1_a25_o5_caRAwJ.png",
+      "file": "059.png",
+      "sha256": "a74f2f57febdc1302fa9f9a85a61644b0cb568109b99a3d19736d4adb2961f4f",
+      "bytes": 303576
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae/r1_g1_a50_o3_RrLqXE.png",
+      "file": "060.png",
+      "sha256": "63d5ccafc654fa0f64768c40719937dacba6b367daaa3909f908bedefc114590",
+      "bytes": 300788
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae/r1_g1_a50_o4_VBiWDb.png",
+      "file": "061.png",
+      "sha256": "39f633f678f036347ede7fc12df25f9305ccbe351014f8f61f79a286ab060534",
+      "bytes": 294086
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/50/identity-00662228-10c0-45ea-8848-7cd46b1e7dae/r1_g1_a50_o5_UGFEbi.png",
+      "file": "062.png",
+      "sha256": "84debd75ce3fbbbe1dc80f669e99a69bacfbc4bd233095b14d2243531f1022e6",
+      "bytes": 300662
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4/r1_g1_a50_o3_wYxaAT.png",
+      "file": "063.png",
+      "sha256": "8fdfc422e4adddfdae3e6aa4e8f08d5267ce012fd9d3f50728d6eab82b5d9438",
+      "bytes": 324334
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4/r1_g1_a50_o4_gemoWh.png",
+      "file": "064.png",
+      "sha256": "6fc152653fb987b272934427c13e35f59ca8bfe747249326ce231e26ed0e44cf",
+      "bytes": 307488
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4",
+      "stratum": "ControlFace10k/Asian/male/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/50/identity-017347a0-ade8-43b7-b2b7-621a72c78eb4/r1_g1_a50_o5_KjkcNa.png",
+      "file": "065.png",
+      "sha256": "d407b657e931e4e0ec5547040e177a0c5804ad71f79bf9aa349e23da549baf8a",
+      "bytes": 325663
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957/r1_g1_a65_o3_AaEJao.png",
+      "file": "066.png",
+      "sha256": "635702d4d6852bbd1fae92a616ac4920c779e19101fc739142b9497fbf0bf842",
+      "bytes": 325232
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957/r1_g1_a65_o4_Gmsnab.png",
+      "file": "067.png",
+      "sha256": "ae8d3b37cbac0c4040c1883087f7e03f5da0888b5ae71f014760aa6cf2286b32",
+      "bytes": 321434
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/65/identity-000c9781-4ed2-4c02-919a-27ded076f957/r1_g1_a65_o5_yfsnRw.png",
+      "file": "068.png",
+      "sha256": "8ece0d9ec3ab78e77ac70eb9309a92d534247c0b189d453ca3274327a58fea3a",
+      "bytes": 318788
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a/r1_g1_a65_o3_UyodPv.png",
+      "file": "069.png",
+      "sha256": "91dd6fdfeea16ad6b274992ac3a4035f909b2d7f9ae6f82e08c419d0c9b8a1da",
+      "bytes": 311649
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a/r1_g1_a65_o4_qEcINr.png",
+      "file": "070.png",
+      "sha256": "8afc8f5fbf0a8af7e36df40075d5e3a095e05416935f6c771f9ac1bdc968d072",
+      "bytes": 296922
+    },
+    {
+      "identity": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a",
+      "stratum": "ControlFace10k/Asian/male/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Asian/male/65/identity-01e22196-1c68-4285-b9dc-639a50f6910a/r1_g1_a65_o5_DIQuDZ.png",
+      "file": "071.png",
+      "sha256": "e0a61ade76181b9d427052ce3fc9fa6182646c60f0516eb458b8774daa699a46",
+      "bytes": 298026
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7/r2_g0_a25_o3_pCACre.png",
+      "file": "072.png",
+      "sha256": "3f6fffd1905726fcab679ad3a6db37bc976d31e62fe7ab63e6cf7ba03c121bd1",
+      "bytes": 334852
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7/r2_g0_a25_o4_hTYmTB.png",
+      "file": "073.png",
+      "sha256": "5ed5023749c33a244dd4a643f89e4c6bfa681d72ccbd56fbff154e9aea846a81",
+      "bytes": 340564
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/25/identity-02d09fe5-a68e-497b-96f0-c0cfbb187ee7/r2_g0_a25_o5_YbWCaF.png",
+      "file": "074.png",
+      "sha256": "cded03e1c65a685887ea006a79b764fdc4a6a67a6c446c667e7c36fa3988a61b",
+      "bytes": 351686
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199/r2_g0_a25_o3_EiJGsF.png",
+      "file": "075.png",
+      "sha256": "c20d732a03c6e312f2192b0c11232c25717eb0984a714f7efa3135c29e2c6d8e",
+      "bytes": 326500
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199/r2_g0_a25_o4_JHzFIB.png",
+      "file": "076.png",
+      "sha256": "9241bc2719e423d895c0bf73d4cd6e6f7d87144daa3d638f8c0254179eb2c59f",
+      "bytes": 343132
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199",
+      "stratum": "ControlFace10k/Caucasian/female/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/25/identity-04a175a3-efa5-4331-8014-847fb10b1199/r2_g0_a25_o5_BAPUOh.png",
+      "file": "077.png",
+      "sha256": "d22e5a4037150eba2b201a99eb7d31e3d4235a94366c77b6153db4355f2f0de1",
+      "bytes": 338476
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee/r2_g0_a50_o3_WeuVdv.png",
+      "file": "078.png",
+      "sha256": "d41cfa1dbc1f521fabfc3d76dfd5fb04d9d42be8d3cea64b8e5c985f347e9c33",
+      "bytes": 345382
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee/r2_g0_a50_o4_LkmlpI.png",
+      "file": "079.png",
+      "sha256": "cb56244488afccfbc5986a02ba302765c29f1d5f54a8e4ddccff695464e37601",
+      "bytes": 338595
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/50/identity-01c357a1-f1d3-4d33-9bbd-06ba441ed9ee/r2_g0_a50_o5_SFaaRK.png",
+      "file": "080.png",
+      "sha256": "7488524e0ec0a1fdedd4e80b271dad8f05378737e7220b364bd1bf5ff4e7ee36",
+      "bytes": 317782
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2/r2_g0_a50_o3_xNUTmy.png",
+      "file": "081.png",
+      "sha256": "027230127822d58acbed5d238dd2507ace64663a4551c5a9564a2293adfbe73b",
+      "bytes": 276625
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2/r2_g0_a50_o4_LImKmx.png",
+      "file": "082.png",
+      "sha256": "d3a8de1324599b215f92f6d793ce6745a4ac83c1b0ffd997932a2c5544588dcc",
+      "bytes": 280828
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2",
+      "stratum": "ControlFace10k/Caucasian/female/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/50/identity-021979a5-c0c5-40d1-b554-19e94da280c2/r2_g0_a50_o5_gbcVIe.png",
+      "file": "083.png",
+      "sha256": "b0f5fc5a4f79e4c8f9f247337a3496a8f4ecb9f167ddc57e6a49b6440ee47790",
+      "bytes": 285247
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a/r2_g0_a65_o3_QuTyOd.png",
+      "file": "084.png",
+      "sha256": "43a6d5825cdf9ca9b6c02a8e17cd87b9a615fd20468d214b7c32ccf3d28c34ac",
+      "bytes": 340299
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a/r2_g0_a65_o4_mMpDDe.png",
+      "file": "085.png",
+      "sha256": "84eff771c8747921b5901fa443559cf1eec73370dbe6795785906696b4eb1192",
+      "bytes": 339808
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0005a04a-cff1-4424-8a87-58d8d4d41f0a/r2_g0_a65_o5_DRYGbX.png",
+      "file": "086.png",
+      "sha256": "4a091b7e3bb4d0e52570bcad23cdacdf57e856e8bc57b74253cc64a9b043f83a",
+      "bytes": 341857
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf/r2_g0_a65_o3_kMRCpG.png",
+      "file": "087.png",
+      "sha256": "6b53c9042f58d47819d64952bc1bddb10e4a71c3a1f1c8329134e2579856e9e8",
+      "bytes": 329869
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf/r2_g0_a65_o4_bkoisd.png",
+      "file": "088.png",
+      "sha256": "a803bd641d39767a230d2e14fd00a0efd874e732f9b7f9e637ebf01853ceea12",
+      "bytes": 342990
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf",
+      "stratum": "ControlFace10k/Caucasian/female/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/female/65/identity-0432ac26-5354-4010-b8a0-694e642b71bf/r2_g0_a65_o5_pbEshE.png",
+      "file": "089.png",
+      "sha256": "1896d37689b15e8db5ca8b9b23148f2cd70ba6fa55bd63715d0958926f77977d",
+      "bytes": 340311
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5/r2_g1_a25_o3_jrbyCp.png",
+      "file": "090.png",
+      "sha256": "be97daf85ee20b9429c69cda605b434726ff0558963777b6b20e163a9de4e63d",
+      "bytes": 300877
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5/r2_g1_a25_o4_Swbvro.png",
+      "file": "091.png",
+      "sha256": "7acccb4870546e585e4f7ff5bd9f479656901f8e5bc3828086a1b7807bcb9262",
+      "bytes": 337435
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/25/identity-02fccdb7-0a0b-4001-9731-40b30e9fc4d5/r2_g1_a25_o5_dJtItk.png",
+      "file": "092.png",
+      "sha256": "ec64afcceda36ba6e96d6aadc3338739543676b0f91c7e70c1e6f78a0858577d",
+      "bytes": 355330
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292/r2_g1_a25_o3_lPWung.png",
+      "file": "093.png",
+      "sha256": "4795f4b8718a79ffe7807278913a5661caeba7fc181e55ded9a7e45d6652d2ee",
+      "bytes": 289618
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292/r2_g1_a25_o4_tbgOdX.png",
+      "file": "094.png",
+      "sha256": "84419c766e540ee366f3f929c96dea88086af9d8d382fc110aae227e70392f6d",
+      "bytes": 293224
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292",
+      "stratum": "ControlFace10k/Caucasian/male/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/25/identity-038f59a2-5849-4bde-b5db-9b2739530292/r2_g1_a25_o5_phoGAW.png",
+      "file": "095.png",
+      "sha256": "a89fee82dbdb530aa6cdee07beeaa5548b1f6871e0c401c477d1dc9b6c2c98d4",
+      "bytes": 299505
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649/r2_g1_a50_o3_IsyFsv.png",
+      "file": "096.png",
+      "sha256": "a8162f4e5acb285c9d66453fccf64467c5889e92f7f52cfc9b6d9ad0d4581799",
+      "bytes": 353423
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649/r2_g1_a50_o4_vSQKuc.png",
+      "file": "097.png",
+      "sha256": "464d635a8bdfdae2d0bccbcaf3b4224fc1a548d08547fd843bdab6769c3553a9",
+      "bytes": 337115
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/50/identity-00d2397f-42ad-4894-9e2f-c8157dd00649/r2_g1_a50_o5_OBbMTm.png",
+      "file": "098.png",
+      "sha256": "a304305dbf8fcc6d24c28560ed91af6149d86292b8a2814d520dd043352c98df",
+      "bytes": 344518
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a/r2_g1_a50_o3_qaDEzU.png",
+      "file": "099.png",
+      "sha256": "706afbb160d40ac2c4d4ccfbff0903fc3fc6d54ef30567a2286e68b31a8c5c67",
+      "bytes": 323030
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a/r2_g1_a50_o4_EoFaOr.png",
+      "file": "100.png",
+      "sha256": "59e7d7da5d81d7d9dfabf1263a241011ea3a6b5f8ef14b516dc1030b249bf5ae",
+      "bytes": 339963
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a",
+      "stratum": "ControlFace10k/Caucasian/male/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/50/identity-026ed7d7-7499-4307-a5be-5651ed63bb2a/r2_g1_a50_o5_ZeqUST.png",
+      "file": "101.png",
+      "sha256": "e0c8cd0d39790e400b419956cc4d395730bdb6f429a48cf5a348be4450e1e9d8",
+      "bytes": 339238
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd/r2_g1_a65_o3_MNjChC.png",
+      "file": "102.png",
+      "sha256": "11aa29453f9d4829fb88f3c5994596cffc21b1515a4a6c6a98384cb2e527b199",
+      "bytes": 330378
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd/r2_g1_a65_o4_UbBLmS.png",
+      "file": "103.png",
+      "sha256": "e09da2193c1c5f080221ac6137fc309ff00ae291b5b80808216d10e38bf4a9e5",
+      "bytes": 326539
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/65/identity-04eb684f-cc54-4959-9186-6c2df0c5debd/r2_g1_a65_o5_ERROUi.png",
+      "file": "104.png",
+      "sha256": "3b690a922765062b928a8e880d901c737464dde787fba75e02c8ea5ea555434b",
+      "bytes": 312216
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e/r2_g1_a65_o3_KMMLwC.png",
+      "file": "105.png",
+      "sha256": "f80ab8db7e176342340b3b5912ee6baf3722c3b075390630504e1bbcf01a331a",
+      "bytes": 336202
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e/r2_g1_a65_o4_KJBEsR.png",
+      "file": "106.png",
+      "sha256": "0af1441210e183152384cf67e8f56fbb1ded6d65e8c57162c9c1c96a545aa2a8",
+      "bytes": 339390
+    },
+    {
+      "identity": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e",
+      "stratum": "ControlFace10k/Caucasian/male/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Caucasian/male/65/identity-084737f5-82b4-4b01-8a7e-08c42c31319e/r2_g1_a65_o5_thZZfj.png",
+      "file": "107.png",
+      "sha256": "e562cb34db927d9a9b22a32e0934dd295b0f59f7b3ce9720f0e97e402b56d42c",
+      "bytes": 341483
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04/r3_g0_a25_o3_lPOHaq.png",
+      "file": "108.png",
+      "sha256": "fb3801746ce77dd9f47486d2d4fe25079d3ec1b80684567d58500aba448dc7af",
+      "bytes": 319853
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04/r3_g0_a25_o4_qQZudj.png",
+      "file": "109.png",
+      "sha256": "97b387dedd36543995c5d8707ec31f4427cb69840344a9556d9f3a0b283e5314",
+      "bytes": 310723
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/25/identity-00688026-8f01-4a40-857f-1535b7a92a04/r3_g0_a25_o5_EQNoXL.png",
+      "file": "110.png",
+      "sha256": "0565c8736f563d9997ce169be9eb10ba6cf834f1600582d0ad05b5d5cafa57e7",
+      "bytes": 324843
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6/r3_g0_a25_o3_ruxYkb.png",
+      "file": "111.png",
+      "sha256": "2bac3f553b7579aa1833de4519ac719fd8bf61bbf672c00fd6e419488130f977",
+      "bytes": 317856
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6/r3_g0_a25_o4_NNGJst.png",
+      "file": "112.png",
+      "sha256": "cce83e5e048dd8eea9c40d21806acb9a0c8250d17ed8a85962c426594eebafb6",
+      "bytes": 309150
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6",
+      "stratum": "ControlFace10k/Indian/female/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/25/identity-007503d5-01f6-4353-be98-80453a23b4a6/r3_g0_a25_o5_tOauMY.png",
+      "file": "113.png",
+      "sha256": "9d8aa95d27222418b493d72cca88f8c5368325b766ce397124feeee5e737388d",
+      "bytes": 330048
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4/r3_g0_a50_o3_JOjgdX.png",
+      "file": "114.png",
+      "sha256": "abc719c8d249775e29fb70e12b05cc524dae3f68fe45ff90ee1f45752dcd0f17",
+      "bytes": 302940
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4/r3_g0_a50_o4_VCkXtm.png",
+      "file": "115.png",
+      "sha256": "218174524270fb7c8696713d2084ab74ec2dcaf064ce00be62291eef84552eec",
+      "bytes": 305048
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/50/identity-025c8bb0-a251-4094-a978-5592131177c4/r3_g0_a50_o5_CYlDrL.png",
+      "file": "116.png",
+      "sha256": "3ab6af78af1c36546615b46c5c0cc1e6c5cb6970b189e696f371ba74aecb2720",
+      "bytes": 298778
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb/r3_g0_a50_o3_cBRVTR.png",
+      "file": "117.png",
+      "sha256": "0100489e5d1a3015b5f31523db0a3ee680971ca3403ba7909a3bf2f167bccd63",
+      "bytes": 339013
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb/r3_g0_a50_o4_dnbPTT.png",
+      "file": "118.png",
+      "sha256": "ef811559ba6d34d564b4b5d6a5fe01ee074fe6191fb9880802c43a1603769dd6",
+      "bytes": 341786
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb",
+      "stratum": "ControlFace10k/Indian/female/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/50/identity-056e9478-b7af-4404-b064-e465094faffb/r3_g0_a50_o5_RuIANJ.png",
+      "file": "119.png",
+      "sha256": "74c2cf22b5b0c1126382166f748379c5e3fe0bfb22fc4edd73bb55637e1ef724",
+      "bytes": 341796
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c/r3_g0_a65_o3_StpgdR.png",
+      "file": "120.png",
+      "sha256": "8a0dd143eec139df796c0965a4e52a79d325f72dbe18c985df9b140c8738506c",
+      "bytes": 303817
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c/r3_g0_a65_o4_ijCozD.png",
+      "file": "121.png",
+      "sha256": "caff3bdb4ced71cd3c80edf14200a3f3ed2fd37bb4081445a68a35e02c6a87d9",
+      "bytes": 319552
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/65/identity-02b57c76-8425-4388-8c55-c16e1058475c/r3_g0_a65_o5_OYHvIt.png",
+      "file": "122.png",
+      "sha256": "f6e4f6b0e31ca3a19681fe8cddba7649301e4e0cec444672fbf0c7e3b2eb11ae",
+      "bytes": 320490
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f/r3_g0_a65_o3_KblXdr.png",
+      "file": "123.png",
+      "sha256": "9ccf2f96bb8d60ac04492615c179481309c6db0613541bde16c20df683fe7387",
+      "bytes": 329232
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f/r3_g0_a65_o4_IRTStd.png",
+      "file": "124.png",
+      "sha256": "2c7bf4a08109f435d52f9414d72e49d5850ee096d8bbbcf2534edcbe23f3c9a2",
+      "bytes": 326365
+    },
+    {
+      "identity": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f",
+      "stratum": "ControlFace10k/Indian/female/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/female/65/identity-041ed1c6-0720-45ee-b610-d2a1a8aa747f/r3_g0_a65_o5_ozKloJ.png",
+      "file": "125.png",
+      "sha256": "6e717404e52c43ef87f1a4a86697c4ca41419e07c5806ec69b562f5106df497e",
+      "bytes": 321754
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895/r3_g1_a25_o3_ghDMdl.png",
+      "file": "126.png",
+      "sha256": "601badb82049e6c4acdb9a6a3f791280773a890036832cdc0ecc48049a35de79",
+      "bytes": 271167
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895/r3_g1_a25_o4_NtXWyA.png",
+      "file": "127.png",
+      "sha256": "e15c72db907754b65c9e0b22afa68e62bbc478698810c4914471de9d0f1991bb",
+      "bytes": 272114
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/25/identity-049cde6b-0a02-4b75-9486-71e0eab41895/r3_g1_a25_o5_ylGtbZ.png",
+      "file": "128.png",
+      "sha256": "2c5444062fda8614c8571aadceb63ba92eba9c54cd6fb754e6d410ee236f4aa5",
+      "bytes": 263708
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e/r3_g1_a25_o3_WbsAJR.png",
+      "file": "129.png",
+      "sha256": "eefeda7cfaa01d7fdfda30ed576a9c349f89d2dcd9237bf43fd3e64fa1c33241",
+      "bytes": 300748
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e/r3_g1_a25_o4_gXNTue.png",
+      "file": "130.png",
+      "sha256": "41ccb14fe5e16825a55980964b5f7f80285f95c994e396a0c85277bc5286177a",
+      "bytes": 304621
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e",
+      "stratum": "ControlFace10k/Indian/male/25",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/25/identity-070e690c-fe98-4341-b47b-b5b64f35003e/r3_g1_a25_o5_XlBeme.png",
+      "file": "131.png",
+      "sha256": "86437b5cf93c8035e541d0ded2021126bfa354a524a1094aa5e089a2bc3a8855",
+      "bytes": 311414
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2/r3_g1_a50_o3_TBzsSZ.png",
+      "file": "132.png",
+      "sha256": "6ee70f5be9fb08347c873be20ebba64f00d57b67a91eca9d250f247a437b5c5a",
+      "bytes": 318846
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2/r3_g1_a50_o4_WMMDOg.png",
+      "file": "133.png",
+      "sha256": "d82c530ac44ac3e7af5dbd58d554509e479039fde46ad5cb7e41891b67e580e9",
+      "bytes": 323825
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/50/identity-02111aca-e67d-4ca2-bde4-c692cf0a24f2/r3_g1_a50_o5_awlrkC.png",
+      "file": "134.png",
+      "sha256": "33f57badaa2a84e40470f41a82d0d0ce148ae5826a59634debfb07300fd36820",
+      "bytes": 320053
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5/r3_g1_a50_o3_Vrqjqz.png",
+      "file": "135.png",
+      "sha256": "520db71b0582e4ba2ed38205307831d88b21a68b1108e3b69c1b69e3bfe73619",
+      "bytes": 296641
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5/r3_g1_a50_o4_cFQybS.png",
+      "file": "136.png",
+      "sha256": "622daaa0672c148f82302f744d92dd27e89a6c480dfd59f7bf301922d5916bbf",
+      "bytes": 292036
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5",
+      "stratum": "ControlFace10k/Indian/male/50",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/50/identity-023da35d-f733-421b-8867-adcab655e1b5/r3_g1_a50_o5_SQBlkg.png",
+      "file": "137.png",
+      "sha256": "6819102cdacb7351e1713c59f87200470cbd58bd17f479764886a460a4cda4ee",
+      "bytes": 300180
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "development",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d/r3_g1_a65_o3_bmPPbf.png",
+      "file": "138.png",
+      "sha256": "4fd0cddf5848ccb57b36843593dcfe199303b03e6285c9a4488ac19513d192e7",
+      "bytes": 318702
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "development",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d/r3_g1_a65_o4_iPlzgR.png",
+      "file": "139.png",
+      "sha256": "7814137782b095d023f473ea1720a3430199117f6195002ce37970c63ae7712b",
+      "bytes": 312023
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "development",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/65/identity-009ea913-f63f-4054-bb7c-d47eacf1155d/r3_g1_a65_o5_UCIVQo.png",
+      "file": "140.png",
+      "sha256": "1256f1dd041bdf1d5b400d46da424a9aa5d3401e53ac0b4da12f3d6d238c1c49",
+      "bytes": 316453
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "heldout",
+      "view": 0,
+      "name": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2/r3_g1_a65_o3_HFEcwt.png",
+      "file": "141.png",
+      "sha256": "3a62e7b17826c85e854b0491931c01dfedafdf5e73ed5b0b81397437325e7bfc",
+      "bytes": 285501
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "heldout",
+      "view": 1,
+      "name": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2/r3_g1_a65_o4_UzhLZA.png",
+      "file": "142.png",
+      "sha256": "1b31458f7477939fe927a72615809e7f0a1fd1acc09621ab68b0fc6e18e82e65",
+      "bytes": 302179
+    },
+    {
+      "identity": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2",
+      "stratum": "ControlFace10k/Indian/male/65",
+      "partition": "heldout",
+      "view": 2,
+      "name": "ControlFace10k/Indian/male/65/identity-00b1adcb-1f1c-4984-8bbc-dfa272c3a5b2/r3_g1_a65_o5_TQVZkW.png",
+      "file": "143.png",
+      "sha256": "10c24ffe248f88ed5c7a1bb61498f72d99c63c93ed62574bb0eb8609fcf2129d",
+      "bytes": 297008
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "python_files_parsed": 66,
+  "python_errors": [],
+  "php_files_linted": 162,
+  "php_errors": [],
+  "production_secret_matches": [],
+  "sanitized_files": [
+    "tests/attendance/FACE-ENR-04-testing-members-remap.php",
+    "tests/attendance/FACE-PILOT-01-camera-smoke-test.php",
+    "classes/services/FaceAttendanceConfig.php",
+    "database/migrations/alter_attendance_settings.php",
+    "docs/ai/face-inference-operations-guide.md",
+    "classes/dbconnection.class.php"
+  ]
+}

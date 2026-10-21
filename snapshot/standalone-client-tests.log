@@ -1,0 +1,15 @@
+TAP version 13
+# Subtest: /tmp/face-standalone-20261021/standalone/tests/client.test.mjs
+ok 1 - /tmp/face-standalone-20261021/standalone/tests/client.test.mjs
+  ---
+  duration_ms: 1058.417653
+  ...
+1..1
+# tests 1
+# suites 0
+# pass 1
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1064.229183

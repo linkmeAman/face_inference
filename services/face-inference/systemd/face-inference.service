@@ -1,0 +1,48 @@
+[Unit]
+Description=Creative Cultural Centre private face inference service
+After=network.target
+StartLimitIntervalSec=120
+StartLimitBurst=5
+
+[Service]
+Type=simple
+User=ccc-face-inference
+Group=ccc-face-inference
+WorkingDirectory=/var/www/admin.creativeculturalcentre.in/services/face-inference
+EnvironmentFile=/var/www/admin.creativeculturalcentre.in/.env
+EnvironmentFile=/etc/ccc/face-experiment/writer.env
+Environment=PYTHONPATH=/var/www/admin.creativeculturalcentre.in/services/face-inference
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=OMP_NUM_THREADS=1
+Environment=OPENBLAS_NUM_THREADS=1
+Environment=MKL_NUM_THREADS=1
+LoadCredential=face-experiment-id-secret:/etc/ccc/face-experiment/id-secret
+Environment=FACE_EXPERIMENT_ID_SECRET_FILE=/run/credentials/face-inference.service/face-experiment-id-secret
+ExecStartPre=/var/lib/creativeculturalcentre/face-inference/venv/bin/python tools/verify_runtime.py
+ExecStart=/var/lib/creativeculturalcentre/face-inference/venv/bin/python -m app.main
+Restart=on-failure
+RestartSec=10s
+TimeoutStopSec=20s
+KillSignal=SIGTERM
+
+# Prefer terminating this isolated model process over MySQL or Apache if the
+# small Testing host experiences another system-wide out-of-memory event.
+OOMScoreAdjust=500
+MemoryHigh=512M
+MemoryMax=768M
+TasksMax=64
+LimitNOFILE=1024
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

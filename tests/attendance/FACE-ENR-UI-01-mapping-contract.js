@@ -1,0 +1,22 @@
+#!/usr/bin/env node
+const assert = require('assert');
+const fs = require('fs');
+const page = fs.readFileSync('pf/attendance.php', 'utf8');
+const controller = fs.readFileSync('pf/js/controllers/batchAttendanceController.js', 'utf8');
+assert(page.includes('faceEnrollmentFeatureEnabled'), 'page must expose enrollment flag');
+assert(page.includes('Manage Face Setup') && page.includes('Set up face'), 'mapping must live in explicit inline setup mode');
+assert(page.includes('faceSetupMode') && page.includes('startFaceEnrollment(row)'), 'setup actions must be progressively disclosed per child');
+assert(controller.includes('$scope.startFaceEnrollment = startFaceEnrollment;'), 'controller must expose setup');
+assert(controller.includes('faceEnrollmentRoute.php') && controller.includes("action: 'enrollFace'"), 'setup must call enrollment endpoint');
+assert(controller.includes('teacher_confirmed_member'), 'request must retain teacher confirmation');
+assert(controller.includes("action: 'onboardReference'"), "setup must automatically create a reference when needed");
+assert(!controller.includes("staff_confirmed"), "setup must not send manual staff confirmation");
+assert(!controller.includes("isStaffConfirmed"), "setup must not block on staff confirmation");
+assert(!page.includes("Reference Portrait Required"), "page must not show a blocking reference portrait card");
+assert(!page.includes("Staff confirmation:"), "page must not show a staff confirmation checkbox");
+assert(!page.includes("Capture & Verify Reference"), "capture action must have a single direct label");
+assert(controller.includes("if (!$scope.faceEnrollmentHasReference) {\n            onboardReferencePortrait"), "Capture must create a missing reference automatically before enrollment");
+assert(controller.includes("form.append('session_id', session_id)"), 'request must identify session');
+assert(controller.includes('enrollmentFrames.push') && controller.includes('if (index < 7)'), 'setup must capture eight bounded frames');
+assert(!controller.includes("window.confirm('Confirm that this camera belongs"), 'initial setup must not add a redundant native confirmation');
+console.log('PASS FACE-ENR-UI-01 progressive mapping contract');

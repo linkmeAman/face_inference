@@ -1,0 +1,27 @@
+[Unit]
+Description=CCC low-priority face experiment shadow worker
+After=network.target face-inference.service
+
+[Service]
+Type=simple
+User=ccc-face-inference
+Group=ccc-face-inference
+WorkingDirectory=/var/www/admin.creativeculturalcentre.in/services/face-inference
+EnvironmentFile=/var/www/admin.creativeculturalcentre.in/.env
+EnvironmentFile=/etc/ccc/face-experiment/writer.env
+LoadCredential=face-experiment-id-secret:/etc/ccc/face-experiment/id-secret
+Environment=FACE_EXPERIMENT_ID_SECRET_FILE=/run/credentials/face-experiment-shadow.service/face-experiment-id-secret
+Environment=PYTHONPATH=/var/www/admin.creativeculturalcentre.in/services/face-inference
+ExecStart=/var/lib/creativeculturalcentre/face-inference/venv/bin/python -m app.experiment_shadow
+Nice=19
+CPUWeight=10
+MemoryHigh=192M
+MemoryMax=256M
+TasksMax=16
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+
+[Install]
+WantedBy=multi-user.target
