@@ -42,10 +42,13 @@ class SQLiteRepository:
         return db
 
     @contextmanager
-    def transaction(self):
+    def transaction(self, mode='IMMEDIATE'):
+        norm_mode = mode.upper() if isinstance(mode, str) else ''
+        if norm_mode not in ('IMMEDIATE', 'DEFERRED'):
+            raise ValueError(f'Unsupported transaction mode: {mode}')
         db = self.connect()
         try:
-            db.execute('BEGIN IMMEDIATE')
+            db.execute(f'BEGIN {norm_mode}')
             yield db
             db.commit()
         except BaseException:
@@ -53,6 +56,11 @@ class SQLiteRepository:
             raise
         finally:
             db.close()
+
+    @contextmanager
+    def read_transaction(self):
+        with self.transaction(mode='DEFERRED') as db:
+            yield db
 
     def checkpoint(self):
         with closing(self.connect()) as db:

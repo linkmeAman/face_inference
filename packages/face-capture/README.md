@@ -36,7 +36,7 @@
 | `collection` | `collection` | `string` | ID of the collection to match against or enroll into. Required. |
 | `mode` | `mode` | `'recognize' \| 'enroll'` | Operation mode. Defaults to `'recognize'`. |
 | `person-id` | `personId` | `string` | Person ID to enroll into collection. Required when `mode="enroll"`. |
-| `model-base-url` | `modelBaseUrl` | `string` | Base URL for YuNet/SFace assets. Defaults to `<api-url>/`. |
+| `model-base-url` | `modelBaseUrl` | `string` | Base URL for YuNet/SFace ONNX models and WASM assets. Defaults to `<api-url>/`. Executable code is always resolved locally from the package and never imported from attribute-controlled origins. |
 | `autostart` | `autostart` | `boolean` | Automatically starts camera stream when attached. Defaults to `false`. |
 
 ### Methods
@@ -70,6 +70,14 @@ All events are bubbling and composed (`bubbles: true`, `composed: true`):
 ## Consent Requirement
 
 When `mode="enroll"`, the component automatically renders an accessible consent confirmation checkbox. The component strictly refuses to initiate capture until consent is explicitly checked.
+
+---
+
+## Security & Code Integrity
+
+`<face-capture>` strictly separates trusted executable logic from model/WASM data assets:
+- **Shipped Code Integrity**: All executable JavaScript modules (including element implementation, client, Web Worker, and ONNX Runtime Web scripts) are shipped directly in the package and resolved locally. The element never imports executable scripts from `model-base-url`, `api-url`, or any attribute-controlled origin.
+- **Configurable Asset Origin**: Heavy model weights (`yunet.onnx`, `sface.onnx`) and WebAssembly binaries (`ort-wasm-simd-threaded.wasm`) are loaded on-demand from the configured `model-base-url` (or the `face_inference` server), keeping the npm package lightweight (~100 KB) while supporting separate CDN hosting for binary assets.
 
 ---
 
