@@ -29,14 +29,15 @@ you later expose different collections to different users.
 ## Startup and private configuration
 
 ```bash
-python3 run.py init       # Generate independent config/token/key and empty SQLite DB
-python3 run.py check      # Validate configuration, models, encryption key and schema
-python3 run.py token      # Print the token only in your own terminal
-python3 run.py            # Serve the UI + API on 127.0.0.1:6122
-python3 run.py --port 7001
+face-inference init       # Generate independent config/token/key and empty SQLite DB
+face-inference check      # Validate configuration, models, encryption key and schema
+face-inference token      # Print the token only in your own terminal
+face-inference serve      # Serve the UI + API on 127.0.0.1:6122
+face-inference serve --host 0.0.0.0 --port 7001
 ```
 
-The files are created in `.standalone/` with private filesystem permissions. An
+The files are created in `.face-inference/` with private filesystem permissions
+(or `FACE_INFERENCE_HOME` when set). An
 existing encryption key must remain stable across restarts and backups. Losing or
 replacing it makes encrypted records unreadable; the persisted key check rejects
 an incorrect key. The API never returns the key, token, stored face vectors or
@@ -44,22 +45,32 @@ database path. The UI keeps its supplied token in memory, clearing the input aft
 connection; it does not save it in localStorage/cookies.
 
 Use `--config /private/location/config.json` or `FACE_STANDALONE_CONFIG` to choose
-an independent deployment. The JSON config supports:
+an independent deployment. Listener settings use CLI flag > environment >
+config.json > default precedence. Overrides apply only to the current run and
+are never saved to config.json; the token and encryption key stay unchanged.
+`FACE_INFERENCE_ALLOWED_ORIGINS` replaces the saved list with comma-separated
+origins, trims whitespace and ignores empty entries; an empty value clears the
+list for that run. The JSON config supports:
 
-| Setting | Default / meaning |
-| --- | --- |
-| `database` | Absolute `.standalone/faces.sqlite3` path; another private path is supported |
-| `host`, `port` | `127.0.0.1`, `6122` |
-| `mode` | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
-| `duplicate_threshold`, `recognition_threshold` | `0.85`, `0.65`, original browser shadow values; provisional |
-| `retention_days` | 30; expired face/evidence ciphertext is excluded and erased during mutations or CLI purge |
-| `timezone` | `Asia/Kolkata`, matching the original capture-date convention; configurable IANA timezone |
-| `capture_source` | `unvalidated-camera`; classify actual live evidence explicitly, never rename synthetic tests as live |
-| `approved_collection_ids` | Empty; exact authorized scopes required for APPROVED captures/recognition |
-| `policy_file` | Empty; private approved policy bound to a complete hash-verified evaluation report |
-| `allowed_origins` | Empty; add exact HTTPS origin(s) only for an HTTPS reverse-proxy deployment |
-| `max_people` | 1000 per collection |
-| `api_token`, `encryption_key` | Independent generated credentials; keep private |
+| Setting | Environment | CLI flag | Default / meaning |
+| --- | --- | --- | --- |
+| `database` | — | — | Absolute `.face-inference/faces.sqlite3` path; another private path is supported |
+| `host` | `FACE_INFERENCE_HOST` | `--host H` | `127.0.0.1`; IP literal or hostname |
+| `port` | `FACE_INFERENCE_PORT` | `--port P` | `6122`; integer from 1 through 65535 |
+| `mode` | — | — | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
+| `duplicate_threshold`, `recognition_threshold` | — | — | `0.85`, `0.65`, original browser shadow values; provisional |
+| `retention_days` | — | — | 30; expired face/evidence ciphertext is excluded and erased during mutations or CLI purge |
+| `timezone` | — | — | `Asia/Kolkata`, matching the original capture-date convention; configurable IANA timezone |
+| `capture_source` | — | — | `unvalidated-camera`; classify actual live evidence explicitly, never rename synthetic tests as live |
+| `approved_collection_ids` | — | — | Empty; exact authorized scopes required for APPROVED captures/recognition |
+| `policy_file` | — | — | Empty; private approved policy bound to a complete hash-verified evaluation report |
+| `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins only for an HTTPS reverse-proxy deployment |
+| `max_people` | — | — | 1000 per collection |
+| `api_token`, `encryption_key` | — | — | Independent generated credentials; keep private |
+
+Invalid listener/origin values exit with status 1 and a one-line error. A listener
+other than `127.0.0.1`, `::1` or `localhost` prints this warning to stderr:
+`listening on a non-loopback address: put TLS in front (camera needs HTTPS)`.
 
 Restart to apply config changes. The approved report is revalidated on every new
 operation, so revoking/corrupting it cannot silently leave approved matching active.
