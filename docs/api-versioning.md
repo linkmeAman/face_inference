@@ -165,7 +165,7 @@ API compatibility is continuously verified through automated test suites:
    - Validates that the top-level error envelope schema and standard status codes (`401`, `403`, `413`, `429`) match server responses (`test_openapi_error_envelope_and_status_codes`).
 2. **Client and Server Regression Suites**:
    - Python client unit tests (`tests/test_client.py`) verify retry policies, idempotency key generation, and error mapping.
-   - Server endpoint tests (`tests/test_server.py`) test authentication, input validation, and route responses.
-   - JavaScript client tests (`tests/js/test_client.mjs`, `packages/face-capture/test/*.test.mjs`) verify browser client decoding and communication.
+   - Server endpoint tests (`tests/test_http.py`) test authentication, input validation, and route responses.
+   - JavaScript client tests (`tests/js/client.test.mjs`, `packages/face-capture/test/*.test.mjs`) verify browser client decoding and communication.
 3. **Static Analysis**:
    - Code formatting and linting are enforced via Ruff (`.venv/bin/ruff check src tests`).
