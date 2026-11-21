@@ -1,3 +1,4 @@
+import os
 import json
 from email.message import Message
 from io import BytesIO
@@ -240,7 +241,8 @@ class SessionTokenTests(unittest.TestCase):
         self.path.write_text(json.dumps(config))
         secret = load_config(self.path)['session_secret']
         self.assertEqual(json.loads(self.path.read_text())['session_secret'], secret)
-        self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
+        if os.name != 'nt':  # POSIX mode bits do not exist on a real Windows filesystem
+            self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
         config['session_secret'] = 'short'
         self.path.write_text(json.dumps(config))
         with self.assertRaises(RuntimeError):

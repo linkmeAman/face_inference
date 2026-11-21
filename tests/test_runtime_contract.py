@@ -6,6 +6,7 @@ routed validation/auth errors from 404, and enforces required security behavior.
 """
 
 import json
+import socket
 import tempfile
 import threading
 import uuid
@@ -440,16 +441,21 @@ def test_transport_security_and_payload_limits(live_server: LiveServerContext):
     assert status == 415
     assert body.get("code") == "INVALID_CONTENT_TYPE"
 
-    # 3. Request exceeding MAX_BODY (128 KiB) must return 413 BODY_LIMIT
-    large_payload = b"x" * (128 * 1024 + 1)
-    status, body = live_server.request(
-        "/api/v1/collections",
-        method="POST",
-        raw=large_payload,
-        headers={"Content-Type": "application/json"},
-    )
-    assert status == 413
-    assert body.get("code") == "BODY_LIMIT"
+    # 3. A request declaring more than MAX_BODY (128 KiB) must return 413 BODY_LIMIT. The limit is
+    # decided from Content-Length alone, so send only the headers: streaming 128 KiB of body races
+    # the server closing the connection and made this test flaky (connection reset on macOS).
+    with socket.create_connection(("127.0.0.1", live_server.server.server_port), timeout=5) as raw:
+        raw.sendall(
+            b"POST /api/v1/collections HTTP/1.1\r\nHost: 127.0.0.1\r\n"
+            + f"Authorization: Bearer {live_server.config['api_token']}\r\n".encode()
+            + b"Content-Type: application/json\r\nContent-Length: 131073\r\n"
+            + b"Connection: close\r\n\r\n"
+        )
+        reply = b""
+        while chunk := raw.recv(4096):
+            reply += chunk
+    assert reply.split(b" ", 2)[1] == b"413"
+    assert b"BODY_LIMIT" in reply
 
     # 4. Malformed JSON syntax must return 400 INVALID_JSON
     status, body = live_server.request(

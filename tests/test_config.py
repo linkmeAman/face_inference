@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 from unittest.mock import Mock
@@ -43,7 +44,8 @@ def test_default_home_platforms(home_environment, monkeypatch, platform, variabl
     assert config['_path'] == str(expected / 'config.json')
     assert config['database'] == str(expected / 'faces.sqlite3')
     assert not (home_environment / '.face-inference').exists()
-    if platform != 'win32':
+    # POSIX mode bits do not exist on a real Windows filesystem, whatever sys.platform is patched to
+    if platform != 'win32' and os.name != 'nt':
         assert expected.stat().st_mode & 0o777 == 0o700
 
 
@@ -74,7 +76,8 @@ def test_home_environment_precedes_legacy(home_environment, monkeypatch, capsys)
     expected = home_environment / 'private'
     assert config_module.default_home() == expected
     assert config['_path'] == str(expected / 'config.json')
-    assert expected.stat().st_mode & 0o777 == 0o700
+    if os.name != 'nt':  # POSIX mode bits do not exist on a real Windows filesystem
+        assert expected.stat().st_mode & 0o777 == 0o700
     assert capsys.readouterr().err == ''
 
 
