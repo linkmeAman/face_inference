@@ -24,7 +24,7 @@ specify before that changes. It makes no spoof-resistance or accuracy claim.
   attacker-controlled client can be forged, and a provider that trusts only
   client-supplied signals is not proof of liveness. `docs/pad.md:34` already
   records that recognition integration is a later task (S20).
-- Program decision D4 (`v1/DECISIONS.md:7`) requires PAD to be optional and
+- The project decision on liveness requires PAD to be optional and
   fail-closed when an operator enables a provider, with no provider leaving
   results marked unvalidated, and no PAD model implemented.
 
@@ -57,14 +57,12 @@ remain as they are: the extension point exists but is not invoked at runtime.
 4. **Fail-closed behavior when enabled.** A required provider that is absent,
    rejects, returns a malformed result or raises must block the protected
    action before it is taken (`src/face_inference/pad.py:19-30`,
-   `v1/DECISIONS.md:7`).
+   the project decision).
 5. **Explicit unvalidated behavior otherwise.** With no provider configured,
    results stay marked unvalidated and no liveness claim is made
-   (`src/face_inference/service.py:34-38`, `v1/DECISIONS.md:7`).
+   (`src/face_inference/service.py:34-38`).
 
 ## Scope of this decision
 
 This decision defers integration only. It does not approve a particular evidence
 format or provider, and it does not authorize any runtime, config or API change.
-`v1/DECISIONS.md` lives in the program control folder, not in the integration
-tree; all other citations above resolve against the integration tree.
