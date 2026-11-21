@@ -4,6 +4,7 @@ Tests all documented client endpoints against the live server using synthetic
 embeddings and verifies contract parity and error mappings.
 """
 
+import os
 import tempfile
 import threading
 import urllib.error
@@ -48,11 +49,15 @@ def real_server() -> Generator[ServerContext, None, None]:
         server = FaceHTTPServer(("127.0.0.1", 0), service, ROOT)
     except PermissionError as err:
         tmp.cleanup()
-        pytest.skip(f"Socket binding forbidden in sandbox: {err}")
+        if os.getenv("FACE_TEST_ALLOW_SKIP_BIND") == "1":
+            pytest.skip(f"Socket binding forbidden in sandbox: {err}")
+        raise
     except OSError as err:
         if "Operation not permitted" in str(err) or "Permission denied" in str(err):
             tmp.cleanup()
-            pytest.skip(f"Socket binding forbidden in sandbox: {err}")
+            if os.getenv("FACE_TEST_ALLOW_SKIP_BIND") == "1":
+                pytest.skip(f"Socket binding forbidden in sandbox: {err}")
+            raise
         tmp.cleanup()
         raise
 
@@ -357,3 +362,36 @@ def test_contract_parity_create_collection_response_schema(
     assert "collection_id" in created
     assert created["collection_id"] == "parity-col"
     assert "id" not in created
+
+
+@pytest.mark.parametrize(
+    "error",
+    [PermissionError("denied"), OSError("Operation not permitted"), OSError("Permission denied")],
+)
+@pytest.mark.parametrize("allow_skip", [False, True])
+def test_bind_permission_skip_is_opt_in(
+    monkeypatch: pytest.MonkeyPatch, error: Exception, allow_skip: bool
+) -> None:
+    if allow_skip:
+        monkeypatch.setenv("FACE_TEST_ALLOW_SKIP_BIND", "1")
+    else:
+        monkeypatch.delenv("FACE_TEST_ALLOW_SKIP_BIND", raising=False)
+
+    def fail_bind(*args: object, **kwargs: object) -> None:
+        raise error
+
+    monkeypatch.setattr("test_e2e_client.FaceHTTPServer", fail_bind)
+    expected = pytest.skip.Exception if allow_skip else type(error)
+    with pytest.raises(expected):
+        next(real_server.__wrapped__())
+
+
+def test_bind_other_error_is_not_skipped(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("FACE_TEST_ALLOW_SKIP_BIND", "1")
+
+    def fail_bind(*args: object, **kwargs: object) -> None:
+        raise OSError("address already in use")
+
+    monkeypatch.setattr("test_e2e_client.FaceHTTPServer", fail_bind)
+    with pytest.raises(OSError, match="address already in use"):
+        next(real_server.__wrapped__())
