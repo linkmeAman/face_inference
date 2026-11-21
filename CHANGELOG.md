@@ -28,8 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Changed model assets from bundled binaries to first-run download and verification, with offline install support via local asset directories.
-- Changed storage behavior to checkpoint the WAL after purge and delete-only operations and to enable SQLite `secure_delete`.
+- Model assets can now be downloaded and checksum-verified on first run (`face-inference models fetch`), with offline install from a local directory. The model and WASM binaries are still bundled in the wheel until the `models-v1` release is published.
 - Changed Python client behavior to align response models and lighting parameters with the server contract.
 
 ### Security
@@ -43,7 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- Removed legacy PHP code and obsolete standalone assets from the repository history path; the legacy state remains available at tag `legacy-ccc-final`.
+- Removed the legacy PHP code, old tests and snapshots from the working tree. Git history was not rewritten; the previous state is available at tag `legacy-ccc-final`.
 
 ### Documentation
 
