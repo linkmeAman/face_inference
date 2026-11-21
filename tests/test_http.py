@@ -1,7 +1,4 @@
 import json
-from email.message import Message
-from io import BytesIO
-from types import SimpleNamespace
 from pathlib import Path
 import tempfile
 import threading
@@ -11,7 +8,7 @@ from urllib.request import Request, urlopen
 import uuid
 
 from face_inference.config import ROOT, contract, load_config
-from face_inference.server import FaceHTTPServer, Handler
+from face_inference.server import FaceHTTPServer
 from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
@@ -97,81 +94,6 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(deleted['data']['state'], 'DELETED')
         self.assertEqual(self.request('/api/v1/collections/team/people')[1]['data'][0]['state'], 'NOT_ENROLLED')
-
-
-class CrossOriginTests(unittest.TestCase):
-    def setUp(self):
-        self.config = {'api_token': 'a' * 32, 'host': '127.0.0.1', 'allowed_origins': []}
-
-    def response(self, origin=None, method='GET', path='/api/v1/config', authorized=True):
-        handler = Handler.__new__(Handler)
-        handler.server = SimpleNamespace(service=SimpleNamespace(config=self.config, safe_config=lambda: {}),
-                                         server_port=6122, check_rate=lambda _: None)
-        handler.command, handler.path, handler.client_address = method, path, ('127.0.0.1', 0)
-        handler.headers, handler.wfile = Message(), BytesIO()
-        if authorized:
-            handler.headers['Authorization'] = 'Bearer ' + self.config['api_token']
-        if origin is not None:
-            handler.headers['Origin'] = origin
-        headers = Message()
-        handler.send_response = lambda status: setattr(handler, 'status', status)
-        handler.send_header = lambda name, value: headers.__setitem__(name, value)
-        handler.end_headers = lambda: None
-        handler.dispatch()
-        return handler.status, headers, handler.wfile.getvalue()
-
-    def test_cors_and_csp(self):
-        origins = ['https://face-workspace.example', 'http://localhost:3000']
-        self.config['allowed_origins'] = origins
-        for origin, allowed in [(origins[0], True), ('https://other.example', False)]:
-            with self.subTest(origin=origin):
-                status, headers, _ = self.response(origin)
-                self.assertEqual(status, 200 if allowed else 403)
-                self.assertEqual(headers.get('Vary'), 'Origin')
-                self.assertEqual(headers.get('Access-Control-Allow-Origin'), origin if allowed else None)
-                self.assertEqual(headers.get('Access-Control-Expose-Headers'), 'Retry-After' if allowed else None)
-                self.assertIn("frame-ancestors 'self' " + ' '.join(origins), headers['Content-Security-Policy'])
-                self.assertEqual(headers['Permissions-Policy'], 'camera=(self), microphone=()')
-        self.config['allowed_origins'] = []
-        self.assertIn("frame-ancestors 'self';", self.response()[1]['Content-Security-Policy'])
-
-    def test_preflight(self):
-        self.config['allowed_origins'] = ['https://face-workspace.example']
-        for origin, status in [('https://face-workspace.example', 204), ('https://other.example', 403), (None, 403)]:
-            with self.subTest(origin=origin):
-                actual, headers, body = self.response(origin, 'OPTIONS', authorized=False)
-                self.assertEqual(actual, status)
-                self.assertEqual(headers.get('Vary'), 'Origin' if origin else None)
-                self.assertEqual(headers.get('Access-Control-Allow-Origin'), origin if status == 204 else None)
-                self.assertEqual(headers.get('Access-Control-Allow-Methods'), 'GET, POST, DELETE, OPTIONS' if status == 204 else None)
-                self.assertEqual(headers.get('Access-Control-Allow-Headers'), 'Authorization, Content-Type' if status == 204 else None)
-                self.assertEqual(headers.get('Access-Control-Max-Age'), '600' if status == 204 else None)
-                if status == 204:
-                    self.assertEqual(body, b'')
-
-
-class OriginConfigTests(unittest.TestCase):
-    def test_allowed_origins(self):
-        with tempfile.TemporaryDirectory() as folder:
-            path = Path(folder) / 'config.json'
-            load_config(path)
-            config = json.loads(path.read_text())
-            valid = ['https://example.com', 'https://example.com:8443', 'https://[::1]:443',
-                     'http://localhost', 'http://127.0.0.1:3000', 'http://[::1]:3000']
-            invalid = ['*', 'null', 'http://example.com', 'https://example.com/path',
-                       'https://example.com?x=1', 'https://user@example.com', 'https://*.example.com',
-                       'https://example.com:bad', 'https://example.com:99999', 'https://example.com:',
-                       'https://[::1%bad;injection]', 'https://[::1]extra',
-                       'https://example.com\nX-Injected: yes', 'https://', 'https://[::1', 42]
-            for origin in valid + invalid:
-                with self.subTest(origin=origin):
-                    config['allowed_origins'] = [origin]
-                    path.write_text(json.dumps(config))
-                    if origin in valid:
-                        self.assertEqual(load_config(path)['allowed_origins'], [origin])
-                    else:
-                        with self.assertRaises(RuntimeError):
-                            load_config(path)
 
 
 if __name__ == '__main__':

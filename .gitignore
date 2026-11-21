@@ -13,3 +13,7 @@ playwright-report/
 # Optional local model environments; keep model binaries tracked.
 .venv*/
 .face-inference/
+
+# Web component build outputs
+packages/face-capture/dist/
+
