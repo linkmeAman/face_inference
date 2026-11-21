@@ -67,7 +67,7 @@ def main() -> int:
     print(f"\n2. Creating collection '{collection_id}' (POST /api/v1/collections)...")
     try:
         col = client.create_collection(id=collection_id, name=collection_name)
-        cid = col.get("collection_id") or col.get("id") or collection_id
+        cid = col.get("collection_id", collection_id)
         cstate = col.get("state", "CREATED")
         print(f"   Collection created: id={cid}, state={cstate}")
     except FaceApiError as exc:

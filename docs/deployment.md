@@ -18,7 +18,7 @@ In production:
 - Ensure the proxy passes the `X-Forwarded-For`, `Host`, and `X-Forwarded-Proto` headers.
 
 > [!NOTE]
-> **Trusted-proxy support**: Client IP resolution for rate limiting is handled by `face_inference.ratelimit.client_ip`. The server traverses the `X-Forwarded-For` header right-to-left, validating each proxy against configured trusted proxy networks and extracting the real untrusted client IP.
+> **Trusted-proxy support**: Client IP resolution for rate limiting is handled by `face_inference.ratelimit.client_ip`. The server traverses the `X-Forwarded-For` header right-to-left, validating each proxy against `trusted_proxies` (or the comma-separated `FACE_INFERENCE_TRUSTED_PROXIES` environment override) and extracting the real untrusted client IP.
 
 ### Caddy Configuration
 
@@ -173,6 +173,14 @@ Run the service under a dedicated, unprivileged system user. Never run the servi
 ## 3. Configuration and Environment Variables
 
 Configuration is loaded from `config.json` inside `FACE_INFERENCE_HOME` (or specified by `--config`).
+Without that override, an existing `./.face-inference/` directory is reused with
+one legacy-location notice on stderr. Otherwise, the default is
+`~/Library/Application Support/face-inference` on macOS,
+`$XDG_DATA_HOME/face-inference` (fallback `~/.local/share/face-inference`) on Linux,
+or `%APPDATA%\face-inference` (fallback `~\AppData\Roaming\face-inference`) on Windows.
+New directories use mode `0700` on POSIX. `init` and `check` report the resolved
+directory as `home` in their JSON output. Model downloads follow `<home>/models`
+unless `FACE_INFERENCE_MODELS_DIR` is set; verified packaged assets remain a fallback.
 
 ### Cross-Origin Embedding (`allowed_origins`)
 
@@ -197,7 +205,7 @@ Rules for `allowed_origins` (see `docs/guide.md`):
 
 | Variable | Description |
 |---|---|
-| `FACE_INFERENCE_HOME` | Path to data directory (default: `./.face-inference`). Holds `config.json` and `faces.sqlite3`. |
+| `FACE_INFERENCE_HOME` | Override the data directory described above. Holds `config.json` and `faces.sqlite3`. |
 | `FACE_STANDALONE_CONFIG` | Absolute path to `config.json` override. |
 | `FACE_INFERENCE_HOST` *(available after G2)* | Override listen host (e.g. `127.0.0.1`). |
 | `FACE_INFERENCE_PORT` *(available after G2)* | Override listen port (e.g. `6122`). |

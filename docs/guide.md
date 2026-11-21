@@ -36,17 +36,29 @@ face-inference serve      # Serve the UI + API on 127.0.0.1:6122
 face-inference serve --host 0.0.0.0 --port 7001
 ```
 
-The files are created in `.face-inference/` with private filesystem permissions
-(or `FACE_INFERENCE_HOME` when set). An
-existing encryption key must remain stable across restarts and backups. Losing or
+The data directory is resolved in this order:
+
+1. `FACE_INFERENCE_HOME`, when set.
+2. An existing `./.face-inference/` directory, with one notice on stderr that the
+   legacy location is in use. Existing data is kept in place.
+3. The per-user OS default:
+   - macOS: `~/Library/Application Support/face-inference`
+   - Linux: `$XDG_DATA_HOME/face-inference`, or `~/.local/share/face-inference`
+   - Windows: `%APPDATA%\face-inference`, or `~\AppData\Roaming\face-inference`
+
+New data directories use mode `0700` on POSIX. `init` and `check` include the
+resolved directory in their JSON `home` field, even when models are missing.
+An existing encryption key must remain stable across restarts and backups. Losing or
 replacing it makes encrypted records unreadable; the persisted key check rejects
 an incorrect key. The API never returns the key, token, stored face vectors or
 database path. The UI keeps its supplied token in memory, clearing the input after
 connection; it does not save it in localStorage/cookies.
 
 Use `--config /private/location/config.json` or `FACE_STANDALONE_CONFIG` to choose
-an independent deployment. Listener settings use CLI flag > environment >
-config.json > default precedence. Overrides apply only to the current run and
+an independent deployment; its config parent is the resolved `home`. Model assets
+use `<home>/models`, with verified packaged assets as a fallback;
+`FACE_INFERENCE_MODELS_DIR` overrides the model location. Listener settings use
+CLI flag > environment > config.json > default precedence. Overrides apply only to the current run and
 are never saved to config.json; the token and encryption key stay unchanged.
 `FACE_INFERENCE_ALLOWED_ORIGINS` replaces the saved list with comma-separated
 origins, trims whitespace and ignores empty entries; an empty value clears the
@@ -54,7 +66,7 @@ list for that run. The JSON config supports:
 
 | Setting | Environment | CLI flag | Default / meaning |
 | --- | --- | --- | --- |
-| `database` | — | — | Absolute `.face-inference/faces.sqlite3` path; another private path is supported |
+| `database` | — | — | Absolute `<home>/faces.sqlite3` path; another private path is supported |
 | `host` | `FACE_INFERENCE_HOST` | `--host H` | `127.0.0.1`; IP literal or hostname |
 | `port` | `FACE_INFERENCE_PORT` | `--port P` | `6122`; integer from 1 through 65535 |
 | `mode` | — | — | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
@@ -65,6 +77,8 @@ list for that run. The JSON config supports:
 | `approved_collection_ids` | — | — | Empty; exact authorized scopes required for APPROVED captures/recognition |
 | `policy_file` | — | — | Empty; private approved policy bound to a complete hash-verified evaluation report |
 | `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins, or HTTP origins for localhost, 127.0.0.1 or [::1] |
+| `rate_limit_per_minute` | `FACE_INFERENCE_RATE_LIMIT` | — | 120; integer from 1 through 100000 per client IP |
+| `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IP addresses or CIDR networks, comma-separated in the environment |
 | `max_people` | — | — | 1000 per collection |
 | `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 

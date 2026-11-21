@@ -8,6 +8,8 @@ from pathlib import Path
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
+from .config import default_home
+
 DEFAULT_BASE_URL = "https://github.com/linkmeAman/face_inference/releases/download/models-v1/"
 PACKAGED_VENDOR_DIR = Path(__file__).resolve().parent / "web" / "vendor" / "browser-face"
 
@@ -67,9 +69,9 @@ def models_dir(config: dict | None = None) -> Path:
     """Resolve models directory following priority:
 
     1. Environment variable FACE_INFERENCE_MODELS_DIR
-    2. <FACE_INFERENCE_HOME>/models if present and valid
+    2. <config parent or default_home()>/models if present and valid
     3. Packaged dir web/vendor/browser-face if all files present and valid
-    4. Default fallback: <FACE_INFERENCE_HOME>/models
+    4. Default fallback: <config parent or default_home()>/models
     """
     if "FACE_INFERENCE_MODELS_DIR" in os.environ:
         return Path(os.environ["FACE_INFERENCE_MODELS_DIR"]).resolve()
@@ -77,9 +79,7 @@ def models_dir(config: dict | None = None) -> Path:
     if config and isinstance(config, dict) and "_path" in config:
         home_models = (Path(config["_path"]).parent / "models").resolve()
     else:
-        home_models = (
-            Path(os.getenv("FACE_INFERENCE_HOME", ".face-inference")).resolve() / "models"
-        )
+        home_models = default_home() / "models"
 
     if _is_dir_valid(home_models):
         return home_models
