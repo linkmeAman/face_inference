@@ -28,7 +28,6 @@ from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-1 Path traversal in asset manifest")
 def test_sec_1_manifest_path_traversal(tmp_path: Path):
     """SEC-1: fetch() must reject manifest entries with relative path traversal.
 
@@ -58,7 +57,6 @@ def test_sec_1_manifest_path_traversal(tmp_path: Path):
         fetch(dest_dir, from_dir=src_dir)
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-2 Client leaks Authorization header on redirect")
 def test_sec_2_client_redirect_strips_authorization():
     """SEC-2: FaceClient must not forward sensitive bearer tokens across redirects.
 
@@ -164,7 +162,6 @@ def test_sec_4_purge_sqlite_secure_delete_enabled(tmp_path: Path):
     assert secure_delete in (1, 2)
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-6 Deeply nested JSON DoS triggers RecursionError")
 def test_sec_6_deeply_nested_json_dos():
     """SEC-6: read_json() must reject deeply nested JSON payloads cleanly.
 
@@ -186,7 +183,6 @@ def test_sec_6_deeply_nested_json_dos():
     assert exc_info.value.code == "INVALID_JSON"
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-7 Subject constraint ignored on recognition")
 def test_sec_7_session_token_subject_binding_on_recognition(tmp_path: Path):
     """SEC-7: Subject-constrained session tokens must be enforced on recognitions.
 
