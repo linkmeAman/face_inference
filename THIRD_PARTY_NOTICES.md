@@ -42,6 +42,7 @@ This project incorporates third-party open-source components and machine-learnin
 - **License Terms:** Licensed under the MIT License ([SPDX MIT](https://spdx.org/licenses/MIT.html)).
 
 ### 4. cryptography
+
 - **License:** Dual licensed under [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0) or [BSD 3-Clause License](https://spdx.org/licenses/BSD-3-Clause.html)
 - **Copyright:** Copyright (c) Individual contributors.
 - **Source:** [pyca/cryptography](https://github.com/pyca/cryptography)
