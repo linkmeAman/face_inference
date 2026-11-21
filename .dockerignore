@@ -1,0 +1,44 @@
+# Source control and VCS
+.git
+.gitignore
+.gitattributes
+.github
+.agents
+.claude
+.clinerules
+.opencode
+.scratch
+.vscode
+
+# Python virtual environments and packages
+.venv
+.venv*
+node_modules
+
+# Python byte code and build caches
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+build
+dist
+*.egg-info
+.pytest_cache
+
+# Test artifacts and reports
+tests
+test-results
+playwright-report
+
+# Project documentation
+docs
+
+# Datasets and distribution assets
+datasets
+dist-assets
+
+# Runtime state and local databases
+.face-inference
+.standalone
+runtime
+*.sqlite3
