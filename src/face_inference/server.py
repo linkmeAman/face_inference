@@ -109,8 +109,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'no-referrer')
         self.send_header('Permissions-Policy', 'camera=(self), microphone=()')
-        self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+        origins = self.server.service.config.get('allowed_origins', [])
+        ancestors = ' '.join(["'self'", *origins])
+        self.send_header('Content-Security-Policy', f"default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' blob:; object-src 'none'; frame-ancestors {ancestors}; base-uri 'none'")
+        self.cors_headers()
         self.end_headers()
+
+    def cors_headers(self):
+        origin = self.headers.get('Origin')
+        if origin is not None:
+            self.send_header('Vary', 'Origin')
+        if origin in self.server.service.config.get('allowed_origins', []):
+            self.send_header('Access-Control-Allow-Origin', origin)
+            self.send_header('Access-Control-Expose-Headers', 'Retry-After')
+            if self.command == 'OPTIONS' and urlsplit(self.path).path.startswith('/api/'):
+                self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+                self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+                self.send_header('Access-Control-Max-Age', '600')
 
     def respond(self, data, status=200, error=None):
         body = json.dumps(dict(error=1 if error else 0, error_msg=str(error) if error else '',
@@ -167,6 +182,12 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(dict(status='ok', api_version='1', storage='sqlite'))
             return
         if path.startswith('/api/'):
+            if self.command == 'OPTIONS':
+                if self.headers.get('Origin') not in service.config.get('allowed_origins', []):
+                    raise FaceError('ORIGIN_REJECTED', 'Use an allowed browser origin', 403)
+                self.send_response(204)
+                self.headers_safe('application/json; charset=utf-8', 0)
+                return
             self.authorize()
             parts = path.strip('/').split('/')
             if self.command == 'GET' and parts == ['api', 'v1', 'config']:
