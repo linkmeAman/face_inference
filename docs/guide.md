@@ -65,6 +65,8 @@ list for that run. The JSON config supports:
 | `approved_collection_ids` | — | — | Empty; exact authorized scopes required for APPROVED captures/recognition |
 | `policy_file` | — | — | Empty; private approved policy bound to a complete hash-verified evaluation report |
 | `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins, or HTTP origins for localhost, 127.0.0.1 or [::1] |
+| `rate_limit_per_minute` | `FACE_INFERENCE_RATE_LIMIT` | — | 120; integer from 1 through 100000 per client IP |
+| `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IP addresses or CIDR networks, comma-separated in the environment |
 | `max_people` | — | — | 1000 per collection |
 | `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 

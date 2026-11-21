@@ -12,6 +12,7 @@ import uuid
 
 from face_inference.config import ROOT, contract, load_config
 from face_inference.server import FaceHTTPServer, Handler
+from face_inference.ratelimit import RateLimiter
 from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
@@ -101,12 +102,12 @@ class HttpTests(unittest.TestCase):
 
 class CrossOriginTests(unittest.TestCase):
     def setUp(self):
-        self.config = {'api_token': 'a' * 32, 'host': '127.0.0.1', 'allowed_origins': []}
+        self.config = {'api_token': 'a' * 32, 'host': '127.0.0.1', 'allowed_origins': [], 'trusted_proxies': []}
 
     def response(self, origin=None, method='GET', path='/api/v1/config', authorized=True):
         handler = Handler.__new__(Handler)
         handler.server = SimpleNamespace(service=SimpleNamespace(config=self.config, safe_config=lambda: {}),
-                                         server_port=6122, check_rate=lambda _: None)
+                                         server_port=6122, rate_limiter=RateLimiter(120))
         handler.command, handler.path, handler.client_address = method, path, ('127.0.0.1', 0)
         handler.headers, handler.wfile = Message(), BytesIO()
         if authorized:
@@ -186,7 +187,7 @@ class SessionTokenTests(unittest.TestCase):
 
     def request(self, path, body=None, token=None, method=None):
         handler = Handler.__new__(Handler)
-        handler.server = SimpleNamespace(service=self.service, server_port=6122, check_rate=lambda _: None)
+        handler.server = SimpleNamespace(service=self.service, server_port=6122, rate_limiter=RateLimiter(120))
         handler.command, handler.path, handler.client_address = method or ('POST' if body is not None else 'GET'), path, ('127.0.0.1', 0)
         handler.headers, handler.wfile = Message(), BytesIO()
         handler.headers['Authorization'] = 'Bearer ' + (self.config['api_token'] if token is None else token)
@@ -244,6 +245,68 @@ class SessionTokenTests(unittest.TestCase):
         self.path.write_text(json.dumps(config))
         with self.assertRaises(RuntimeError):
             load_config(self.path)
+
+
+class RateLimitTests(unittest.TestCase):
+    def setUp(self):
+        from unittest.mock import patch
+
+        self.config = {'api_token': 'a' * 32, 'host': '127.0.0.1',
+                       'rate_limit_per_minute': 1, 'trusted_proxies': ['127.0.0.1']}
+        service = SimpleNamespace(config=self.config, safe_config=lambda: {})
+        with patch('face_inference.server.ThreadingHTTPServer.__init__', return_value=None):
+            self.server = FaceHTTPServer(('127.0.0.1', 0), service, ROOT)
+        self.server.server_port = 6122
+
+    def request(self, peer='127.0.0.1', forwarded=None, token=None, method='GET'):
+        handler = Handler.__new__(Handler)
+        handler.server = self.server
+        handler.command, handler.path, handler.client_address = method, '/api/v1/config', (peer, 0)
+        handler.headers, handler.wfile = Message(), BytesIO()
+        handler.headers['Authorization'] = 'Bearer ' + (token or self.config['api_token'])
+        if forwarded:
+            handler.headers['X-Forwarded-For'] = forwarded
+        headers = Message()
+        handler.send_response = lambda status: setattr(handler, 'status', status)
+        handler.send_header = lambda name, value: headers.__setitem__(name, value)
+        handler.end_headers = lambda: None
+        handler.dispatch()
+        return handler.status, headers
+
+    def test_trusted_clients_are_independent_and_retry_after_is_sent(self):
+        self.assertEqual(self.request(forwarded='192.0.2.1')[0], 200)
+        self.assertEqual(self.request(forwarded='192.0.2.2')[0], 200)
+        status, headers = self.request(forwarded='192.0.2.1')
+        self.assertEqual(status, 429)
+        self.assertGreater(int(headers['Retry-After']), 0)
+
+    def test_untrusted_forwarded_header_is_ignored(self):
+        self.assertEqual(self.request(peer='192.0.2.3', forwarded='192.0.2.1')[0], 200)
+        self.assertEqual(self.request(peer='192.0.2.3', forwarded='192.0.2.2')[0], 429)
+
+    def test_wrong_tokens_are_limited(self):
+        self.assertEqual(self.request(token='wrong')[0], 401)
+        self.assertEqual(self.request(token='wrong')[0], 429)
+
+    def test_10001st_client_is_allowed(self):
+        for i in range(10001):
+            status, _ = self.request(peer=f'10.{i // 65536}.{(i // 256) % 256}.{i % 256}')
+            self.assertEqual(status, 200)
+
+    def test_preflight_does_not_consume_limit(self):
+        self.config['allowed_origins'] = ['https://example.com']
+        handler = Handler.__new__(Handler)
+        handler.server = self.server
+        handler.command, handler.path = 'OPTIONS', '/api/v1/config'
+        handler.headers = Message()
+        handler.headers['Origin'] = 'https://example.com'
+        handler.wfile = BytesIO()
+        handler.send_response = lambda status: setattr(handler, 'status', status)
+        handler.send_header = lambda *_: None
+        handler.end_headers = lambda: None
+        handler.dispatch()
+        self.assertEqual(handler.status, 204)
+        self.assertEqual(self.request()[0], 200)
 
 
 if __name__ == '__main__':
