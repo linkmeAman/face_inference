@@ -39,3 +39,16 @@ def test_existing_unbound_database_rejected(tmp_path):
                    "VALUES ('c', 'p', 'P', 0)")
     with pytest.raises(RuntimeError, match='no encryption-key binding'):
         SQLiteRepository(path, key)
+
+
+def test_transaction_modes_and_validation(tmp_path):
+    path = tmp_path / 'faces.db'
+    key = Fernet.generate_key().decode()
+    repo = SQLiteRepository(path, key)
+    with repo.transaction(mode='DEFERRED') as db:
+        assert db.execute('SELECT 1').fetchone()[0] == 1
+    with repo.read_transaction() as db:
+        assert db.execute('SELECT 1').fetchone()[0] == 1
+    with pytest.raises(ValueError, match='Unsupported transaction mode'):
+        with repo.transaction(mode='INVALID'):
+            pass
