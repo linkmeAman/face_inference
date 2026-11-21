@@ -7,6 +7,10 @@ test-results/
 playwright-report/
 .env
 
+# Build artifacts
+dist/
+*.egg-info/
+
 # Independent Python/SQLite private runtime
 .standalone/
 
