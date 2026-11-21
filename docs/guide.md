@@ -57,7 +57,7 @@ an independent deployment. The JSON config supports:
 | `capture_source` | `unvalidated-camera`; classify actual live evidence explicitly, never rename synthetic tests as live |
 | `approved_collection_ids` | Empty; exact authorized scopes required for APPROVED captures/recognition |
 | `policy_file` | Empty; private approved policy bound to a complete hash-verified evaluation report |
-| `allowed_origins` | Empty; add exact HTTPS origin(s) only for an HTTPS reverse-proxy deployment |
+| `allowed_origins` | Empty; add exact HTTPS origins or HTTP origins for localhost, 127.0.0.1, or [::1] |
 | `max_people` | 1000 per collection |
 | `api_token`, `encryption_key` | Independent generated credentials; keep private |
 
@@ -65,6 +65,23 @@ Restart to apply config changes. The approved report is revalidated on every new
 operation, so revoking/corrupting it cannot silently leave approved matching active.
 Exact idempotent retries can recover an earlier committed outcome after later
 configuration or gallery changes.
+
+## Cross-origin use
+
+Add the embedding page's exact origin to the private JSON configuration, then restart:
+
+```json
+"allowed_origins": ["https://app.example.com", "http://localhost:3000"]
+```
+
+Test preflight without sending the API token:
+
+```bash
+curl -i -X OPTIONS http://127.0.0.1:6122/api/v1/config \
+  -H 'Origin: https://app.example.com' \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Access-Control-Request-Headers: authorization, content-type'
+```
 
 For a remote host, keep the listener private and use an SSH tunnel, for example
 `ssh -L 6122:127.0.0.1:6122 USER@SERVER`, then open localhost in your browser. An
