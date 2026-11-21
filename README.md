@@ -3,7 +3,7 @@
 [![CI](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml/badge.svg)](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A browser-based face enrollment and recognition toolkit with local in-browser inference, encrypted storage, and zero external runtime dependencies.
+A browser-based face enrollment and recognition toolkit with local in-browser inference, encrypted storage, and one runtime dependency (`cryptography`); inference runs in the browser.
 
 - **In-browser inference**: Face detection (YuNet) and recognition feature extraction (SFace) run locally via WebAssembly (`onnxruntime-web`)—no video or raw facial images leave the client browser.
 - **Encrypted persistence**: 128-dimensional biometric embeddings are encrypted at rest with Fernet in SQLite, with automated retention expiry and consent gating.
@@ -55,27 +55,30 @@ Open **http://127.0.0.1:6122** in your browser, enter the API token from `face-i
 
 ## Embed in Your Own Page
 
-Embed the standalone `<face-capture>` Web Component:
+Mint short-lived session tokens from your backend using the admin token so private credentials remain secret:
 
-```html
-<script type="module" src="node_modules/face-capture/dist/face-capture.js"></script>
-
-<face-capture
-  api-url="http://127.0.0.1:6122"
-  token="YOUR_API_TOKEN"
-  collection="default"
-  mode="recognize"
-  autostart>
-</face-capture>
-```
-
-For public pages, mint short-lived session tokens from your backend using the admin token so private credentials remain secret:
 ```bash
 curl -X POST http://127.0.0.1:6122/api/v1/session-tokens \
   -H "Authorization: Bearer ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"collection_id":"default","scope":"recognize","ttl":300}'
 ```
+
+Embed the `<face-capture>` Web Component using the session token. Before publish, run `cd packages/face-capture && npm run build` and load `src="packages/face-capture/dist/face-capture.js"` (once published, use `node_modules/face-capture/dist/face-capture.js`):
+
+```html
+<script type="module" src="packages/face-capture/dist/face-capture.js"></script>
+
+<face-capture
+  api-url="http://127.0.0.1:6122"
+  token="SESSION_TOKEN"
+  collection="default"
+  mode="recognize"
+  autostart>
+</face-capture>
+```
+
+For local experiments only you can paste the admin token.
 
 ## Use from Python
 
@@ -96,7 +99,7 @@ See [examples/python/quickstart.py](examples/python/quickstart.py) for a complet
 
 ## REST API
 
-The HTTP REST API specification is documented in [docs/openapi.yaml](docs/openapi.yaml) (OpenAPI 3.0). All `/api/v1/` endpoints require `Authorization: Bearer <TOKEN>` and `Content-Type: application/json`.
+The HTTP REST API specification is documented in [docs/openapi.yaml](docs/openapi.yaml) (OpenAPI 3.1). All `/api/v1/` endpoints require `Authorization: Bearer <TOKEN>` and `Content-Type: application/json`.
 
 ## Privacy & Operational Limits
 
@@ -110,7 +113,7 @@ The HTTP REST API specification is documented in [docs/openapi.yaml](docs/openap
 
 ## Configuration
 
-Configuration is stored in `<home>/config.json`. Data directory `<home>` resolves in order: `FACE_INFERENCE_HOME`, existing `./.face-inference/`, or the per-user OS data directory (`~/Library/Application Support/face-inference` on macOS, `~/.local/share/face-inference` on Linux, `%APPDATA%\face-inference` on Windows).
+Configuration and data live in `<home>`. Back up `config.json` AND `faces.sqlite3` together: the encryption key is in config.json; losing it makes enrolled faces unrecoverable. Data directory `<home>` resolves in order: `FACE_INFERENCE_HOME`, existing `./.face-inference/`, or the per-user OS data directory (`~/Library/Application Support/face-inference` on macOS, `~/.local/share/face-inference` on Linux, `%APPDATA%\face-inference` on Windows).
 
 | Setting | Environment | CLI flag | Default / meaning |
 | --- | --- | --- | --- |
@@ -124,7 +127,7 @@ Configuration is stored in `<home>/config.json`. Data directory `<home>` resolve
 | `capture_source` | — | — | `unvalidated-camera`; classify actual evidence explicitly |
 | `approved_collection_ids` | — | — | Empty; exact authorized scopes required for APPROVED mode |
 | `policy_file` | — | — | Empty; private policy bound to verified evaluation report |
-| `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins (or local HTTP on listener port) |
+| `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins, or HTTP origins for `localhost`, `127.0.0.1`, `[::1]` (see docs/guide.md) |
 | `rate_limit_per_minute` | `FACE_INFERENCE_RATE_LIMIT` | — | 120; integer from 1 through 100000 per client IP |
 | `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IPs/CIDRs |
 | `max_people` | — | — | 1000 per collection |
@@ -142,7 +145,7 @@ Configuration is stored in `<home>/config.json`. Data directory `<home>` resolve
 | [docs/guide.md](docs/guide.md) | Configuration reference, REST API, session tokens, and clients |
 | [docs/model-alternatives.md](docs/model-alternatives.md) | Evaluation of alternative models and future upgrade paths |
 | [docs/model-setup.md](docs/model-setup.md) | Model weight verification, checksums, and offline setup |
-| [docs/openapi.yaml](docs/openapi.yaml) | OpenAPI 3.0 REST API specification |
+| [docs/openapi.yaml](docs/openapi.yaml) | OpenAPI 3.1 REST API specification |
 | [docs/releasing.md](docs/releasing.md) | Maintainer release process, PyPI trusted publishing, and npm |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Diagnosing camera issues, CORS errors, and status codes |
 
@@ -159,6 +162,7 @@ face_inference/
 ├── packages/
 │   └── face-capture/           # Reusable <face-capture> Web Component
 ├── examples/                   # Python & Web integration examples
+├── tools/                      # Maintenance, release packaging, and smoke scripts
 ├── docs/                       # Architecture, guides, and specifications
 └── tests/                      # Pytest and Node.js test suites
 ```

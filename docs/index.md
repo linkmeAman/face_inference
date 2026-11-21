@@ -12,6 +12,6 @@ Table of contents for the `face-inference` documentation suite.
 | [guide.md](guide.md) | Configuration reference, REST API, session tokens, and clients |
 | [model-alternatives.md](model-alternatives.md) | Evaluation of alternative models and future upgrade paths |
 | [model-setup.md](model-setup.md) | Model weight verification, checksums, and offline setup |
-| [openapi.yaml](openapi.yaml) | OpenAPI 3.0 REST API specification |
+| [openapi.yaml](openapi.yaml) | OpenAPI 3.1 REST API specification |
 | [releasing.md](releasing.md) | Maintainer release process, PyPI trusted publishing, and npm |
 | [troubleshooting.md](troubleshooting.md) | Diagnosing camera issues, CORS errors, and status codes |
