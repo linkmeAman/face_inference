@@ -174,5 +174,77 @@ class OriginConfigTests(unittest.TestCase):
                             load_config(path)
 
 
+class SessionTokenTests(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.path = Path(self.folder.name) / 'config.json'
+        self.config = load_config(self.path)
+        self.service = FaceService(SQLiteRepository(self.config['database'], self.config['encryption_key']), self.config, contract(), clock=lambda: 1000)
+        self.service.mutate('team', 'collection', {'id': 'team', 'name': 'Team', 'idempotency_key': str(uuid.uuid4())})
+        self.service.mutate = lambda collection, action, body: {'collection': collection, 'action': action}
+
+    def request(self, path, body=None, token=None, method=None):
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(service=self.service, server_port=6122, check_rate=lambda _: None)
+        handler.command, handler.path, handler.client_address = method or ('POST' if body is not None else 'GET'), path, ('127.0.0.1', 0)
+        handler.headers, handler.wfile = Message(), BytesIO()
+        handler.headers['Authorization'] = 'Bearer ' + (self.config['api_token'] if token is None else token)
+        raw = json.dumps(body).encode() if body is not None else b''
+        handler.headers['Content-Type'] = 'application/json'
+        handler.headers['Content-Length'] = str(len(raw))
+        handler.rfile = BytesIO(raw)
+        handler.send_response = lambda status: setattr(handler, 'status', status)
+        handler.send_header = lambda *_: None
+        handler.end_headers = lambda: None
+        handler.dispatch()
+        return handler.status, json.loads(handler.wfile.getvalue())
+
+    def test_mint_and_restrictions(self):
+        mint = '/api/v1/session-tokens'
+        body = {'collection_id': 'team', 'scope': 'enroll', 'person_id': 'a'}
+        status, result = self.request(mint, body)
+        self.assertEqual(status, 200, result)
+        token = result['data']['token']
+        self.assertEqual(result['data']['expires_at'], 1300)
+        self.assertEqual(self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token)[0], 200)
+        for path, payload, method in [('/api/v1/collections/team/enrollments', {'person_id': 'b'}, None),
+                                      ('/api/v1/collections/other/enrollments', {'person_id': 'a'}, None),
+                                      ('/api/v1/collections/team/recognitions', {}, None),
+                                      ('/api/v1/config', None, None), (mint, body, None),
+                                      ('/api/v1/collections/team/people/a/face', {}, 'DELETE'),
+                                      ('/api/v1/collections/team/export', None, None)]:
+            with self.subTest(path=path, payload=payload):
+                self.assertEqual(self.request(path, payload, token, method)[0], 403)
+        for ttl in (0, 3601, True, 1.5):
+            self.assertEqual(self.request(mint, {**body, 'ttl': ttl})[0], 400)
+        self.assertEqual(self.request(mint, {**body, 'collection_id': 'missing'})[0], 404)
+        self.assertEqual(self.request('/api/v1/config')[0], 200)
+        status, result = self.request('/api/v1/collections/other/enrollments', {'person_id': 'a'}, token)
+        self.assertEqual((status, result['code']), (403, 'TOKEN_SCOPE'))
+        self.service.clock = lambda: 1300
+        status, result = self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token)
+        self.assertEqual((status, result['code']), (401, 'TOKEN_EXPIRED'))
+        self.service.clock = lambda: 1000
+        status, result = self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token[:-1] + ('A' if token[-1] != 'A' else 'B'))
+        self.assertEqual((status, result['code']), (401, 'TOKEN_INVALID'))
+        status, result = self.request(mint, {'collection_id': 'team', 'scope': 'recognize', 'ttl': 1})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.request('/api/v1/collections/team/recognitions', {}, result['data']['token'])[0], 200)
+
+    def test_secret_persisted_and_validated(self):
+        config = json.loads(self.path.read_text())
+        self.assertEqual(load_config(self.path)['session_secret'], config['session_secret'])
+        config.pop('session_secret')
+        self.path.write_text(json.dumps(config))
+        secret = load_config(self.path)['session_secret']
+        self.assertEqual(json.loads(self.path.read_text())['session_secret'], secret)
+        self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
+        config['session_secret'] = 'short'
+        self.path.write_text(json.dumps(config))
+        with self.assertRaises(RuntimeError):
+            load_config(self.path)
+
+
 if __name__ == '__main__':
     unittest.main()

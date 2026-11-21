@@ -66,7 +66,7 @@ list for that run. The JSON config supports:
 | `policy_file` | — | — | Empty; private approved policy bound to a complete hash-verified evaluation report |
 | `allowed_origins` | `FACE_INFERENCE_ALLOWED_ORIGINS` | — | Empty; exact HTTPS origins, or HTTP origins for localhost, 127.0.0.1 or [::1] |
 | `max_people` | — | — | 1000 per collection |
-| `api_token`, `encryption_key` | — | — | Independent generated credentials; keep private |
+| `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 
 Invalid listener/origin values exit with status 1 and a one-line error. A listener
 other than `127.0.0.1`, `::1` or `localhost` prints this warning to stderr:
@@ -100,6 +100,18 @@ HTTPS reverse proxy must forward this app's UI/API/assets together and have its
 public origin listed in `allowed_origins`. No Nginx/systemd installation was
 performed by this change. Only the explicitly allowlisted frontend/model assets
 are served; datasets, source references, SQLite and keys have no HTTP route.
+
+## Session tokens for public pages
+
+Keep the admin token on your server. After authorizing the user, call
+`POST /api/v1/session-tokens` with the admin bearer token and JSON such as
+`{"collection_id":"my-team","scope":"enroll","person_id":"person-1","ttl":300}`.
+The response data contains `token` and Unix timestamp `expires_at`. Send the
+short-lived token to the page and use it as the bearer token for that collection's
+`enrollments` route. Omit `person_id` to allow enrollment of any person in the
+collection, or use scope `recognize` for its `recognitions` route. TTL defaults
+to 300 seconds and must be an integer from 1 to 3600. Session tokens cannot
+access other routes or issue new tokens; obtain a new one after expiry.
 
 ## JSON API
 
