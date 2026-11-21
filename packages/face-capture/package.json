@@ -29,7 +29,9 @@
     "./src/face-capture.js"
   ],
   "scripts": {
+    "pretest": "npm run build",
     "test": "node --test test/*.test.mjs",
+    "pretest:e2e": "npm run build",
     "test:e2e": "playwright test test/e2e/enroll.spec.mjs",
     "build": "node scripts/sync.mjs",
     "prepack": "npm run build"

@@ -113,9 +113,7 @@ jobs:
 
       - name: Build and test package
         working-directory: packages/face-capture
-        run: |
-          npm test
-          npm run build --if-present
+        run: npm test
 
       - name: Publish to npm with provenance
         working-directory: packages/face-capture
