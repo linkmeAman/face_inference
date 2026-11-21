@@ -166,7 +166,7 @@ def test_migration_failure_rolls_back(tmp_path, monkeypatch):
     with sqlite3.connect(path) as db:
         before = list(db.iterdump())
 
-    monkeypatch.setattr(migrations, 'V2_STATEMENTS', (*migrations.V2_STATEMENTS, 'INVALID SQL'))
+    monkeypatch.setitem(migrations.MIGRATIONS, 1, (*migrations.MIGRATIONS[1], 'INVALID SQL'))
     with pytest.raises(sqlite3.OperationalError):
         SQLiteRepository(path, KEY)
 

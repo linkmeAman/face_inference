@@ -6,17 +6,14 @@ import sqlite3
 
 CURRENT_SCHEMA_VERSION = 2
 
-V2_STATEMENTS = (
-    "CREATE INDEX IF NOT EXISTS events_collection_id ON events(collection_id, id)",
-    "CREATE INDEX IF NOT EXISTS captures_expires_at ON captures(expires_at)",
-    "CREATE INDEX IF NOT EXISTS people_expires_at ON people(expires_at)",
-)
-
-def get_migration_statements(version: int) -> tuple[str, ...] | None:
-    """Return migration statements for the given version, dynamically looking up attributes."""
-    if version == 1:
-        return globals().get("V2_STATEMENTS")
-    return None
+MIGRATIONS: dict[int, tuple[str, ...]] = {
+    # version -> statements that upgrade the schema from that version to the next
+    1: (
+        "CREATE INDEX IF NOT EXISTS events_collection_id ON events(collection_id, id)",
+        "CREATE INDEX IF NOT EXISTS captures_expires_at ON captures(expires_at)",
+        "CREATE INDEX IF NOT EXISTS people_expires_at ON people(expires_at)",
+    ),
+}
 
 
 def migrate(db: sqlite3.Connection) -> None:
@@ -47,7 +44,7 @@ def migrate(db: sqlite3.Connection) -> None:
 
     while current_v < CURRENT_SCHEMA_VERSION:
         target_v = current_v + 1
-        statements = get_migration_statements(current_v)
+        statements = MIGRATIONS.get(current_v)
         if statements is None:
             raise RuntimeError("Unsupported face database schema version")
 
