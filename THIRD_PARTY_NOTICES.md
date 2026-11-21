@@ -10,6 +10,7 @@ This project incorporates third-party open-source components and machine-learnin
 | **SFace** | Face Recognition Model | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | [opencv_zoo: face_recognition_sface](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) | [SFace LICENSE](https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_recognition_sface/LICENSE) |
 | **onnxruntime-web** | In-Browser ML Runtime (v1.24.3) | [MIT](https://spdx.org/licenses/MIT.html) | [microsoft/onnxruntime](https://github.com/microsoft/onnxruntime) | [npm package](https://registry.npmjs.org/onnxruntime-web) |
 | **cryptography** | Server-side Encryption | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) / [BSD-3-Clause](https://spdx.org/licenses/BSD-3-Clause.html) | [pyca/cryptography](https://github.com/pyca/cryptography) | [cryptography LICENSE](https://raw.githubusercontent.com/pyca/cryptography/main/LICENSE) |
+| **ControlFace10K (subset)** | Evaluation Dataset | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) | [HuMInGameLab/ControlFace10K](https://huggingface.co/datasets/HuMInGameLab/ControlFace10K/resolve/a03589de1a9e028b2d16fa1eb0e019a6930e817c/controlface10k.zip) | [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) |
 
 ---
 
@@ -45,3 +46,16 @@ This project incorporates third-party open-source components and machine-learnin
 - **Copyright:** Copyright (c) Individual contributors.
 - **Source:** [pyca/cryptography](https://github.com/pyca/cryptography)
 - **License Terms:** Distributed under the terms of either Apache-2.0 ([LICENSE.APACHE](https://raw.githubusercontent.com/pyca/cryptography/main/LICENSE.APACHE)) or BSD-3-Clause ([LICENSE.BSD](https://raw.githubusercontent.com/pyca/cryptography/main/LICENSE.BSD)).
+
+---
+
+## Datasets
+
+### ControlFace10K (subset)
+- **Name:** ControlFace10K (subset)
+- **Path:** `datasets/controlface10k-subset/`
+- **Source:** [HuMInGameLab/ControlFace10K](https://huggingface.co/datasets/HuMInGameLab/ControlFace10K/resolve/a03589de1a9e028b2d16fa1eb0e019a6930e817c/controlface10k.zip) (revision `a03589de1a9e028b2d16fa1eb0e019a6930e817c`)
+- **License:** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+- **Credit:** Kassi Nzalasse, Rishav Raj, Eli Laird and Corey Clark, "SIG: A Synthetic Identity Generation Pipeline for Generating Evaluation Datasets for Face Recognition" (2024), arXiv:2409.08345
+- **Modification Statement:** Subset selection only; images unchanged (verified against `datasets/controlface10k-subset/manifest.json`).
+- **Usage:** The dataset is used for evaluation only and is not part of the published wheel or npm package.
