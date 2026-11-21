@@ -1,8 +1,0 @@
-.venv/
-node_modules/
-runtime/
-__pycache__/
-*.pyc
-test-results/
-playwright-report/
-.env

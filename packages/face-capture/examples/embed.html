@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Face Capture Embed Example</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f172a;
+      color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 {
+      margin-bottom: 8px;
+      font-size: 24px;
+    }
+    p {
+      margin-top: 0;
+      color: #94a3b8;
+    }
+    #log {
+      margin-top: 20px;
+      width: 640px;
+      max-width: 100%;
+      background: #1e293b;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 13px;
+      min-height: 48px;
+      box-sizing: border-box;
+      word-break: break-all;
+    }
+  </style>
+  <script type="module" src="../dist/face-capture.js"></script>
+</head>
+<body>
+  <h1>Face Capture Component</h1>
+  <p>Live camera face enrollment and recognition web component.</p>
+
+  <!-- 6-line embed snippet -->
+  <face-capture
+    api-url="http://127.0.0.1:6122"
+    token="YOUR_API_TOKEN"
+    collection="default"
+    mode="recognize"
+    autostart>
+  </face-capture>
+
+  <script>
+    // Read optional overrides from URL query parameters (e.g. ?api-url=...&token=...&autostart=false)
+    const params = new URLSearchParams(window.location.search);
+    const captureEl = document.querySelector('face-capture');
+    if (captureEl) {
+      if (params.get('autostart') === 'false') captureEl.removeAttribute('autostart');
+      for (const attr of ['api-url', 'token', 'collection', 'mode', 'person-id', 'model-base-url']) {
+        if (params.has(attr)) captureEl.setAttribute(attr, params.get(attr));
+      }
+    }
+  </script>
+
+  <div id="log">Waiting for component events...</div>
+
+  <script>
+    const el = document.querySelector('face-capture');
+    const log = document.getElementById('log');
+
+    el.addEventListener('face-ready', () => {
+      log.textContent = '[face-ready] Camera and recognition engine initialized';
+    });
+
+    el.addEventListener('face-result', (event) => {
+      log.textContent = '[face-result] ' + JSON.stringify(event.detail);
+    });
+
+    el.addEventListener('face-error', (event) => {
+      log.textContent = '[face-error] (' + event.detail.code + '): ' + event.detail.message;
+    });
+  </script>
+</body>
+</html>

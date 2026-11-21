@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>face_inference — Web Component Embed Example</title>
+  <style>
+    :root {
+      --bg-primary: #0f172a;
+      --bg-surface: #1e293b;
+      --bg-card: #182234;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #38bdf8;
+      --accent-hover: #0ea5e9;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      padding: 32px 16px;
+      line-height: 1.5;
+    }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 16px;
+    }
+
+    h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 6px;
+    }
+
+    .badge-warning {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      background-color: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .form-hint {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    input[type="text"],
+    input[type="password"],
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-main);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--accent);
+    }
+
+    .row {
+      display: flex;
+      gap: 16px;
+    }
+
+    .row .form-group {
+      flex: 1;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    button {
+      padding: 10px 18px;
+      border-radius: 6px;
+      border: none;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #0f172a;
+    }
+
+    button.primary:hover {
+      background: var(--accent-hover);
+    }
+
+    button.secondary {
+      background: #334155;
+      color: var(--text-main);
+    }
+
+    button.secondary:hover {
+      background: #475569;
+    }
+
+    .component-wrapper {
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .log-panel {
+      background: #090d16;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .log-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+
+    .clear-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .clear-btn:hover {
+      color: var(--text-main);
+    }
+
+    #log {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      max-height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      color: #e2e8f0;
+    }
+
+    .log-entry {
+      margin-bottom: 4px;
+      padding-bottom: 4px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .log-time {
+      color: var(--text-muted);
+      margin-right: 8px;
+    }
+
+    .log-tag-ready { color: var(--accent); }
+    .log-tag-result { color: var(--success); }
+    .log-tag-error { color: var(--danger); }
+  </style>
+  <script type="module" src="../../packages/face-capture/dist/face-capture.js"></script>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Face Capture Web Component</h1>
+      <p class="subtitle">Vanilla JavaScript embed of &lt;face-capture&gt; from packages/face-capture</p>
+    </header>
+
+    <div class="panel">
+      <div class="row">
+        <div class="form-group">
+          <label for="apiUrl">Server API URL</label>
+          <input type="text" id="apiUrl" value="http://127.0.0.1:6122" placeholder="http://127.0.0.1:6122">
+        </div>
+        <div class="form-group">
+          <label for="collectionId">Collection ID</label>
+          <input type="text" id="collectionId" value="default" placeholder="default">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="tokenInput">
+          API Token
+          <span class="badge-warning">dev only — use session tokens in production</span>
+        </label>
+        <input type="password" id="tokenInput" placeholder="Paste your API token here">
+        <p class="form-hint">
+          Notice: Operator API tokens have full privileges and should never be exposed in client code in production. Short-lived session-token minting (task A3) is upcoming for public clients.
+        </p>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="modeSelect">Operation Mode</label>
+          <select id="modeSelect">
+            <option value="recognize">Recognize (Identify Face)</option>
+            <option value="enroll">Enroll (Register Identity)</option>
+          </select>
+        </div>
+        <div class="form-group" id="personIdGroup" style="display: none;">
+          <label for="personId">Person ID (Required for Enroll)</label>
+          <input type="text" id="personId" value="alice" placeholder="e.g. alice">
+        </div>
+      </div>
+
+      <div class="button-group">
+        <button id="applyBtn" class="primary" type="button">Apply &amp; Start Camera</button>
+        <button id="stopBtn" class="secondary" type="button">Stop Camera</button>
+      </div>
+    </div>
+
+    <div class="component-wrapper">
+      <face-capture
+        id="faceCapture"
+        api-url="http://127.0.0.1:6122"
+        token=""
+        collection="default"
+        mode="recognize">
+      </face-capture>
+    </div>
+
+    <div class="log-panel">
+      <div class="log-header">
+        <span class="log-title">Event Log</span>
+        <button id="clearLogBtn" class="clear-btn" type="button">Clear</button>
+      </div>
+      <div id="log">Waiting for user action or component events...</div>
+    </div>
+  </div>
+
+  <script>
+    const el = document.getElementById('faceCapture');
+    const apiUrlInput = document.getElementById('apiUrl');
+    const tokenInput = document.getElementById('tokenInput');
+    const collectionInput = document.getElementById('collectionId');
+    const modeSelect = document.getElementById('modeSelect');
+    const personIdInput = document.getElementById('personId');
+    const personIdGroup = document.getElementById('personIdGroup');
+    const applyBtn = document.getElementById('applyBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const clearLogBtn = document.getElementById('clearLogBtn');
+    const logEl = document.getElementById('log');
+
+    let logInitialized = false;
+
+    function appendLog(tag, message, cssClass) {
+      if (!logInitialized) {
+        logEl.innerHTML = '';
+        logInitialized = true;
+      }
+      const time = new Date().toLocaleTimeString();
+      const entry = document.createElement('div');
+      entry.className = 'log-entry';
+      entry.innerHTML = `<span class="log-time">[${time}]</span> <strong class="${cssClass}">[${tag}]</strong> ${escapeHtml(message)}`;
+      logEl.prepend(entry);
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    clearLogBtn.addEventListener('click', () => {
+      logEl.innerHTML = 'Log cleared.';
+      logInitialized = false;
+    });
+
+    modeSelect.addEventListener('change', () => {
+      personIdGroup.style.display = modeSelect.value === 'enroll' ? 'block' : 'none';
+    });
+
+    applyBtn.addEventListener('click', async () => {
+      const token = tokenInput.value.trim();
+      if (!token) {
+        appendLog('config', 'Please paste an API token before starting.', 'log-tag-error');
+        tokenInput.focus();
+        return;
+      }
+
+      el.setAttribute('api-url', apiUrlInput.value.trim());
+      el.setAttribute('token', token);
+      el.setAttribute('collection', collectionInput.value.trim());
+      el.setAttribute('mode', modeSelect.value);
+
+      if (modeSelect.value === 'enroll') {
+        el.setAttribute('person-id', personIdInput.value.trim());
+      } else {
+        el.removeAttribute('person-id');
+      }
+
+      appendLog('action', `Applied configuration. Starting capture (mode: ${modeSelect.value})...`, 'log-tag-ready');
+      try {
+        await el.start();
+      } catch (err) {
+        appendLog('error', err.message || String(err), 'log-tag-error');
+      }
+    });
+
+    stopBtn.addEventListener('click', () => {
+      el.stop();
+      appendLog('action', 'Stopped camera and capture loop.', 'log-tag-ready');
+    });
+
+    el.addEventListener('face-ready', () => {
+      appendLog('face-ready', 'Camera active and YuNet/SFace inference worker initialized.', 'log-tag-ready');
+    });
+
+    el.addEventListener('face-result', (e) => {
+      appendLog('face-result', JSON.stringify(e.detail), 'log-tag-result');
+    });
+
+    el.addEventListener('face-error', (e) => {
+      const detail = e.detail || {};
+      appendLog('face-error', `(${detail.code || 'UNKNOWN'}): ${detail.message || 'Unknown error'}`, 'log-tag-error');
+    });
+  </script>
+</body>
+</html>
