@@ -1,0 +1,35 @@
+{
+  "name": "face-capture",
+  "version": "0.1.0",
+  "description": "Embeddable face capture web component for enrollment and recognition",
+  "type": "module",
+  "main": "./dist/face-capture.js",
+  "module": "./dist/face-capture.js",
+  "types": "./index.d.ts",
+  "exports": {
+    ".": "./src/face-capture.js",
+    "./dist": "./dist/face-capture.js",
+    "./config": "./src/config.js"
+  },
+  "files": [
+    "src",
+    "dist",
+    "index.d.ts",
+    "README.md"
+  ],
+  "sideEffects": [
+    "./src/face-capture.js",
+    "./dist/face-capture.js"
+  ],
+  "scripts": {
+    "test": "node --test test/*.test.mjs",
+    "build": "node scripts/sync.mjs"
+  },
+  "keywords": [
+    "face-capture",
+    "web-component",
+    "face-inference"
+  ],
+  "author": "Aman Singh",
+  "license": "MIT"
+}
