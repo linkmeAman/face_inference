@@ -563,6 +563,11 @@ components:
             $ref: '#/components/schemas/ErrorEnvelope'
     TooManyRequestsError:
       description: Rate limit exceeded (120 requests/min per IP) (429)
+      headers:
+        Retry-After:
+          description: Seconds until another request is allowed
+          schema:
+            type: integer
       content:
         application/json:
           schema:

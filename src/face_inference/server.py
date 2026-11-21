@@ -8,12 +8,12 @@ import math
 from pathlib import Path
 import sqlite3
 import threading
-import time
 from urllib.parse import unquote, urlsplit
 
 from .assets import models_dir
 from .config import ROOT
 from .matching import FaceError
+from .ratelimit import RateLimiter, client_ip
 from .service import identifier
 from . import tokens
 
@@ -48,7 +48,7 @@ class FaceHTTPServer(ThreadingHTTPServer):
     def __init__(self, address, service, root=ROOT):
         self.service, self.root = service, Path(root)
         self.slots = threading.BoundedSemaphore(8)
-        self.rate_lock, self.rates = threading.Lock(), {}
+        self.rate_limiter = RateLimiter(limit=service.config['rate_limit_per_minute'], window=60)
         self.assets = {'/': self.root / 'index.html'}
         for file in (self.root).iterdir():
             if file.suffix in ('.mjs', '.css'):
@@ -82,15 +82,6 @@ class FaceHTTPServer(ThreadingHTTPServer):
         finally:
             self.slots.release()
 
-    def check_rate(self, address):
-        now = time.monotonic()
-        with self.rate_lock:
-            # Bound retained peer keys; no request bodies or biometric data.
-            self.rates = {key: record for key, record in self.rates.items() if now - record[0] < 60}
-            start, count = self.rates.get(address, (now, 0))
-            if count >= 120 or len(self.rates) > 1000:
-                raise FaceError('RATE_LIMIT', 'Too many requests; wait a minute', 429)
-            self.rates[address] = (start, count + 1)
 
 
 class Handler(BaseHTTPRequestHandler):
@@ -134,10 +125,19 @@ class Handler(BaseHTTPRequestHandler):
             message=str(error) if error else data.get('message', '') if isinstance(data, dict) else '',
             code=error.code if error else '', data={} if error else data), allow_nan=False).encode()
         self.send_response(status)
+        if error and error.code == 'RATE_LIMIT':
+            self.send_header('Retry-After', str(error.retry_after))
         self.headers_safe('application/json; charset=utf-8', len(body))
         self.wfile.write(body)
 
     def authorize(self, parts):
+        config = self.server.service.config
+        address = client_ip(self.client_address[0], self.headers.get('X-Forwarded-For'), config['trusted_proxies'])
+        decision = self.server.rate_limiter.check(address)
+        if not decision.allowed:
+            error = FaceError('RATE_LIMIT', 'Too many requests; wait a minute', 429)
+            error.retry_after = decision.retry_after
+            raise error
         expected = 'Bearer ' + self.server.service.config['api_token']
         authorization = self.headers.get('Authorization', '')
         claims = None
@@ -165,7 +165,6 @@ class Handler(BaseHTTPRequestHandler):
             local_origin = parsed.netloc == host and host in allowed and parsed.scheme in ('http', 'https') and not parsed.path
             if not (explicitly_allowed or local_origin):
                 raise FaceError('ORIGIN_REJECTED', 'Use the same-origin face service', 403)
-        self.server.check_rate(self.client_address[0])
         return claims
 
     def read_json(self):
