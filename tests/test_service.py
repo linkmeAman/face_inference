@@ -1,5 +1,4 @@
 from concurrent.futures import ThreadPoolExecutor
-import copy
 import hashlib
 import json
 from pathlib import Path
@@ -11,7 +10,7 @@ import uuid
 from cryptography.fernet import Fernet
 
 from face_inference.config import contract, load_config
-from face_inference.matching import FaceError, aggregate, cosine, identify, normalize, vector
+from face_inference.matching import FaceError, aggregate, normalize, vector
 from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 

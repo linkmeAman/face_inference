@@ -148,7 +148,7 @@ def test_fetch_http_server(tmp_path):
     (dest_dir / 'manifest.json').write_text(json.dumps(manifest))
 
     class QuietHandler(SimpleHTTPRequestHandler):
-        def log_message(self, format, *args):
+        def log_message(self, *args, **kwargs):
             pass
 
     import functools
@@ -189,7 +189,7 @@ def test_fetch_rejects_corrupt_download_and_cleans_temp(tmp_path):
     (dest_dir / 'manifest.json').write_text(json.dumps(manifest))
 
     class QuietHandler(SimpleHTTPRequestHandler):
-        def log_message(self, format, *args):
+        def log_message(self, *args, **kwargs):
             pass
 
     import functools

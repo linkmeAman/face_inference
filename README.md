@@ -8,7 +8,7 @@ current system.
 ## Start on this server
 
 ```bash
-cd /var/www/face_inference
+cd face_inference
 python -m face_inference check
 python -m face_inference token
 python -m face_inference
@@ -30,8 +30,7 @@ python3 -m venv .venv
 
 No Python model dependencies are required for this UI: the existing browser WASM
 runtime runs YuNet/SFace. Models/runtime assets are already included, with no CDN.
-The separately preserved Python ONNX/PAD inference service is still available
-through `run_inference.py` and its original requirements when needed.
+Legacy services, historical snapshots, and old tests are preserved under Git tag `legacy-ccc-final`.
 
 For every model, exact local paths, installation, offline use and missing-file recovery,
 see [docs/model-setup.md](docs/model-setup.md). Verify model/runtime assets with:
@@ -68,21 +67,15 @@ approved collections. Face quality and recognition do not establish liveness.
 
 | File | Purpose |
 | --- | --- |
-| [STANDALONE_GUIDE.md](STANDALONE_GUIDE.md) | Configuration, API, embedding into another app, evidence/export and verification |
-| [MODEL_SETUP.md](MODEL_SETUP.md) | All models/runtime assets, local installation, checksum verification, recovery and Git instructions |
-| [MODEL_ALTERNATIVES.md](MODEL_ALTERNATIVES.md) | Recorded model alternatives, additional candidates, tradeoffs, sources and migration requirements |
-| [docs/contract.md](docs/contract.md) | API, schema, lifecycle and original test matrix |
+| [docs/guide.md](docs/guide.md) | Configuration, API, embedding into another app, evidence/export and verification |
+| [docs/model-setup.md](docs/model-setup.md) | All models/runtime assets, local installation, checksum verification, and recovery |
+| [docs/model-alternatives.md](docs/model-alternatives.md) | Recorded model alternatives, additional candidates, tradeoffs, sources and migration requirements |
+| [docs/contract.md](docs/contract.md) | API, schema, lifecycle and verification matrix |
 | `src/face_inference/service.py`, `matching.py` | PHP-free enrollment, aggregation, duplicate and unanimous matching logic |
 | `src/face_inference/storage.py`, `schema.sql` | Authenticated encryption and SQLite persistence/transactions |
 | `src/face_inference/server.py`, `web/` | Python HTTP API and plain JavaScript camera UI/client |
-| [DATASETS.md](DATASETS.md) | Original synthetic dataset, model provenance, results and limitations |
-| [REUSE_GUIDE.md](REUSE_GUIDE.md) | Detailed original pipeline/method map and historical CCC integration context |
+| [docs/datasets.md](docs/datasets.md) | Original synthetic dataset, model provenance, results and limitations |
 
-The original PHP code is retained as reference and provenance. The standalone
-application never executes it or calls PHP endpoints. Original source models,
-datasets, tweaks, tests and historical docs remain intact. The previous export
-README is preserved in `snapshot/EXPORT_README.original.md`.
-
-See `snapshot/STANDALONE_VERIFICATION.md` for the new actual-model browser and
-Python/SQLite test results. No live CCC database or installed service was changed.
-# face_inference
+Legacy PHP code, historical snapshots, and old tests were removed from `main`
+and are preserved under Git tag `legacy-ccc-final`. The standalone application
+has zero PHP/MySQL dependencies.
