@@ -12,7 +12,35 @@ const distVendorDir = resolve(distDir, 'vendor-js');
 const distBrowserFaceDir = resolve(distVendorDir, 'browser-face');
 const distVendorVendorDir = resolve(distVendorDir, 'vendor/browser-face');
 
-async function build() {
+export function patchWorker(source) {
+  const target = "const assets = new URL('../'+config.assets_base, import.meta.url).href;";
+  if (!source.includes(target)) {
+    throw new Error('worker.mjs asset patch did not apply');
+  }
+  const replacement = "const assets = config.assets_url || (config.assets_base && /^[a-z]+:\\/\\//i.test(config.assets_base) ? config.assets_base : new URL('../'+config.assets_base, import.meta.url).href);";
+  const result = source.replace(target, replacement);
+  if (result === source || !result.includes('assets_url')) {
+    throw new Error('worker.mjs asset patch did not apply');
+  }
+  return result;
+}
+
+export function patchFaceCapture(source) {
+  const target = '../dist/vendor-js/';
+  if (!source.includes(target)) {
+    throw new Error('face-capture.js import patch did not apply');
+  }
+  const replacement = './vendor-js/';
+  const result = source.replaceAll(target, replacement);
+  if (result === source) {
+    throw new Error('face-capture.js import patch did not apply');
+  }
+  return result;
+}
+
+export const patchFaceCaptureImports = patchFaceCapture;
+
+export async function build() {
   console.log('Building face-capture package...');
 
   // Ensure fresh output directories
@@ -43,10 +71,7 @@ async function build() {
 
   // Copy worker.mjs with configured asset origin support
   let workerCode = await readFile(resolve(browserFaceSrcDir, 'worker.mjs'), 'utf8');
-  workerCode = workerCode.replace(
-    "const assets = new URL('../'+config.assets_base, import.meta.url).href;",
-    "const assets = config.assets_url || (config.assets_base && /^[a-z]+:\\/\\//i.test(config.assets_base) ? config.assets_base : new URL('../'+config.assets_base, import.meta.url).href);"
-  );
+  workerCode = patchWorker(workerCode);
   await writeFile(resolve(distBrowserFaceDir, 'worker.mjs'), workerCode, 'utf8');
   copiedCount++;
   console.log(`Copied ${copiedCount} files from browser-face -> dist/vendor-js/browser-face/`);
@@ -76,9 +101,7 @@ async function build() {
   // 5. Build dist/face-capture.js with relative vendor imports
   const elementSrc = resolve(pkgRoot, 'src/face-capture.js');
   let elementCode = await readFile(elementSrc, 'utf8');
-
-  // Replace relative paths from src/ (../dist/vendor-js/) to dist/ (./vendor-js/)
-  elementCode = elementCode.replaceAll('../dist/vendor-js/', './vendor-js/');
+  elementCode = patchFaceCapture(elementCode);
 
   const elementDest = resolve(distDir, 'face-capture.js');
   await writeFile(elementDest, elementCode, 'utf8');
@@ -87,7 +110,10 @@ async function build() {
   console.log('Build complete successfully.');
 }
 
-build().catch((err) => {
-  console.error('Build failed:', err);
-  process.exit(1);
-});
+const isDirectExecution = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+if (isDirectExecution) {
+  build().catch((err) => {
+    console.error('Build failed:', err);
+    process.exit(1);
+  });
+}
