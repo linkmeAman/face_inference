@@ -67,7 +67,7 @@ class FaceService:
         return count
 
     def list_collections(self):
-        with self.repository.transaction() as db:
+        with self.repository.transaction(mode='DEFERRED') as db:
             return [dict(row) for row in db.execute('SELECT id,name,created_at FROM collections ORDER BY name,id')]
 
     def list_people(self, collection):
@@ -82,7 +82,7 @@ class FaceService:
 
     def events(self, collection):
         identifier(collection)
-        with self.repository.transaction() as db:
+        with self.repository.transaction(mode='DEFERRED') as db:
             self.collection(db, collection)
             return [dict(row) for row in db.execute('SELECT id,person_id,event,state,created_at FROM events WHERE collection_id=? ORDER BY id DESC LIMIT 100', (collection,))]
 
