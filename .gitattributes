@@ -1,0 +1,12 @@
+# Normalize text files to LF on every platform so checksum-pinned assets and scripts
+# are byte-identical on Windows (core.autocrlf=true) and elsewhere.
+* text=auto eol=lf
+
+# Pinned model/runtime assets are hashed in manifest.json: never convert them.
+src/face_inference/web/vendor/** -text
+
+# Binary files.
+*.wasm binary
+*.onnx binary
+*.png binary
+*.jpg binary
