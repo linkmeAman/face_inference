@@ -8,7 +8,7 @@ This project incorporates third-party open-source components and machine-learnin
 |---|---|---|---|---|
 | **YuNet** | Face Detection Model | [MIT](https://spdx.org/licenses/MIT.html) | [opencv_zoo: face_detection_yunet](https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet) | [YuNet LICENSE](https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_detection_yunet/LICENSE) |
 | **SFace** | Face Recognition Model | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) | [opencv_zoo: face_recognition_sface](https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface) | [SFace LICENSE](https://raw.githubusercontent.com/opencv/opencv_zoo/main/models/face_recognition_sface/LICENSE) |
-| **onnxruntime-web** | In-Browser ML Runtime (v1.24.3) | [MIT](https://spdx.org/licenses/MIT.html) | [onnxruntime.ai](https://onnxruntime.ai) (`microsoft/onnxruntime`) | [npm package](https://registry.npmjs.org/onnxruntime-web) |
+| **onnxruntime-web** | In-Browser ML Runtime (v1.24.3) | [MIT](https://spdx.org/licenses/MIT.html) | [microsoft/onnxruntime](https://github.com/microsoft/onnxruntime) | [npm package](https://registry.npmjs.org/onnxruntime-web) |
 | **cryptography** | Server-side Encryption | [Apache-2.0](https://www.apache.org/licenses/LICENSE-2.0) / [BSD-3-Clause](https://spdx.org/licenses/BSD-3-Clause.html) | [pyca/cryptography](https://github.com/pyca/cryptography) | [cryptography LICENSE](https://raw.githubusercontent.com/pyca/cryptography/main/LICENSE) |
 
 ---
