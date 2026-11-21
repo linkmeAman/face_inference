@@ -23,7 +23,7 @@ jobs:
         python: ["3.10", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10
         with:
           python-version: ${{ matrix.python }}
       - run: uv venv --python ${{ matrix.python }}
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10
       - run: uv build
       - run: uv venv .venv-wheel
       - run: uv pip install --python .venv-wheel dist/*.whl
@@ -67,6 +67,4 @@ jobs:
       - name: test package
         if: hashFiles('packages/face-capture/package.json') != ''
         working-directory: packages/face-capture
-        run: |
-          npm ci
-          npm test
+        run: npm test
