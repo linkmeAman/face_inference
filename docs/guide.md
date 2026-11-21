@@ -128,6 +128,52 @@ An evaluation suggestion is `SUGGESTED` with `verified:false`; it must not be
 treated as an approved identity action. API calls return decisions only. Your
 application owns any subsequent action and its own permissions/idempotency.
 
+## Python client
+
+Applications can interact with the HTTP API using the typed standard-library client:
+
+```python
+from face_inference.client import FaceClient, FaceApiError, FaceConnectionError
+
+client = FaceClient("http://127.0.0.1:6122", token=operator_token, timeout=10.0)
+
+# Check service health
+health = client.health()
+
+# Manage collections and people
+client.create_collection("my-team", "My team")
+client.add_person("my-team", "employee-001", "Person One", metadata={"dept": "engineering"})
+
+# Enroll a person
+result = client.enroll(
+    collection_id="my-team",
+    person_id="employee-001",
+    observations=observations,
+    template=template,
+    capture_session=session_uuid,
+    model_version="sface-int8bq-fb143eea",
+    preprocessing_version="yunet640-similarity5-rgb255-v1",
+)
+
+# Recognize
+match = client.recognize(
+    collection_id="my-team",
+    observations=observations,
+    capture_session=session_uuid,
+    model_version="sface-int8bq-fb143eea",
+    preprocessing_version="yunet640-similarity5-rgb255-v1",
+)
+
+# Erase face data for subject
+client.delete_face("my-team", "employee-001")
+```
+
+The client requires zero third-party dependencies (Python 3.10+ stdlib only).
+- **Idempotency and retry**: Mutating calls (`POST`, `DELETE`) automatically attach a unique UUID `idempotency_key` and retry up to 3 times on transient network failures or 5xx/429 status codes with exponential backoff. Confirmed client errors (4xx) are raised immediately without retry.
+- **Unresolved request recovery**: If retries are exhausted on a mutation, the request state remains pending in `client.pending` and can be recovered with `client.retry()`.
+- **Token redaction**: The API credential is never exposed in `repr()`, `str()`, or exception messages.
+- **Error types**: Server-side error responses raise `FaceApiError(status, code, message)`; network failures or timeouts raise `FaceConnectionError`.
+
 ## Enrollment lifecycle and persistence
 
 The SQLite transaction covers duplicate comparison, face save, capture claim,
