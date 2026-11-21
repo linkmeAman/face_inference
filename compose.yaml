@@ -11,7 +11,7 @@ services:
     volumes:
       - face-data:/data
     environment:
-      # Optional environment passthrough for allowed origins (if supported by configuration)
+      # Environment passthrough for allowed origins (defaults to empty)
       - FACE_INFERENCE_ALLOWED_ORIGINS=${FACE_INFERENCE_ALLOWED_ORIGINS:-}
 
   # Commented Caddy reverse-proxy block for HTTPS termination.

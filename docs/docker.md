@@ -11,8 +11,9 @@ The `face-inference` container image is built using a multi-stage `python:3.12-s
 - **Stage 1 (Builder):** Installs `hatchling` and packages the project into a wheel using `pip wheel`.
 - **Stage 2 (Runtime):** Installs the generated wheel and runtime dependencies (`cryptography`), configures a non-root system user (`faceapp`, UID `10001`), creates a persistent `/data` volume mount point, and configures healthchecks.
 - **Security:** Runs as non-root user UID `10001` with minimal filesystem privileges.
+- **Host Binding:** Sets `ENV FACE_INFERENCE_HOST=0.0.0.0` inside the container so the HTTP server listens on all container network interfaces.
 - **Port:** Exposes private listener port `6122`.
-- **Models:** Model weights are not baked into the image. On startup, the container entrypoint invokes `face-inference models fetch` to download and verify required model assets into `/data/models`.
+- **Models:** Model weights and ONNX runtime WASM assets are stored under `/data/models`. On startup, `serve` automatically runs `face-inference models fetch` to download and verify required model assets into `/data/models` (or verify pre-mounted assets).
 
 ---
 
@@ -77,14 +78,68 @@ docker compose down
 
 ### Network and Host Binding
 
-By default, `compose.yaml` binds port `6122` to `127.0.0.1:6122:6122` on the host to adhere to the project's privacy-by-default standard.
+By default, `compose.yaml` binds port `6122` to `127.0.0.1:6122:6122` on the host to adhere to the project's privacy-by-default standard. The container sets `ENV FACE_INFERENCE_HOST=0.0.0.0` so traffic forwarded from the host loopback is accepted by the server.
 
-> [!NOTE]
-> Within the container, `face-inference` creates `/data/config.json` with `host: "127.0.0.1"` if none exists. If you expose the service outside the container or across a container network, ensure `config.json` has `"host": "0.0.0.0"`.
+### Allowed Origins Configuration
+
+You can configure CORS allowed origins via the environment variable `FACE_INFERENCE_ALLOWED_ORIGINS`:
+
+```bash
+FACE_INFERENCE_ALLOWED_ORIGINS="http://localhost:3000,https://app.example.com" docker compose up -d
+```
 
 ---
 
-## 5. HTTPS Reverse Proxy (Camera Access Requirement)
+## 5. Offline / Air-Gapped Deployment
+
+In air-gapped or restricted network environments where the container cannot reach GitHub Releases to download model weights, you can provide the 6 required assets (`ORT-LICENSE`, `ort-wasm-simd-threaded.mjs`, `ort-wasm-simd-threaded.wasm`, `ort.wasm.min.mjs`, `sface.onnx`, `yunet.onnx`) offline using either of two methods:
+
+### Method A: Host Directory Mount
+
+Mount a directory from the host containing the 6 model files directly into the container's `/data/models` directory:
+
+```bash
+docker run -d \
+  --name face-inference \
+  -p 127.0.0.1:6122:6122 \
+  -v face-data:/data \
+  -v /path/to/host/models:/data/models:ro \
+  face-inference:latest
+```
+
+When the container launches `serve`, the entrypoint runs `face-inference models fetch`. Because all required files are already present and match their recorded SHA-256 checksums, `fetch` succeeds idempotently without making any outbound network requests.
+
+### Method B: Pre-Seeded Container Image Build
+
+You can build a self-contained offline container image by copying model assets from `src/face_inference/web/vendor/browser-face` (or any local directory) into a build-time directory, and fetching them locally using `--from-dir`:
+
+```dockerfile
+# Example Offline Dockerfile
+FROM face-inference:latest
+
+USER root
+COPY src/face_inference/web/vendor/browser-face /opt/models-seed
+RUN mkdir -p /data/models && \
+    face-inference models fetch --from-dir /opt/models-seed && \
+    rm -rf /opt/models-seed && \
+    chown -R 10001:10001 /data
+USER 10001:10001
+```
+
+Alternatively, pass `FACE_INFERENCE_MODELS_FROM_DIR` at runtime if you mount a directory at a custom path:
+
+```bash
+docker run -d \
+  -p 127.0.0.1:6122:6122 \
+  -v face-data:/data \
+  -v /path/to/host/models:/seed:ro \
+  -e FACE_INFERENCE_MODELS_FROM_DIR=/seed \
+  face-inference:latest
+```
+
+---
+
+## 6. HTTPS Reverse Proxy (Camera Access Requirement)
 
 Modern web browsers enforce strict security policies on media devices: **camera access (`navigator.mediaDevices.getUserMedia`) is restricted to secure contexts (`https://`) or `localhost`/`127.0.0.1`**.
 
@@ -115,13 +170,13 @@ face.example.com {
 
 ---
 
-## 6. Data Volume & Critical Key-Loss Warning
+## 7. Data Volume & Critical Key-Loss Warning
 
 All persistent runtime data is stored in the volume mounted at `/data` (`ENV FACE_INFERENCE_HOME=/data`), including:
 
 - `/data/config.json`: Configuration file containing `api_token` and `encryption_key`.
 - `/data/faces.sqlite3`: SQLite database holding enrolled face metadata and encrypted feature embeddings.
-- `/data/models/`: Downloaded model assets (YuNet, SFace, ONNX Runtime WASM).
+- `/data/models/`: Model assets (YuNet, SFace, ONNX Runtime WASM).
 
 > [!CAUTION]
 > **CRITICAL KEY-LOSS WARNING:**

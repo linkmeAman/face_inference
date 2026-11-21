@@ -17,7 +17,8 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     FACE_INFERENCE_HOME=/data \
-    FACE_INFERENCE_MODELS_DIR=/data/models
+    FACE_INFERENCE_MODELS_DIR=/data/models \
+    FACE_INFERENCE_HOST=0.0.0.0
 
 # Create non-root system group and user with uid 10001
 RUN groupadd -g 10001 faceapp && \
@@ -34,26 +35,31 @@ RUN pip install --no-cache-dir /tmp/*.whl && \
 RUN printf '%s\n' \
     '#!/bin/sh' \
     'set -e' \
+    'fetch_models() {' \
+    '  if [ -n "$FACE_INFERENCE_MODELS_FROM_DIR" ]; then' \
+    '    face-inference models fetch --from-dir "$FACE_INFERENCE_MODELS_FROM_DIR"' \
+    '  else' \
+    '    face-inference models fetch' \
+    '  fi' \
+    '}' \
+    'if [ "$#" -eq 0 ]; then' \
+    '  fetch_models' \
+    '  exec face-inference serve' \
+    'fi' \
     'case "$1" in' \
     '  init|check|token|purge|export|models)' \
     '    exec face-inference "$@"' \
     '    ;;' \
     '  serve)' \
     '    shift' \
-    '    face-inference models fetch' \
+    '    fetch_models' \
     '    exec face-inference serve "$@"' \
     '    ;;' \
     '  -*)' \
-    '    face-inference models fetch' \
-    '    exec face-inference serve "$@"' \
+    '    exec face-inference "$@"' \
     '    ;;' \
     '  *)' \
-    '    if [ "$#" -eq 0 ]; then' \
-    '      face-inference models fetch' \
-    '      exec face-inference serve' \
-    '    else' \
-    '      exec "$@"' \
-    '    fi' \
+    '    exec "$@"' \
     '    ;;' \
     'esac' > /usr/local/bin/docker-entrypoint.sh && \
     chmod 0755 /usr/local/bin/docker-entrypoint.sh
