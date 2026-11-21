@@ -22,7 +22,7 @@ def test_key_binding_tamper_and_rollback(tmp_path):
             raise ValueError('abort')
     with repo.connect() as db:
         assert db.execute("SELECT value FROM metadata WHERE key='rollback'").fetchone() is None
-        db.execute("UPDATE metadata SET value='2' WHERE key='schema_version'")
+        db.execute("UPDATE metadata SET value='99' WHERE key='schema_version'")
         db.commit()
     with pytest.raises(RuntimeError, match='schema version'):
         SQLiteRepository(path, key)
