@@ -7,7 +7,7 @@ test fails, demonstrating the existence and mechanics of the weakness.
 
 import http.server
 import json
-import subprocess
+import re
 import threading
 import uuid
 from email.message import Message
@@ -124,8 +124,6 @@ def test_sec_3_component_never_imports_code_from_model_base_url():
     component must always use its shipped capture implementation. A dynamic `import(...)` in the
     element source is the mechanism that previously loaded remote code, so none may exist.
     """
-    import re
-
     source = (Path(__file__).resolve().parents[1] / "packages/face-capture/src/face-capture.js").read_text()
     assert not re.search(r"\bimport\s*\(", source), "dynamic import() found in face-capture.js"
 
