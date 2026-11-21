@@ -11,18 +11,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', nargs='?', default='serve', choices=('init', 'serve', 'check', 'token', 'purge', 'export'))
     parser.add_argument('--config', help='Private standalone JSON configuration path')
-    parser.add_argument('--port', type=int, help='Override private listener port for this run')
+    parser.add_argument('--host', help='Override listener IP address or hostname for this run')
+    parser.add_argument('--port', help='Override listener port for this run (1–65535)')
     parser.add_argument('--collection', help='Collection to export for calibration')
     parser.add_argument('--output', help='New private JSONL export file')
     args = parser.parse_args()
     from .config import load_config, verify_assets
     from .service import FaceService
     from .storage import SQLiteRepository
-    config = load_config(args.config)
-    if args.port is not None:
-        if not 1024 <= args.port <= 65535:
-            parser.error('Port must be 1024–65535')
-        config['port'] = args.port
+    try:
+        config = load_config(args.config, host=args.host, port=args.port)
+    except (RuntimeError, ValueError) as error:
+        print(' '.join(str(error).splitlines()), file=sys.stderr)
+        return 1
     if args.command == 'token':
         print(config['api_token'])
         return 0
@@ -48,6 +49,8 @@ def main():
             'mode': config['mode'], 'model_version': model['model_version']}))
         return 0
     from .server import FaceHTTPServer
+    if config['host'] not in ('127.0.0.1', '::1', 'localhost'):
+        print('listening on a non-loopback address: put TLS in front (camera needs HTTPS)', file=sys.stderr)
     server = FaceHTTPServer((config['host'], config['port']), service)
     print('Face service: http://' + config['host'] + ':' + str(server.server_port), flush=True)
     print('Use python -m face_inference token in your terminal to get the private API token.', flush=True)

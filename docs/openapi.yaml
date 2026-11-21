@@ -1,0 +1,1093 @@
+openapi: 3.1.0
+info:
+  title: Face Inference API
+  version: 1.0.0
+  description: |
+    Bounded same-origin JSON API for face enrollment, recognition, and evidence storage.
+    Browser client executes YuNet and SFace via ONNX Runtime Web WASM; Python server
+    stores encrypted biometric templates and matches vectors without CCC or PHP dependencies.
+
+    ### Additional Endpoints and Static Assets (Not Operations)
+    * `GET /health`: Public health check (no authentication required). Returns `{"status": "ok", "api_version": "1", "storage": "sqlite"}`.
+    * Static Frontend & Web Assets: Served directly from allowlisted files at `/`, `/index.html`, `/app.mjs`, `/client.mjs`, `/style.css`.
+    * Model and WASM Assets: Served under `/browser-face/*` (e.g., `capture.mjs`, `worker.mjs`, `model.mjs`, `math.mjs`) and `/vendor/browser-face/*` (e.g., `manifest.json`, `sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`).
+    All `/api/v1/` endpoints require HTTP Bearer token authentication.
+servers:
+  - url: http://127.0.0.1:6122
+    description: Default local standalone server
+security:
+  - BearerAuth: []
+
+paths:
+  /api/v1/config:
+    get:
+      x-source: "src/face_inference/server.py:188"
+      summary: Get safe browser configuration and policy status
+      description: |
+        Returns the safe browser contract, operational mode (COLLECT, EVALUATION, APPROVED),
+        policy readiness, duplicate and recognition thresholds, and capacity limits.
+      operationId: getConfig
+      responses:
+        '200':
+          description: Safe configuration response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /api/v1/collections:
+    get:
+      x-source: "src/face_inference/server.py:193"
+      summary: List all collections
+      description: Returns a list of all collections ordered by name and id.
+      operationId: listCollections
+      responses:
+        '200':
+          description: List of collections
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListCollectionsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      x-source: "src/face_inference/server.py:196"
+      summary: Create a collection
+      description: Create a new independent collection namespace with an application-defined ID.
+      operationId: createCollection
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCollectionRequest'
+      responses:
+        '200':
+          description: Collection created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateCollectionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/people:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    get:
+      x-source: "src/face_inference/server.py:203"
+      summary: List people in collection
+      description: Returns all registered people in the collection, purging expired references.
+      operationId: listPeople
+      responses:
+        '200':
+          description: List of people
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListPeopleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      x-source: "src/face_inference/server.py:210"
+      summary: Create or update person in collection
+      description: Register or update metadata for a person within a collection namespace.
+      operationId: upsertPerson
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpsertPersonRequest'
+      responses:
+        '200':
+          description: Person created or updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpsertPersonResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/enrollments:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    post:
+      x-source: "src/face_inference/server.py:210"
+      summary: Enroll face observations for a person
+      description: |
+        Saves consented face observations and stores an encrypted aggregate reference template.
+        Validates model contract, verifies submitted template matches medoid aggregate of 3-5 unit vectors,
+        and performs duplicate detection against existing references in the collection.
+      operationId: enrollFace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EnrollmentRequest'
+      responses:
+        '200':
+          description: Enrollment decision response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnrollmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/recognitions:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    post:
+      x-source: "src/face_inference/server.py:210"
+      summary: Recognize face observations against collection gallery
+      description: |
+        Matches 3-5 unit face vectors against active references in the collection.
+        Returns MATCHED (in approved policy mode), SUGGESTED (in default evaluation mode),
+        or UNKNOWN / COLLECTION_ONLY. Never mutates biometric references during recognition.
+      operationId: recognizeFace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RecognitionRequest'
+      responses:
+        '200':
+          description: Recognition decision response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecognitionResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/observations:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    post:
+      x-source: "src/face_inference/server.py:210"
+      summary: Save labeled capture observations without gallery update
+      description: |
+        Saves labeled validation observations from an independent visit.
+        Does not adapt or update the existing gallery reference.
+      operationId: observeFace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ObservationRequest'
+      responses:
+        '200':
+          description: Observation saved response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ObservationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/people/{person}/face:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+      - name: person
+        in: path
+        required: true
+        description: Person identifier whose face data should be erased
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    delete:
+      x-source: "src/face_inference/server.py:213"
+      summary: Delete person face biometric reference and observations
+      description: |
+        Physically erases encrypted face reference template and capture observations
+        for the specified person, resetting their state to NOT_ENROLLED while preserving
+        non-biometric metadata and audit history.
+      operationId: deletePersonFace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DeleteFaceRequest'
+      responses:
+        '200':
+          description: Biometric data deleted response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteFaceResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '409':
+          $ref: '#/components/responses/ConflictError'
+        '411':
+          $ref: '#/components/responses/LengthRequiredError'
+        '413':
+          $ref: '#/components/responses/PayloadTooLargeError'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailableError'
+
+  /api/v1/collections/{id}/events:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: Target collection identifier
+        schema:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+    get:
+      x-source: "src/face_inference/server.py:206"
+      summary: List recent collection events
+      description: Returns the last 100 audit event records for the collection. Does not expose biometric vectors or images.
+      operationId: listEvents
+      responses:
+        '200':
+          description: List of audit events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListEventsResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '429':
+          $ref: '#/components/responses/TooManyRequestsError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Private API bearer token configured on the server.
+
+  responses:
+    BadRequestError:
+      description: Invalid request syntax, body, ID format, or field values (400)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnauthorizedError:
+      description: Missing or invalid API bearer token (401)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ForbiddenError:
+      description: Origin not allowed or collection outside approved scope (403)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    NotFoundError:
+      description: Requested route, collection, or person not found (404)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ConflictError:
+      description: Idempotency conflict, collection already exists/full, or capture reused (409)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    LengthRequiredError:
+      description: Content-Length header is missing or invalid (411)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    PayloadTooLargeError:
+      description: Request body exceeds maximum size limit of 128 KiB (413)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    UnsupportedMediaTypeError:
+      description: Content-Type must be application/json (415)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    TooManyRequestsError:
+      description: Rate limit exceeded (120 requests/min per IP) (429)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    InternalServerError:
+      description: Internal server or configuration error (500)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+    ServiceUnavailableError:
+      description: SQLite storage is temporarily busy or locked; retry with same request key (503)
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorEnvelope'
+
+  schemas:
+    ErrorEnvelope:
+      type: object
+      description: Standard server error response envelope returned by Handler.respond()
+      required:
+        - error
+        - error_msg
+        - message
+        - code
+        - data
+      properties:
+        error:
+          type: integer
+          enum: [1]
+          description: Always 1 for error responses
+        error_msg:
+          type: string
+          description: Human-readable error description
+        message:
+          type: string
+          description: Duplicate of error description for client compatibility
+        code:
+          type: string
+          description: Stable machine-readable error code (e.g., AUTH_REQUIRED, BODY_LIMIT, RATE_LIMIT)
+        data:
+          type: object
+          description: Empty object for error responses
+
+    SuccessEnvelope:
+      type: object
+      required:
+        - error
+        - error_msg
+        - message
+        - code
+        - data
+      properties:
+        error:
+          type: integer
+          enum: [0]
+          description: Always 0 for successful responses
+        error_msg:
+          type: string
+          enum: [""]
+          description: Empty string on success
+        message:
+          type: string
+          description: Optional status message
+        code:
+          type: string
+          enum: [""]
+          description: Empty string on success
+        data:
+          description: Payload data (object or array)
+
+    FaceVector:
+      type: array
+      description: Finite 128-dimensional L2 unit-norm embedding vector
+      items:
+        type: number
+      minItems: 128
+      maxItems: 128
+
+    ConfigResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - contract
+                - mode
+                - approved
+                - duplicate_threshold
+                - recognition_threshold
+                - liveness_validated
+                - maximum_people
+              properties:
+                contract:
+                  type: object
+                  description: Model and preprocessing version parameters
+                mode:
+                  type: string
+                  enum: [COLLECT, EVALUATION, APPROVED]
+                  description: Service policy mode
+                approved:
+                  type: boolean
+                  description: Whether policy has verified held-out benchmark approval
+                duplicate_threshold:
+                  type: number
+                  description: Minimum cosine similarity threshold to reject duplicate faces
+                recognition_threshold:
+                  type: number
+                  description: Minimum cosine similarity threshold for unique identification
+                liveness_validated:
+                  type: boolean
+                  enum: [false]
+                  description: Explicit flag stating liveness is not provided by this service
+                maximum_people:
+                  type: integer
+                  description: Maximum allowed people per collection
+
+    CollectionDTO:
+      type: object
+      required:
+        - id
+        - name
+        - created_at
+      properties:
+        id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+        name:
+          type: string
+        created_at:
+          type: number
+          description: Unix timestamp in seconds
+
+    ListCollectionsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/CollectionDTO'
+
+    CreateCollectionRequest:
+      type: object
+      required:
+        - id
+        - name
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+          description: Unique collection identifier
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+          description: Human-readable collection name
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+          description: Unique client key binding request payload for idempotent execution
+
+    CreateCollectionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - collection_id
+              properties:
+                state:
+                  type: string
+                  enum: [CREATED]
+                collection_id:
+                  type: string
+
+    PersonDTO:
+      type: object
+      required:
+        - id
+        - name
+        - metadata
+        - state
+        - expires_at
+      properties:
+        id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+        name:
+          type: string
+        metadata:
+          type: object
+          description: Arbitrary non-biometric person metadata (max 8 KiB)
+        state:
+          type: string
+          enum: [NOT_ENROLLED, PENDING, ACTIVE, REJECTED_DUPLICATE, RECAPTURE_REQUIRED]
+        expires_at:
+          type: number
+          nullable: true
+          description: Biometric data expiry Unix timestamp, or null if not enrolled
+
+    ListPeopleResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PersonDTO'
+
+    UpsertPersonRequest:
+      type: object
+      required:
+        - id
+        - name
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+          description: Unique person identifier within this collection
+        name:
+          type: string
+          minLength: 1
+          maxLength: 160
+          description: Person full name
+        metadata:
+          type: object
+          description: Optional JSON metadata object (maximum 8 KiB serialized)
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+          description: Client idempotency key
+
+    UpsertPersonResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - person_id
+                - person
+              properties:
+                state:
+                  type: string
+                  enum: [CREATED, UPDATED]
+                person_id:
+                  type: string
+                person:
+                  $ref: '#/components/schemas/PersonDTO'
+
+    EnrollmentRequest:
+      type: object
+      required:
+        - person_id
+        - consent
+        - capture_session
+        - observations
+        - template
+        - model_version
+        - preprocessing_version
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        person_id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+        consent:
+          type: boolean
+          enum: [true]
+          description: Explicit subject consent must be true
+        capture_session:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 16
+          maxLength: 80
+          description: Unique single-use capture session UUID
+        observations:
+          type: array
+          description: 3 to 5 finite 128-dimensional unit face vectors
+          items:
+            $ref: '#/components/schemas/FaceVector'
+          minItems: 3
+          maxItems: 5
+        template:
+          $ref: '#/components/schemas/FaceVector'
+          description: Medoid/MAD aggregate unit vector computed from observations
+        model_version:
+          type: string
+          description: Expected model version string matching server contract
+        preprocessing_version:
+          type: string
+          description: Expected preprocessing version string matching server contract
+        device:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Optional client camera/device description
+        lighting:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Optional client lighting environment description
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+
+    EnrollmentResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - person_id
+                - verified
+              properties:
+                state:
+                  type: string
+                  enum: [PENDING, ACTIVE, REJECTED_DUPLICATE]
+                person_id:
+                  type: string
+                reference_preserved:
+                  type: boolean
+                  description: True if an existing active reference was retained
+                previous_reference_preserved:
+                  type: boolean
+                  description: True if duplicate attempt preserved previous active reference
+                duplicate_person_id:
+                  type: string
+                  nullable: true
+                  description: Conflicting person ID if a single duplicate was detected
+                ambiguous:
+                  type: boolean
+                  description: True if multiple conflicting reference candidates exist
+                verified:
+                  type: boolean
+                  description: True only when operating under approved policy
+                evaluation_only:
+                  type: boolean
+                  description: True when running under evaluation policy
+
+    RecognitionRequest:
+      type: object
+      required:
+        - capture_session
+        - observations
+        - model_version
+        - preprocessing_version
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        capture_session:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 16
+          maxLength: 80
+          description: Unique single-use capture session UUID
+        observations:
+          type: array
+          description: 3 to 5 finite 128-dimensional unit face vectors
+          items:
+            $ref: '#/components/schemas/FaceVector'
+          minItems: 3
+          maxItems: 5
+        model_version:
+          type: string
+        preprocessing_version:
+          type: string
+        eligible_ids:
+          type: array
+          description: Optional subset of collection person IDs to evaluate against
+          items:
+            type: string
+            pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+
+    RecognitionResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - person_id
+                - person_name
+                - reason
+                - verified
+                - business_action
+              properties:
+                state:
+                  type: string
+                  enum: [MATCHED, SUGGESTED, UNKNOWN, COLLECTION_ONLY]
+                  description: |
+                    MATCHED (approved policy only), SUGGESTED (evaluation mode),
+                    UNKNOWN (no candidate met threshold or vote was ambiguous),
+                    COLLECTION_ONLY (COLLECT mode).
+                person_id:
+                  type: string
+                  nullable: true
+                person_name:
+                  type: string
+                  nullable: true
+                reason:
+                  type: string
+                  nullable: true
+                  description: Diagnostic reason explaining recognition outcome
+                verified:
+                  type: boolean
+                  description: True only if matched under approved policy
+                business_action:
+                  type: boolean
+                  enum: [false]
+                  description: Server never takes automated business actions; always false
+                observation_count:
+                  type: integer
+                  description: Number of observations submitted
+                model_version:
+                  type: string
+                preprocessing_version:
+                  type: string
+
+    ObservationRequest:
+      type: object
+      required:
+        - person_id
+        - consent
+        - capture_session
+        - observations
+        - template
+        - model_version
+        - preprocessing_version
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        person_id:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 1
+          maxLength: 80
+        consent:
+          type: boolean
+          enum: [true]
+        capture_session:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 16
+          maxLength: 80
+        observations:
+          type: array
+          items:
+            $ref: '#/components/schemas/FaceVector'
+          minItems: 3
+          maxItems: 5
+        template:
+          $ref: '#/components/schemas/FaceVector'
+        model_version:
+          type: string
+        preprocessing_version:
+          type: string
+        device:
+          type: string
+          minLength: 1
+          maxLength: 100
+        lighting:
+          type: string
+          minLength: 1
+          maxLength: 100
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+
+    ObservationResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - person_id
+                - split
+              properties:
+                state:
+                  type: string
+                  enum: [OBSERVATION_SAVED]
+                person_id:
+                  type: string
+                split:
+                  type: string
+                  enum: [calibration, validation]
+
+    DeleteFaceRequest:
+      type: object
+      required:
+        - idempotency_key
+      additionalProperties: false
+      properties:
+        idempotency_key:
+          type: string
+          pattern: '^[A-Za-z0-9][A-Za-z0-9_.:-]*$'
+          minLength: 8
+          maxLength: 128
+          description: Client idempotency key
+
+    DeleteFaceResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: object
+              required:
+                - state
+                - person_id
+              properties:
+                state:
+                  type: string
+                  enum: [DELETED]
+                person_id:
+                  type: string
+
+    EventDTO:
+      type: object
+      required:
+        - id
+        - person_id
+        - event
+        - state
+        - created_at
+      properties:
+        id:
+          type: integer
+          description: Auto-incrementing event sequence ID
+        person_id:
+          type: string
+          nullable: true
+          description: Subject person ID if applicable
+        event:
+          type: string
+          description: Mutation action (collection, person, enroll, observe, recognize, delete)
+        state:
+          type: string
+          description: Outcome state of the event
+        created_at:
+          type: number
+          description: Event timestamp in Unix seconds
+
+    ListEventsResponse:
+      allOf:
+        - $ref: '#/components/schemas/SuccessEnvelope'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/EventDTO'

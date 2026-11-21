@@ -1,0 +1,67 @@
+name: Bug Report
+description: Report a reproducible bug or defect in face-inference
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Privacy & Security Notice
+        > **DO NOT attach real face images, personal photos, or identifiable biometric data.**
+        > **DO NOT post API tokens, private encryption keys, or passwords.**
+        > Use synthetic vectors, sanitized logs, or references to fixtures in `datasets/`.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is.
+      placeholder: Describe what happened and why it is incorrect.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to Reproduce
+      description: Minimal steps to reproduce the behavior (ensure no real biometric data or credentials are included).
+      placeholder: |
+        1. Start server with `face-inference serve`
+        2. Send request to ...
+        3. See error response ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Behavior
+      description: A concise description of what you expected to happen.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, Node.js version, browser, face-inference version.
+      placeholder: macOS 14.5, Python 3.12, Chrome 125, face-inference 0.1.0
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant Logs / Tracebacks
+      description: Copy relevant console output or tracebacks here. Ensure all sensitive tokens, paths, or keys are redacted.
+      render: shell
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Confirmation
+      options:
+        - label: I confirm that this report contains NO real face images, photos, or raw biometric vectors.
+          required: true
+        - label: I confirm that all API tokens, encryption keys, and private secrets have been redacted.
+          required: true
