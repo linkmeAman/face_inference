@@ -124,7 +124,8 @@ def test_sec_3_component_never_imports_code_from_model_base_url():
     component must always use its shipped capture implementation. A dynamic `import(...)` in the
     element source is the mechanism that previously loaded remote code, so none may exist.
     """
-    source = (Path(__file__).resolve().parents[1] / "packages/face-capture/src/face-capture.js").read_text()
+    component = Path(__file__).resolve().parents[1] / "packages/face-capture/src/face-capture.js"
+    source = component.read_text()
     assert not re.search(r"\bimport\s*\(", source), "dynamic import() found in face-capture.js"
 
 
