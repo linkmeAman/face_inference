@@ -1,0 +1,170 @@
+name: Release
+
+'on':
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: verify
+    runs-on: ubuntu-latest
+    outputs:
+      npm_publish: ${{ steps.check-version.outputs.npm_publish }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.12"
+
+      - name: Build package distributions
+        run: uv build
+
+      - name: Verify tag matches package version
+        id: check-version
+        run: |
+          python -c '
+          import os, json, pathlib, sys
+          sys.path.insert(0, "src")
+          tag = os.environ.get("GITHUB_REF_NAME", "")
+          version = tag.lstrip("v")
+
+          # 1. Check face_inference.__version__
+          import face_inference
+          py_ver = face_inference.__version__
+          if py_ver != version:
+              raise SystemExit(f"Tag version {version} does not match face_inference.__version__ {py_ver}")
+          print(f"Tag {tag} matches face_inference.__version__ ({py_ver})")
+
+          # 2. Check npm package.json version
+          pkg_file = pathlib.Path("packages/face-capture/package.json")
+          npm_match = False
+          if pkg_file.is_file():
+              pkg_data = json.loads(pkg_file.read_text(encoding="utf-8"))
+              npm_ver = pkg_data.get("version", "")
+              npm_match = (npm_ver == version)
+              print(f"npm package version ({npm_ver}) matches tag version ({version}): {npm_match}")
+          else:
+              print("packages/face-capture/package.json not found")
+
+          output_file = os.environ.get("GITHUB_OUTPUT")
+          if output_file:
+              with open(output_file, "a", encoding="utf-8") as f:
+                  f.write(f"npm_publish={str(npm_match).lower()}\n")
+          '
+
+      - name: Install test dependencies
+        run: |
+          uv venv
+          uv pip install -e . pytest pytest-xdist ruff
+
+      - name: Run lint and tests
+        run: |
+          uv run --no-sync ruff check src tests
+          uv run --no-sync pytest -q
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: dist
+          path: dist/
+
+  pypi:
+    name: pypi
+    needs: verify
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Download build distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+
+  npm:
+    name: npm
+    needs: verify
+    if: needs.verify.outputs.npm_publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Build and test package
+        working-directory: packages/face-capture
+        run: |
+          npm ci
+          npm test
+          npm run build --if-present
+
+      - name: Publish to npm with provenance
+        working-directory: packages/face-capture
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
+
+  github-release:
+    name: github-release
+    needs: [verify, pypi]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Download build distributions
+        uses: actions/download-artifact@v8
+        with:
+          name: dist
+          path: dist/
+
+      - name: Create GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          python -c '
+          import os, re, pathlib
+          tag = os.environ.get("TAG", "")
+          version = tag.lstrip("v")
+          changelog_path = pathlib.Path("CHANGELOG.md")
+          notes = ""
+          if changelog_path.is_file():
+              content = changelog_path.read_text(encoding="utf-8")
+              pattern = rf"^##\s+\[?v?{re.escape(version)}\]?(?:\s*-\s*[^\n]+)?\s*$(.*?)(?=^##\s+|\Z)"
+              match = re.search(pattern, content, re.MULTILINE | re.DOTALL)
+              if match:
+                  notes = match.group(1).strip()
+          if notes:
+              pathlib.Path("/tmp/release_notes.md").write_text(notes + "\n", encoding="utf-8")
+              print(f"Extracted release notes for {tag}")
+          else:
+              print(f"No explicit CHANGELOG section for {tag}; will fallback to generated notes")
+          '
+          if [ -s /tmp/release_notes.md ]; then
+            gh release create "$TAG" dist/* --title "$TAG" --notes-file /tmp/release_notes.md
+          else
+            gh release create "$TAG" dist/* --title "$TAG" --generate-notes
+          fi

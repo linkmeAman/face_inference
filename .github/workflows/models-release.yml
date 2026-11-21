@@ -1,0 +1,46 @@
+name: Models Release
+
+'on':
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag for model assets'
+        required: true
+        default: 'models-v1'
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  models-release:
+    name: package and publish models
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+
+      - name: Set up Python
+        uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Package model and runtime assets
+        run: |
+          python tools/package_assets.py
+
+      - name: Publish assets to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.event.inputs.tag }}
+        run: |
+          echo "Publishing assets to release tag: $TAG"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG exists. Uploading assets to existing release..."
+            gh release upload "$TAG" dist-assets/* --clobber
+          else
+            echo "Creating release $TAG and uploading assets..."
+            gh release create "$TAG" dist-assets/* \
+              --title "Model Assets $TAG" \
+              --notes "Model and WASM runtime assets for face_inference ($TAG). Packaged by tools/package_assets.py."
+          fi
