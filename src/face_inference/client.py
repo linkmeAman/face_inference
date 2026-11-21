@@ -21,20 +21,55 @@ class HealthResponse(TypedDict, total=False):
     storage: str
 
 
-class ConfigResponse(TypedDict, total=False):
-    mode: str
+class ModelContract(TypedDict, total=False):
     model_version: str
     preprocessing_version: str
-    dimensions: int
-    provisional: bool
-    policy_ready: bool
-    allowed_origins: list[str]
+    dimension: int
+    detector_size: int
+    input_size: int
+    input_order: str
+    input_scale: float
+    input_mean: float
+    detector_score: float
+    nms_iou: float
+    sample_interval_ms: int
+    batch_size: int
+    minimum_observations: int
+    capture_timeout_ms: int
+    minimum_face_pixels: int
+    brightness_min: int
+    brightness_max: int
+    blur_variance_min: int
+    clipped_fraction_max: float
+    assets_base: str
+    recognizer_file: str
+    detector_file: str
+    recognizer_source_sha256: str
+    detector_source_sha256: str
+
+
+class ConfigResponse(TypedDict, total=False):
+    contract: ModelContract | dict[str, Any]
+    mode: str
+    approved: bool
+    duplicate_threshold: float
+    recognition_threshold: float
+    liveness_validated: bool
+    maximum_people: int
 
 
 class Collection(TypedDict, total=False):
     id: str
     name: str
-    created_at: str
+    created_at: float
+
+
+class CreateCollectionResult(TypedDict, total=False):
+    state: str
+    collection_id: str
+
+
+CollectionResult = CreateCollectionResult
 
 
 class Person(TypedDict, total=False):
@@ -75,11 +110,10 @@ class DeleteResult(TypedDict, total=False):
 
 class Event(TypedDict, total=False):
     id: int
-    collection_id: str
     person_id: str | None
-    event_type: str
-    created_at: str
-    metadata: dict[str, Any]
+    event: str
+    state: str
+    created_at: float
 
 
 class FaceError(Exception):
@@ -312,7 +346,7 @@ class FaceClient:
         name: str,
         *,
         idempotency_key: str | None = None,
-    ) -> Collection:
+    ) -> CreateCollectionResult:
         """Create a new collection (POST /api/v1/collections)."""
         payload: dict[str, Any] = {"id": id, "name": name}
         if idempotency_key:

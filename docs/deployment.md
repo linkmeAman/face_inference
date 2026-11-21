@@ -18,7 +18,7 @@ In production:
 - Ensure the proxy passes the `X-Forwarded-For`, `Host`, and `X-Forwarded-Proto` headers.
 
 > [!NOTE]
-> **Trusted-proxy support**: Client IP resolution for rate limiting is handled by `face_inference.ratelimit.client_ip`. The server traverses the `X-Forwarded-For` header right-to-left, validating each proxy against configured trusted proxy networks and extracting the real untrusted client IP.
+> **Trusted-proxy support**: Client IP resolution for rate limiting is handled by `face_inference.ratelimit.client_ip`. The server traverses the `X-Forwarded-For` header right-to-left, validating each proxy against `trusted_proxies` (or the comma-separated `FACE_INFERENCE_TRUSTED_PROXIES` environment override) and extracting the real untrusted client IP.
 
 ### Caddy Configuration
 

@@ -75,12 +75,28 @@ class StubHandler(BaseHTTPRequestHandler):
                     "code": "",
                     "error_msg": "",
                     "message": "",
-                    "data": {"mode": "EVALUATION", "model_version": "sface-v1"},
+                    "data": {
+                        "mode": "EVALUATION",
+                        "contract": {"model_version": "sface-v1", "dimension": 128},
+                        "approved": True,
+                        "duplicate_threshold": 0.85,
+                        "recognition_threshold": 0.85,
+                        "liveness_validated": False,
+                        "maximum_people": 1000,
+                    },
                 },
             )
             return
         if self.path == "/api/v1/collections":
-            self.send_json(200, {"error": 0, "data": [{"id": "col1", "name": "Collection 1"}]})
+            self.send_json(
+                200,
+                {
+                    "error": 0,
+                    "data": [
+                        {"id": "col1", "name": "Collection 1", "created_at": 1700000000.0}
+                    ],
+                },
+            )
             return
         if self.path == "/api/v1/collections/col1/people":
             self.send_json(
@@ -89,7 +105,21 @@ class StubHandler(BaseHTTPRequestHandler):
             )
             return
         if self.path == "/api/v1/collections/col1/events":
-            self.send_json(200, {"error": 0, "data": [{"id": 1, "event_type": "ENROLL"}]})
+            self.send_json(
+                200,
+                {
+                    "error": 0,
+                    "data": [
+                        {
+                            "id": 1,
+                            "person_id": None,
+                            "event": "enroll",
+                            "state": "PENDING",
+                            "created_at": 1700000000.0,
+                        }
+                    ],
+                },
+            )
             return
         if self.path == "/transient-get":
             self.server.transient_get_count += 1
@@ -162,7 +192,7 @@ class StubHandler(BaseHTTPRequestHandler):
         if self.path == "/api/v1/collections":
             self.send_json(
                 200,
-                {"error": 0, "data": {"id": body.get("id"), "name": body.get("name")}},
+                {"error": 0, "data": {"state": "CREATED", "collection_id": body.get("id")}},
             )
             return
         if self.path == "/api/v1/collections/col1/people":
@@ -279,6 +309,7 @@ class ClientTests(unittest.TestCase):
     def test_config_endpoint(self):
         result = self.client.get_config()
         self.assertEqual(result.get("mode"), "EVALUATION")
+        self.assertEqual(result.get("contract", {}).get("model_version"), "sface-v1")
         self.assertEqual(self.client.config(), result)
 
     def test_collections_crud(self):
@@ -287,8 +318,8 @@ class ClientTests(unittest.TestCase):
         self.assertEqual(cols[0]["id"], "col1")
 
         created = self.client.create_collection("col2", "Collection 2")
-        self.assertEqual(created["id"], "col2")
-        self.assertEqual(created["name"], "Collection 2")
+        self.assertEqual(created["state"], "CREATED")
+        self.assertEqual(created["collection_id"], "col2")
         last_req = self.stub_server.requests_log[-1]
         self.assertIn("idempotency_key", last_req["body"])
 
@@ -352,7 +383,8 @@ class ClientTests(unittest.TestCase):
 
         events = self.client.list_events("col1")
         self.assertEqual(len(events), 1)
-        self.assertEqual(events[0]["event_type"], "ENROLL")
+        self.assertEqual(events[0]["event"], "enroll")
+        self.assertEqual(events[0]["state"], "PENDING")
 
     def test_error_mapping_client_error(self):
         with self.assertRaises(FaceApiError) as cm:

@@ -90,7 +90,7 @@ export function mapCameraError(error = {}) {
   const name = error.name || '';
   const message = error.message || '';
 
-  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || /permission|denied/i.test(message)) {
+  if (name === 'NotAllowedError' || name === 'PermissionDeniedError' || /permission|denied|allow camera/i.test(message)) {
     return {
       code: 'CAMERA_DENIED',
       message: 'Camera access denied. Please allow camera permissions and retry.',

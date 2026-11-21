@@ -136,7 +136,7 @@ def test_cli_reports_resolved_home(
 
 @pytest.fixture(autouse=True)
 def clean_environment(monkeypatch):
-    for name in ('HOST', 'PORT', 'ALLOWED_ORIGINS'):
+    for name in ('HOST', 'PORT', 'ALLOWED_ORIGINS', 'RATE_LIMIT', 'TRUSTED_PROXIES'):
         monkeypatch.delenv('FACE_INFERENCE_' + name, raising=False)
 
 
@@ -327,3 +327,50 @@ def test_concurrent_session_secret_migration(config_file):
         secrets = list(executor.map(lambda _: load(), range(12)))
     assert len(set(secrets)) == 1
     assert secrets[0] == json.loads(config_file.read_text())['session_secret']
+
+
+def test_rate_settings_defaults_and_environment(config_file, monkeypatch):
+    config = load_config(config_file)
+    assert (config['rate_limit_per_minute'], config['trusted_proxies']) == (120, [])
+    monkeypatch.setenv('FACE_INFERENCE_RATE_LIMIT', '7')
+    monkeypatch.setenv('FACE_INFERENCE_TRUSTED_PROXIES', ' 127.0.0.1, 10.0.0.0/8, ,::1 ')
+    config = load_config(config_file)
+    assert config['rate_limit_per_minute'] == 7
+    assert config['trusted_proxies'] == ['127.0.0.1', '10.0.0.0/8', '::1']
+
+
+@pytest.mark.parametrize('key,value', [
+    ('rate_limit_per_minute', 0), ('rate_limit_per_minute', 100001),
+    ('rate_limit_per_minute', True), ('rate_limit_per_minute', '12'),
+    ('trusted_proxies', '127.0.0.1'), ('trusted_proxies', ['bad']),
+    ('trusted_proxies', [42]),
+])
+def test_invalid_rate_settings(config_file, key, value):
+    stored = json.loads(config_file.read_text())
+    stored[key] = value
+    config_file.write_text(json.dumps(stored))
+    with pytest.raises(RuntimeError, match=key):
+        load_config(config_file)
+
+
+@pytest.mark.parametrize('name,value', [
+    ('RATE_LIMIT', 'nope'), ('RATE_LIMIT', '0'), ('RATE_LIMIT', '100001'),
+    ('TRUSTED_PROXIES', '10.0.0.0/99'),
+])
+def test_invalid_rate_environment(config_file, monkeypatch, name, value):
+    monkeypatch.setenv('FACE_INFERENCE_' + name, value)
+    with pytest.raises(RuntimeError):
+        load_config(config_file)
+
+
+@pytest.mark.parametrize('name,value', [
+    ('RATE_LIMIT', 'bad'), ('TRUSTED_PROXIES', 'bad'),
+])
+def test_rate_environment_cli_error(config_file, monkeypatch, capsys, name, value):
+    monkeypatch.setenv('FACE_INFERENCE_' + name, value)
+    monkeypatch.setattr(sys, 'argv', ['face-inference', 'serve', '--config', str(config_file)])
+    assert cli.main() == 1
+    output = capsys.readouterr()
+    assert output.out == ''
+    assert len(output.err.splitlines()) == 1
+    assert 'Traceback' not in output.err

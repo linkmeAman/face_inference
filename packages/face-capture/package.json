@@ -7,23 +7,32 @@
   "module": "./dist/face-capture.js",
   "types": "./index.d.ts",
   "exports": {
-    ".": "./src/face-capture.js",
+    ".": {
+      "types": "./index.d.ts",
+      "import": "./dist/face-capture.js",
+      "default": "./dist/face-capture.js"
+    },
     "./dist": "./dist/face-capture.js",
-    "./config": "./src/config.js"
+    "./config": {
+      "types": "./index.d.ts",
+      "import": "./dist/config.js",
+      "default": "./dist/config.js"
+    }
   },
   "files": [
-    "src",
-    "dist",
+    "dist/**",
     "index.d.ts",
     "README.md"
   ],
   "sideEffects": [
-    "./src/face-capture.js",
-    "./dist/face-capture.js"
+    "./dist/face-capture.js",
+    "./src/face-capture.js"
   ],
   "scripts": {
     "test": "node --test test/*.test.mjs",
-    "build": "node scripts/sync.mjs"
+    "test:e2e": "playwright test test/e2e/enroll.spec.mjs",
+    "build": "node scripts/sync.mjs",
+    "prepack": "npm run build"
   },
   "keywords": [
     "face-capture",

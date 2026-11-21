@@ -50,6 +50,18 @@
     autostart>
   </face-capture>
 
+  <script>
+    // Read optional overrides from URL query parameters (e.g. ?api-url=...&token=...&autostart=false)
+    const params = new URLSearchParams(window.location.search);
+    const captureEl = document.querySelector('face-capture');
+    if (captureEl) {
+      if (params.get('autostart') === 'false') captureEl.removeAttribute('autostart');
+      for (const attr of ['api-url', 'token', 'collection', 'mode', 'person-id', 'model-base-url']) {
+        if (params.has(attr)) captureEl.setAttribute(attr, params.get(attr));
+      }
+    }
+  </script>
+
   <div id="log">Waiting for component events...</div>
 
   <script>
