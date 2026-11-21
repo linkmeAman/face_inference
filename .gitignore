@@ -14,3 +14,6 @@ playwright-report/
 .venv*/
 .face-inference/
 dist-assets/
+
+# Web component build outputs
+packages/face-capture/dist/
