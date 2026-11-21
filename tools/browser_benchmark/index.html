@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Inference — Browser Performance Benchmark</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --surface: #1e293b;
+            --surface-accent: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #475569;
+            --success: #4ade80;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.75rem;
+            color: var(--primary);
+        }
+
+        header p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.25rem;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.5rem;
+        }
+
+        .privacy-box {
+            background-color: rgba(56, 189, 248, 0.08);
+            border-left: 4px solid var(--primary);
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 1rem;
+        }
+
+        .consent-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-weight: 500;
+        }
+
+        .consent-row input[type="checkbox"] {
+            width: 1.1rem;
+            height: 1.1rem;
+            cursor: pointer;
+        }
+
+        .controls-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .input-group input {
+            background: var(--surface-accent);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.4rem 0.6rem;
+            border-radius: 4px;
+            width: 80px;
+        }
+
+        button.primary-btn {
+            background-color: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        button.primary-btn:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        button.primary-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.secondary-btn {
+            background-color: var(--surface-accent);
+            color: var(--text);
+            border: 1px solid var(--border);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        button.secondary-btn:hover {
+            background-color: var(--border);
+        }
+
+        #status {
+            margin-top: 1rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            background: var(--surface-accent);
+        }
+        .status-running { color: var(--warning); }
+        .status-complete { color: var(--success); }
+        .status-error { color: var(--danger); }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .metric-card {
+            background: var(--surface-accent);
+            border-radius: 6px;
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .metric-value {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        pre {
+            background: #090d16;
+            padding: 1rem;
+            border-radius: 6px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            border: 1px solid var(--border);
+            max-height: 400px;
+        }
+
+        .action-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Face Inference — Browser Performance Benchmark</h1>
+            <p>Local, opt-in harness to measure cold/warm startup latencies, ONNX model and WASM transfer vs decoded sizes, and capture/inference latency (p50/p95) using browser Performance APIs.</p>
+        </header>
+
+        <section class="card">
+            <h2>Operator Consent & Execution Policy</h2>
+            <div class="privacy-box">
+                <strong>Zero Telemetry & Redaction Policy:</strong> This benchmark runs strictly inside your local browser session. No facial photos, biometric embedding vectors, auth tokens, camera device IDs, or hardware serial numbers are collected, stored, or transmitted. No external uploads are performed.
+            </div>
+
+            <div class="consent-row">
+                <input type="checkbox" id="consent">
+                <label for="consent">I am a consented operator and consent to running this local browser benchmark on this device.</label>
+            </div>
+
+            <div class="controls-row">
+                <div class="input-group">
+                    <label for="iterations">Iterations:</label>
+                    <input type="number" id="iterations" value="10" min="1" max="100">
+                </div>
+                <button id="start-btn" class="primary-btn" disabled>Run Benchmark</button>
+            </div>
+
+            <div id="status">Awaiting operator consent...</div>
+        </section>
+
+        <section id="results-container" class="card" hidden>
+            <h2>Benchmark Results</h2>
+
+            <div class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-label">Platform</div>
+                    <div id="res-browser" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Cache State</div>
+                    <div id="res-cache" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Cold Startup</div>
+                    <div id="res-cold" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Warm Startup</div>
+                    <div id="res-warm" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Sample Count</div>
+                    <div id="res-samples" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Inference p50</div>
+                    <div id="res-p50" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Inference p95</div>
+                    <div id="res-p95" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Network Transfer</div>
+                    <div id="res-transfer" class="metric-value">-</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-label">Decoded Memory</div>
+                    <div id="res-decoded" class="metric-value">-</div>
+                </div>
+            </div>
+
+            <h3>Redacted Benchmark Report (JSON)</h3>
+            <pre><code id="report-json">{}</code></pre>
+            <div class="action-bar">
+                <button id="copy-btn" class="secondary-btn">Copy JSON</button>
+                <button id="download-btn" class="secondary-btn">Download JSON</button>
+            </div>
+        </section>
+    </div>
+
+    <script type="module">
+        import { initBenchmarkUI } from './harness.mjs';
+        initBenchmarkUI(document);
+    </script>
+</body>
+</html>
