@@ -4,162 +4,41 @@ Validates Python and npm package metadata, semver conformity, tag consistency,
 least-privilege CI workflow definitions, and supply-chain auditing documentation.
 """
 
+from __future__ import annotations
+
 import json
-import os
-import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
 
 import pytest
 import yaml
 
-try:
-    import tomllib
-except ModuleNotFoundError:  # pragma: no cover
-    import tomli as tomllib  # type: ignore[no-redef]
+REPO_ROOT = Path(__file__).resolve().parents[1]
+TOOLS_DIR = REPO_ROOT / "tools"
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
 
-SEMVER_PATTERN = re.compile(
-    r"^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)"
-    r"(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)"
-    r"(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?"
-    r"(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$"
+# ruff: noqa: E402
+from verify_release_metadata import (
+    SEMVER_PATTERN,
+    extract_python_version_from_init,
+    verify_release_metadata,
 )
-
-
-def extract_python_version_from_init(init_path: Path) -> str:
-    """Extract __version__ string from a Python __init__.py file."""
-    if not init_path.is_file():
-        raise FileNotFoundError(f"Python init file not found: {init_path}")
-    content = init_path.read_text(encoding="utf-8")
-    match = re.search(r'^__version__\s*=\s*["\']([^"\']+)["\']', content, re.MULTILINE)
-    if not match:
-        raise ValueError(f"No __version__ definition found in {init_path}")
-    version = match.group(1).strip()
-    if not SEMVER_PATTERN.match(version):
-        raise ValueError(f"Invalid SemVer in __version__ ({version!r}) at {init_path}")
-    return version
-
-
-def verify_release_metadata(
-    repo_root: Path,
-    tag: str | None = None,
-    output_file: Path | str | None = None,
-) -> dict[str, Any]:
-    """Verify package metadata, tag consistency, and output build flags.
-
-    Checks:
-    1. Python package metadata in pyproject.toml and src/face_inference/__init__.py.
-    2. npm package metadata in packages/face-capture/package.json if present.
-    3. Tag consistency against Python package version (when tag is present).
-    4. Conditional npm publication flag based on whether tag matches npm version.
-    5. Outputs build variables to GitHub Actions output file if specified.
-    """
-    resolved_root = repo_root.resolve()
-
-    # 1. Validate pyproject.toml
-    pyproject_path = resolved_root / "pyproject.toml"
-    if not pyproject_path.is_file():
-        raise FileNotFoundError(f"pyproject.toml not found at {pyproject_path}")
-    try:
-        pyproject_data = tomllib.loads(pyproject_path.read_text(encoding="utf-8"))
-    except Exception as err:
-        raise ValueError(f"Failed to parse pyproject.toml: {err}") from err
-
-    project_section = pyproject_data.get("project", {})
-    if project_section.get("name") != "face-inference":
-        raise ValueError(
-            f"Expected project name 'face-inference', got {project_section.get('name')!r}"
-        )
-    dynamic_fields = project_section.get("dynamic", [])
-    if "version" not in dynamic_fields:
-        raise ValueError("pyproject.toml must declare dynamic = ['version']")
-
-    hatch_version_path = (
-        pyproject_data.get("tool", {}).get("hatch", {}).get("version", {}).get("path")
-    )
-    if hatch_version_path != "src/face_inference/__init__.py":
-        raise ValueError(
-            f"Expected [tool.hatch.version].path = 'src/face_inference/__init__.py', "
-            f"got {hatch_version_path!r}"
-        )
-
-    # 2. Validate Python __init__.py version
-    init_path = resolved_root / "src" / "face_inference" / "__init__.py"
-    py_ver = extract_python_version_from_init(init_path)
-
-    # 3. Validate npm package.json if present
-    pkg_file = resolved_root / "packages" / "face-capture" / "package.json"
-    npm_ver: str | None = None
-    if pkg_file.is_file():
-        try:
-            pkg_data = json.loads(pkg_file.read_text(encoding="utf-8"))
-        except Exception as err:
-            raise ValueError(f"Failed to parse {pkg_file}: {err}") from err
-
-        if pkg_data.get("name") != "face-capture":
-            raise ValueError(
-                f"Expected npm package name 'face-capture', got {pkg_data.get('name')!r}"
-            )
-        raw_npm_ver = str(pkg_data.get("version", "")).strip()
-        if not raw_npm_ver or not SEMVER_PATTERN.match(raw_npm_ver):
-            raise ValueError(f"Invalid SemVer in npm package.json: {raw_npm_ver!r}")
-        npm_ver = raw_npm_ver
-
-    # 4. Check tag consistency when tag is provided
-    npm_match = False
-    clean_tag_ver: str | None = None
-    if tag:
-        clean_tag = tag.strip()
-        if clean_tag.startswith("refs/tags/"):
-            clean_tag = clean_tag[len("refs/tags/") :]
-        if clean_tag.startswith("v"):
-            clean_tag_ver = clean_tag[1:]
-        else:
-            clean_tag_ver = clean_tag
-
-        if not SEMVER_PATTERN.match(clean_tag_ver):
-            raise ValueError(
-                f"Release tag {tag!r} does not conform to valid SemVer format ('vX.Y.Z')"
-            )
-
-        if py_ver != clean_tag_ver:
-            raise ValueError(
-                f"Tag version {clean_tag_ver!r} does not match "
-                f"face_inference.__version__ {py_ver!r}"
-            )
-
-        npm_match = (npm_ver == clean_tag_ver) if npm_ver is not None else False
-    else:
-        npm_match = (npm_ver == py_ver) if npm_ver is not None else False
-
-    # 5. Write to output file if provided (e.g. GITHUB_OUTPUT)
-    if output_file:
-        out_path = Path(output_file)
-        with out_path.open("a", encoding="utf-8") as f:
-            f.write(f"npm_publish={str(npm_match).lower()}\n")
-            if clean_tag_ver:
-                f.write(f"tag_version={clean_tag_ver}\n")
-            f.write(f"python_version={py_ver}\n")
-            if npm_ver:
-                f.write(f"npm_version={npm_ver}\n")
-
-    return {
-        "python_version": py_ver,
-        "npm_version": npm_ver,
-        "npm_match": npm_match,
-        "tag": tag,
-        "tag_version": clean_tag_ver,
-        "valid": True,
-    }
-
+from verify_release_metadata import (
+    main as tool_main,
+)
 
 # =============================================================================
 # Unit Tests
 # =============================================================================
 
-REPO_ROOT = Path(__file__).resolve().parents[1]
+
+def test_extract_python_version_direct():
+    """Verify extract_python_version_from_init reads version correctly."""
+    init_file = REPO_ROOT / "src" / "face_inference" / "__init__.py"
+    assert extract_python_version_from_init(init_file) == "0.1.0"
+    assert SEMVER_PATTERN.match("0.1.0") is not None
 
 
 def test_verify_current_repo_metadata():
@@ -343,10 +222,11 @@ def test_invalid_pyproject_name(tmp_path: Path):
 
 
 def test_cli_execution():
-    """Verify CLI entrypoint of test_release_metadata works."""
+    """Verify CLI entrypoint of verify_release_metadata works."""
+    tool_path = REPO_ROOT / "tools" / "verify_release_metadata.py"
     cmd = [
         sys.executable,
-        str(Path(__file__).resolve()),
+        str(tool_path),
         "--repo-root",
         str(REPO_ROOT),
         "--tag",
@@ -355,6 +235,45 @@ def test_cli_execution():
     proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
     assert proc.returncode == 0
     assert "Release metadata valid" in proc.stdout
+
+
+def test_cli_execution_isolated_stdlib_only(tmp_path: Path):
+    """Verify tools/verify_release_metadata.py runs under python -I (isolated mode, stdlib only)."""
+    tool_path = REPO_ROOT / "tools" / "verify_release_metadata.py"
+    out_file = tmp_path / "github_output"
+    cmd = [
+        sys.executable,
+        "-I",
+        str(tool_path),
+        "--repo-root",
+        str(REPO_ROOT),
+        "--tag",
+        "v0.1.0",
+        "--github-output",
+        str(out_file),
+    ]
+    proc = subprocess.run(cmd, capture_output=True, text=True, check=False)
+    assert proc.returncode == 0, f"Isolated run failed: {proc.stderr}"
+    assert "Release metadata valid" in proc.stdout
+    assert "npm_publish=true" in out_file.read_text(encoding="utf-8")
+
+    cmd_mismatch = [
+        sys.executable,
+        "-I",
+        str(tool_path),
+        "--repo-root",
+        str(REPO_ROOT),
+        "--tag",
+        "v0.9.9",
+    ]
+    proc_mismatch = subprocess.run(
+        cmd_mismatch, capture_output=True, text=True, check=False
+    )
+    assert proc_mismatch.returncode != 0
+    assert (
+        "Tag version '0.9.9' does not match face_inference.__version__ '0.1.0'"
+        in proc_mismatch.stderr
+    )
 
 
 # =============================================================================
@@ -379,6 +298,15 @@ def test_release_workflow_structure():
     assert "pypi" in jobs
     assert "npm" in jobs
     assert "github-release" in jobs
+
+    verify_steps = jobs["verify"].get("steps", [])
+    verify_step = next(
+        (s for s in verify_steps if "verify_release_metadata.py" in s.get("run", "")),
+        None,
+    )
+    assert verify_step is not None, "Missing verify_release_metadata step in verify job"
+    assert "--tag" in verify_step["run"]
+    assert "--github-output" in verify_step["run"]
 
     npm_job = jobs["npm"]
     assert npm_job.get("needs") == "verify"
@@ -411,6 +339,7 @@ def test_supply_chain_workflow_structure():
     py_run_step = next((s for s in py_steps if "pip-audit" in s.get("run", "")), None)
     assert py_run_step is not None
     assert "pip-audit==2.10.1" in py_run_step["run"]
+    assert "--skip-editable" in py_run_step["run"]
 
 
 def test_synthetic_workflow_structure():
@@ -444,17 +373,4 @@ def test_supply_chain_documentation_coverage():
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser(description="Verify release metadata consistency")
-    parser.add_argument("--repo-root", default=".")
-    parser.add_argument("--tag", default=os.environ.get("GITHUB_REF_NAME", ""))
-    parser.add_argument("--output-file", default=os.environ.get("GITHUB_OUTPUT"))
-    args = parser.parse_args()
-
-    res = verify_release_metadata(
-        Path(args.repo_root),
-        tag=args.tag if args.tag else None,
-        output_file=args.output_file if args.output_file else None,
-    )
-    print(f"Release metadata valid: {res}")
+    sys.exit(tool_main())

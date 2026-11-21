@@ -43,10 +43,10 @@ To run the supply-chain audit locally:
 
 ```bash
 # Audit Python production dependencies
-uv run --with pip-audit==2.10.1 pip-audit
+uv run --with pip-audit==2.10.1 pip-audit --skip-editable
 
 # Audit Python development dependencies
-uv run --with pip-audit==2.10.1 pip-audit --extra dev
+uv run --extra dev --with pip-audit==2.10.1 pip-audit --skip-editable
 
 # Audit root npm dependencies
 npm audit --audit-level=high

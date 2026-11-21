@@ -29,15 +29,7 @@ jobs:
       - name: Verify release metadata and tag consistency
         id: check-version
         run: |
-          python -c '
-          import os, sys, pathlib
-          sys.path.insert(0, ".")
-          from tests.test_release_metadata import verify_release_metadata
-          tag = os.environ.get("GITHUB_REF_NAME", "")
-          output_file = os.environ.get("GITHUB_OUTPUT")
-          res = verify_release_metadata(repo_root=pathlib.Path("."), tag=tag, output_file=output_file)
-          print(f"Release metadata verification succeeded: {res}")
-          '
+          python tools/verify_release_metadata.py --tag "$GITHUB_REF_NAME" --github-output "$GITHUB_OUTPUT"
 
       - name: Install test dependencies
         run: |

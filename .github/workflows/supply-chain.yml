@@ -30,11 +30,11 @@ jobs:
 
       - name: Audit production dependencies with pip-audit
         run: |
-          uv run --with pip-audit==2.10.1 pip-audit
+          uv run --with pip-audit==2.10.1 pip-audit --skip-editable
 
       - name: Audit dev dependencies with pip-audit
         run: |
-          uv run --with pip-audit==2.10.1 pip-audit --extra dev
+          uv run --extra dev --with pip-audit==2.10.1 pip-audit --skip-editable
 
   npm-audit:
     name: audit npm dependencies
