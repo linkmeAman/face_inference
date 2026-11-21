@@ -88,5 +88,5 @@ def test_execute_builds_request(monkeypatch):
         assert json.loads(request.data) == {'a': 1}
         assert timeout == 10
         return Response()
-    monkeypatch.setattr('urllib.request.urlopen', open_request)
+    monkeypatch.setattr(client._opener, 'open', open_request)
     assert client._execute_once('items', 'POST', {'a': 1}) == (200, b'{}')
