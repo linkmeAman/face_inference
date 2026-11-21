@@ -4,6 +4,7 @@ import argparse
 import json
 import os
 import sys
+from pathlib import Path
 
 from .assets import fetch, models_dir, verify
 from .config import contract, load_config
@@ -54,7 +55,7 @@ def main():
             print('Run: face-inference models fetch')
             return 1
         if args.command in ('init', 'check'):
-            print(json.dumps({'status': 'assets-missing', 'config': config['_path'], 'database': config['database']}))
+            print(json.dumps({'status': 'assets-missing', 'home': str(Path(config['_path']).parent), 'config': config['_path'], 'database': config['database']}))
             return 0
     model = contract()
     from .service import FaceService
@@ -64,7 +65,6 @@ def main():
     if args.command == 'export':
         if not args.collection or not args.output:
             parser.error('export requires --collection and --output')
-        from pathlib import Path
         destination = Path(args.output).resolve()
         rows = service.export_records(args.collection)
         with open(destination, 'x', opener=lambda p, flags: os.open(p, flags, 0o600)) as stream:
@@ -76,7 +76,7 @@ def main():
         print(json.dumps({'erased_expired_records': service.purge()}))
         return 0
     if args.command in ('init', 'check'):
-        print(json.dumps({'status': 'ready', 'config': config['_path'], 'database': config['database'],
+        print(json.dumps({'status': 'ready', 'home': str(Path(config['_path']).parent), 'config': config['_path'], 'database': config['database'],
             'mode': config['mode'], 'model_version': model['model_version']}))
         return 0
     from .server import FaceHTTPServer

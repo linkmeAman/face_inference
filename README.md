@@ -44,12 +44,20 @@ face-inference models verify
 
 * Create arbitrary collections and people through the UI or JSON API. IDs can be
   your employee/customer/student/application identifiers; metadata is optional.
-* The private `.face-inference/config.json` controls SQLite location, host/port,
+* The private `<home>/config.json` controls SQLite location, host/port,
   thresholds, retention, timezone, evidence source and approved collection scope.
-* `.face-inference/faces.sqlite3` stores encrypted face templates and observations.
+* `<home>/faces.sqlite3` stores encrypted face templates and observations.
   Keys and the API token are independent of the original CCC application.
 * `FaceClient` and the `face-result` browser event let another application consume
   identity decisions. Recognition itself triggers no attendance or external action.
+
+`<home>` uses `FACE_INFERENCE_HOME` when set, then an existing `./.face-inference/`
+(with a legacy-location notice), otherwise the per-user OS data directory:
+`~/Library/Application Support/face-inference` on macOS,
+`$XDG_DATA_HOME/face-inference` or `~/.local/share/face-inference` on Linux, and
+`%APPDATA%\face-inference` or `~\AppData\Roaming\face-inference` on Windows.
+`face-inference init` and `check` print the resolved `home` in their JSON output.
+See the [guide](docs/guide.md) for config and model directory overrides.
 
 Default mode is **EVALUATION**. Enrollment is PENDING; recognition returns an
 unverified SUGGESTED identity. The original shadow thresholds are provisional.

@@ -1,13 +1,137 @@
 import json
 import sys
+from pathlib import Path
 from unittest.mock import Mock
 
 import pytest
 
 from face_inference import cli
+from face_inference import config as config_module
 from face_inference.config import load_config
 
 WARNING = 'listening on a non-loopback address: put TLS in front (camera needs HTTPS)'
+
+
+@pytest.fixture
+def home_environment(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, 'home', classmethod(lambda cls: tmp_path / 'user'))
+    monkeypatch.setattr(sys, 'platform', 'linux')
+    for name in ('FACE_INFERENCE_HOME', 'FACE_STANDALONE_CONFIG',
+                 'FACE_INFERENCE_MODELS_DIR', 'XDG_DATA_HOME', 'APPDATA'):
+        monkeypatch.delenv(name, raising=False)
+    return tmp_path
+
+
+@pytest.mark.parametrize('platform, variable, relative', [
+    ('darwin', None, 'user/Library/Application Support/face-inference'),
+    ('linux', None, 'user/.local/share/face-inference'),
+    ('linux', 'XDG_DATA_HOME', 'custom/face-inference'),
+    ('linux', 'EMPTY_XDG', 'user/.local/share/face-inference'),
+    ('win32', None, 'user/AppData/Roaming/face-inference'),
+    ('win32', 'APPDATA', 'custom/face-inference'),
+])
+def test_default_home_platforms(home_environment, monkeypatch, platform, variable, relative):
+    monkeypatch.setattr(sys, 'platform', platform)
+    if variable == 'EMPTY_XDG':
+        monkeypatch.setenv('XDG_DATA_HOME', '')
+    elif variable:
+        monkeypatch.setenv(variable, str(home_environment / 'custom'))
+    expected = home_environment / relative
+    assert config_module.default_home() == expected
+    config = load_config()
+    assert config['_path'] == str(expected / 'config.json')
+    assert config['database'] == str(expected / 'faces.sqlite3')
+    assert not (home_environment / '.face-inference').exists()
+    if platform != 'win32':
+        assert expected.stat().st_mode & 0o777 == 0o700
+
+
+def test_legacy_home_preserves_config_and_notices(home_environment, capsys):
+    legacy = home_environment / '.face-inference'
+    original = load_config(legacy / 'config.json')
+    before = (legacy / 'config.json').read_bytes()
+    config = load_config()
+    assert config == original
+    assert (legacy / 'config.json').read_bytes() == before
+    notice = capsys.readouterr()
+    assert notice.out == ''
+    assert len(notice.err.splitlines()) == 1
+    assert 'legacy' in notice.err.lower()
+    assert str(legacy) in notice.err
+
+
+def test_legacy_file_is_not_a_home(home_environment, capsys):
+    (home_environment / '.face-inference').write_text('not a directory')
+    assert config_module.default_home() == home_environment / 'user/.local/share/face-inference'
+    assert capsys.readouterr().err == ''
+
+
+def test_home_environment_precedes_legacy(home_environment, monkeypatch, capsys):
+    (home_environment / '.face-inference').mkdir()
+    monkeypatch.setenv('FACE_INFERENCE_HOME', 'private')
+    config = load_config()
+    expected = home_environment / 'private'
+    assert config_module.default_home() == expected
+    assert config['_path'] == str(expected / 'config.json')
+    assert expected.stat().st_mode & 0o777 == 0o700
+    assert capsys.readouterr().err == ''
+
+
+@pytest.mark.parametrize('explicit', [False, True])
+def test_config_path_overrides_home(home_environment, monkeypatch, capsys, explicit):
+    (home_environment / '.face-inference').mkdir()
+    monkeypatch.setenv('FACE_INFERENCE_HOME', str(home_environment / 'other'))
+    monkeypatch.setenv('FACE_STANDALONE_CONFIG', 'environment/config.json')
+    path = 'explicit/config.json' if explicit else None
+    expected = home_environment / (path or 'environment/config.json')
+    config = load_config(path)
+    assert config['_path'] == str(expected)
+    assert config['database'] == str(expected.parent / 'faces.sqlite3')
+    assert not (home_environment / 'other').exists()
+    assert capsys.readouterr().err == ''
+
+
+@pytest.mark.parametrize('source', ['default', 'legacy', 'home', 'config', 'models'])
+def test_models_follow_home(home_environment, monkeypatch, source):
+    from face_inference import assets
+
+    monkeypatch.setattr(assets, 'PACKAGED_VENDOR_DIR', home_environment / 'no-assets')
+    config = None
+    expected = home_environment / 'user/.local/share/face-inference/models'
+    if source == 'legacy':
+        (home_environment / '.face-inference').mkdir()
+        expected = home_environment / '.face-inference/models'
+    elif source == 'home':
+        monkeypatch.setenv('FACE_INFERENCE_HOME', str(home_environment / 'private'))
+        expected = home_environment / 'private/models'
+    elif source == 'config':
+        config = load_config(home_environment / 'deployment/config.json')
+        expected = home_environment / 'deployment/models'
+    elif source == 'models':
+        monkeypatch.setenv('FACE_INFERENCE_MODELS_DIR', str(home_environment / 'models'))
+        expected = home_environment / 'models'
+    assert assets.models_dir(config) == expected
+
+
+@pytest.mark.parametrize('command', ['init', 'check'])
+@pytest.mark.parametrize('status', ['PASS', 'FAIL'])
+@pytest.mark.parametrize('explicit', [False, True])
+def test_cli_reports_resolved_home(
+    home_environment, monkeypatch, capsys, command, status, explicit,
+):
+    arguments = ['face-inference', command]
+    expected = home_environment / 'user/.local/share/face-inference'
+    if explicit:
+        expected = home_environment / 'deployment'
+        arguments += ['--config', str(expected / 'config.json')]
+    monkeypatch.setattr(sys, 'argv', arguments)
+    monkeypatch.setattr(cli, 'verify', Mock(return_value={'status': status}))
+    assert cli.main() == 0
+    result = json.loads(capsys.readouterr().out)
+    assert result['home'] == str(expected)
+    assert result['config'] == str(expected / 'config.json')
+    assert result['status'] == ('ready' if status == 'PASS' else 'assets-missing')
 
 
 @pytest.fixture(autouse=True)

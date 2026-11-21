@@ -9,6 +9,7 @@ from pathlib import Path
 import re
 import secrets
 import sqlite3
+import sys
 import tempfile
 from zoneinfo import ZoneInfo
 from urllib.parse import urlsplit
@@ -18,8 +19,29 @@ from cryptography.fernet import Fernet
 ROOT = Path(__file__).resolve().parent / 'web'
 
 
+def default_home():
+    if 'FACE_INFERENCE_HOME' in os.environ:
+        return Path(os.environ['FACE_INFERENCE_HOME']).resolve()
+    legacy = Path('.face-inference')
+    if legacy.is_dir():
+        home = legacy.resolve()
+        print(f'Using legacy data directory: {home}', file=sys.stderr)
+        return home
+    if sys.platform == 'darwin':
+        home = Path.home() / 'Library' / 'Application Support'
+    elif sys.platform == 'win32':
+        home = Path(os.getenv('APPDATA') or Path.home() / 'AppData' / 'Roaming')
+    else:
+        home = Path(os.getenv('XDG_DATA_HOME') or Path.home() / '.local' / 'share')
+    return (home / 'face-inference').resolve()
+
+
 def load_config(path=None, *, host=None, port=None):
-    path = Path(path or os.getenv('FACE_STANDALONE_CONFIG', Path(os.getenv('FACE_INFERENCE_HOME', '.face-inference')) / 'config.json')).resolve()
+    if not path:
+        path = os.getenv('FACE_STANDALONE_CONFIG')
+        if path is None:
+            path = default_home() / 'config.json'
+    path = Path(path).resolve()
     if not path.exists():
         path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
         database = path.parent / 'faces.sqlite3'
