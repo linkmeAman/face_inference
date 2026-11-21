@@ -1,0 +1,31 @@
+name: Synthetic CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: synthetic-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  synthetic:
+    name: synthetic held-out evaluation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.12"
+
+      - name: Run synthetic evaluation check
+        run: |
+          uv run --python 3.12 python tools/evaluate_synthetic.py --check

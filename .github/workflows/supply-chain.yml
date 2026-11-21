@@ -1,0 +1,62 @@
+name: Supply Chain Audit
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supply-chain-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python-audit:
+    name: audit python dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v10
+        with:
+          python-version: "3.12"
+
+      - name: Audit production dependencies with pip-audit
+        run: |
+          uv run --with pip-audit==2.10.1 pip-audit --skip-editable
+
+      - name: Audit dev dependencies with pip-audit
+        run: |
+          uv run --extra dev --with pip-audit==2.10.1 pip-audit --skip-editable
+
+  npm-audit:
+    name: audit npm dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Audit root dependencies
+        run: |
+          npm audit --audit-level=high
+
+      - name: Audit package dependencies
+        run: |
+          if [ -f packages/face-capture/package-lock.json ]; then
+            npm --prefix packages/face-capture audit --audit-level=high
+          else
+            echo "packages/face-capture has no external package-lock dependencies"
+          fi
