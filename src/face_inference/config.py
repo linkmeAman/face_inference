@@ -30,7 +30,8 @@ def load_config(path=None, *, host=None, port=None):
             session_secret=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode(),
             mode='EVALUATION', duplicate_threshold=0.85, recognition_threshold=0.65,
             retention_days=30, policy_file='', max_people=1000, timezone='Asia/Kolkata',
-            capture_source='unvalidated-camera', approved_collection_ids=[], allowed_origins=[])
+            capture_source='unvalidated-camera', approved_collection_ids=[], allowed_origins=[],
+            rate_limit_per_minute=120, trusted_proxies=[])
         with open(path, 'x', opener=lambda p, flags: os.open(p, flags, 0o600)) as stream:
             json.dump(config, stream, indent=2)
             stream.write('\n')
@@ -68,6 +69,26 @@ def load_config(path=None, *, host=None, port=None):
     origins = os.getenv('FACE_INFERENCE_ALLOWED_ORIGINS')
     if origins is not None:
         config['allowed_origins'] = [origin.strip() for origin in origins.split(',') if origin.strip()]
+    rate = os.getenv('FACE_INFERENCE_RATE_LIMIT')
+    if rate is not None:
+        try:
+            config['rate_limit_per_minute'] = int(rate)
+        except ValueError:
+            raise RuntimeError('Invalid config: rate_limit_per_minute') from None
+    config.setdefault('rate_limit_per_minute', 120)
+    proxies = os.getenv('FACE_INFERENCE_TRUSTED_PROXIES')
+    if proxies is not None:
+        config['trusted_proxies'] = [proxy.strip() for proxy in proxies.split(',') if proxy.strip()]
+    proxies = config.setdefault('trusted_proxies', [])
+    if not isinstance(proxies, list):
+        raise RuntimeError('Invalid config: trusted_proxies')
+    for proxy in proxies:
+        try:
+            if not isinstance(proxy, str):
+                raise ValueError
+            ipaddress.ip_network(proxy, strict=False)
+        except ValueError:
+            raise RuntimeError('Invalid config: trusted_proxies') from None
     host = config['host']
     if not isinstance(host, str):
         raise RuntimeError('Invalid config: host')
@@ -112,7 +133,7 @@ def load_config(path=None, *, host=None, port=None):
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value) or not -1 <= value <= 1:
             raise RuntimeError('Invalid server threshold: ' + name)
-    for name, minimum, maximum in [('port', 1, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000)]:
+    for name, minimum, maximum in [('port', 1, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000), ('rate_limit_per_minute', 1, 100000)]:
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, int) or not minimum <= value <= maximum:
             raise RuntimeError('Invalid config: ' + name)
