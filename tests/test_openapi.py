@@ -45,12 +45,12 @@ def extract_server_routes(server_code: str) -> set[tuple[str, str]]:
 
         # 2b. len(parts) >= 5 -> subresources under collection
         subresource_match = re.search(
-            r"if len\(parts\) >= 5:(.*?)(?=raise FaceError|\Z)",
+            r"^([ \t]*)if len\(parts\) >= 5:(.*?)(?=^\1raise FaceError|\Z)",
             server_code,
-            re.DOTALL,
+            re.DOTALL | re.MULTILINE,
         )
         if subresource_match:
-            sub_block = subresource_match.group(1)
+            sub_block = subresource_match.group(2)
 
             # GET subresources with len(parts) == 5
             get_block_match = re.search(
@@ -73,14 +73,15 @@ def extract_server_routes(server_code: str) -> set[tuple[str, str]]:
                         routes.add(("POST", f"{base_path}/{{id}}/{resource}"))
 
             # DELETE subresources: DELETE len(parts) == 7, people, parts[6] == 'face'
-            del_pattern = (
-                r"self\.command == 'DELETE'\s+and\s+len\(parts\) == 7\s+and\s+"
-                r"resource == '([a-z]+)'\s+and\s+parts\[6\] == '([a-z]+)'"
-            )
-            delete_match = re.search(del_pattern, sub_block)
+            delete_match = re.search(r"if (?:\()?([^:]*self\.command == 'DELETE'[^:]*):", sub_block)
             if delete_match:
-                res1, res2 = delete_match.groups()
-                routes.add(("DELETE", f"{base_path}/{{id}}/{res1}/{{person}}/{res2}"))
+                condition = delete_match.group(1)
+                resource = re.search(r"resource == '([a-z]+)'", condition)
+                subresource = re.search(r"parts\[6\] == '([a-z]+)'", condition)
+                if "len(parts) == 7" in condition and resource and subresource:
+                    path = f"{base_path}/{{id}}/{resource.group(1)}/{{person}}"
+                    path += f"/{subresource.group(1)}"
+                    routes.add(("DELETE", path))
 
     return routes
 
@@ -121,6 +122,25 @@ def test_route_extractor_regex_unit():
     assert ("DELETE", "/api/v1/collections/{id}/people/{person}/face") in extracted
 
 
+
+@pytest.mark.parametrize("condition", [
+    "self.command == 'DELETE' and len(parts) == 7 and resource == 'people' and parts[6] == 'face'",
+    "self.command == 'DELETE' and len(parts) == 7 and parts[6] == 'face' and resource == 'people'",
+])
+def test_route_extractor_delete_after_nested_raise(condition):
+    snippet = f"""
+    if parts[:3] == ['api', 'v1', 'collections']:
+        if len(parts) >= 5:
+            if invalid:
+                raise FaceError('INVALID')
+            if {condition}:
+                return
+    """
+    assert ("DELETE", "/api/v1/collections/{id}/people/{person}/face") in (
+        extract_server_routes(snippet)
+    )
+
+
 def test_server_routes_extracted():
     """Verify that route extractor discovers all 10 API operations from server.py."""
     assert SERVER_PY.is_file(), f"server.py not found at {SERVER_PY}"
@@ -128,6 +148,7 @@ def test_server_routes_extracted():
     server_routes = extract_server_routes(server_code)
 
     expected_routes = {
+        ("POST", "/api/v1/session-tokens"),
         ("GET", "/api/v1/config"),
         ("GET", "/api/v1/collections"),
         ("POST", "/api/v1/collections"),

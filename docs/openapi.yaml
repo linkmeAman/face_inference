@@ -19,6 +19,62 @@ security:
   - BearerAuth: []
 
 paths:
+  /api/v1/session-tokens:
+    post:
+      x-source: "src/face_inference/server.py:205"
+      summary: Issue a scoped session token
+      description: Requires the admin bearer token. Session tokens cannot issue tokens.
+      operationId: issueSessionToken
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              required: [collection_id, scope]
+              properties:
+                collection_id:
+                  type: string
+                scope:
+                  type: string
+                  enum: [enroll, recognize]
+                ttl:
+                  type: integer
+                  minimum: 1
+                  maximum: 3600
+                  default: 300
+                person_id:
+                  type: string
+                  description: Restricts enrollment to this person.
+      responses:
+        '200':
+          description: Session token and expiry in the response envelope's data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessEnvelope'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        required: [token, expires_at]
+                        properties:
+                          token:
+                            type: string
+                          expires_at:
+                            type: integer
+                            description: Expiry as a Unix timestamp in seconds.
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
   /api/v1/config:
     get:
       x-source: "src/face_inference/server.py:188"
@@ -196,6 +252,9 @@ paths:
         Validates model contract, verifies submitted template matches medoid aggregate of 3-5 unit vectors,
         and performs duplicate detection against existing references in the collection.
       operationId: enrollFace
+      security:
+        - BearerAuth: []
+        - SessionBearerAuth: []
       requestBody:
         required: true
         content:
@@ -251,6 +310,9 @@ paths:
         Returns MATCHED (in approved policy mode), SUGGESTED (in default evaluation mode),
         or UNKNOWN / COLLECTION_ONLY. Never mutates biometric references during recognition.
       operationId: recognizeFace
+      security:
+        - BearerAuth: []
+        - SessionBearerAuth: []
       requestBody:
         required: true
         content:
@@ -441,6 +503,10 @@ paths:
 
 components:
   securitySchemes:
+    SessionBearerAuth:
+      type: http
+      scheme: bearer
+      description: Scoped session token beginning with v1.; valid only for its collection and action.
     BearerAuth:
       type: http
       scheme: bearer

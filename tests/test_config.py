@@ -184,3 +184,22 @@ def test_serve_uses_overrides_and_warns(config_file, monkeypatch, capsys, host):
     server.server_close.assert_called_once_with()
     expected = '' if host in ('127.0.0.1', '::1', 'localhost') else WARNING + '\n'
     assert capsys.readouterr().err == expected
+
+
+def test_concurrent_session_secret_migration(config_file):
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+
+    config = json.loads(config_file.read_text())
+    config.pop('session_secret', None)
+    config_file.write_text(json.dumps(config))
+    barrier = threading.Barrier(12)
+
+    def load():
+        barrier.wait()
+        return load_config(config_file)['session_secret']
+
+    with ThreadPoolExecutor(max_workers=12) as executor:
+        secrets = list(executor.map(lambda _: load(), range(12)))
+    assert len(set(secrets)) == 1
+    assert secrets[0] == json.loads(config_file.read_text())['session_secret']

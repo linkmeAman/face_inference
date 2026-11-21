@@ -1,3 +1,5 @@
+import base64
+import binascii
 import hashlib
 import ipaddress
 import json
@@ -6,6 +8,8 @@ import os
 from pathlib import Path
 import re
 import secrets
+import sqlite3
+import tempfile
 from zoneinfo import ZoneInfo
 from urllib.parse import urlsplit
 
@@ -23,6 +27,7 @@ def load_config(path=None, *, host=None, port=None):
             raise RuntimeError('Existing database has no configuration; restore its original encryption key')
         config = dict(version=1, host='127.0.0.1', port=6122, database=str(database),
             api_token=secrets.token_urlsafe(32), encryption_key=Fernet.generate_key().decode(),
+            session_secret=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode(),
             mode='EVALUATION', duplicate_threshold=0.85, recognition_threshold=0.65,
             retention_days=30, policy_file='', max_people=1000, timezone='Asia/Kolkata',
             capture_source='unvalidated-camera', approved_collection_ids=[], allowed_origins=[])
@@ -30,6 +35,28 @@ def load_config(path=None, *, host=None, port=None):
             json.dump(config, stream, indent=2)
             stream.write('\n')
     config = json.loads(path.read_text())
+    if 'session_secret' not in config:
+        with sqlite3.connect(str(path) + '.lock', timeout=30) as lock:
+            lock.execute('BEGIN EXCLUSIVE')
+            config = json.loads(path.read_text())
+            if 'session_secret' not in config:
+                config['session_secret'] = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+                fd, temporary = tempfile.mkstemp(dir=path.parent, prefix='.config-', suffix='.tmp')
+                try:
+                    with os.fdopen(fd, 'w') as stream:
+                        json.dump(config, stream, indent=2)
+                        stream.write('\n')
+                    os.replace(temporary, path)
+                finally:
+                    if os.path.exists(temporary):
+                        os.unlink(temporary)
+            config = json.loads(path.read_text())
+    try:
+        secret = config['session_secret']
+        if not isinstance(secret, str) or len(base64.b64decode(secret, altchars=b'-_', validate=True)) < 32:
+            raise ValueError
+    except (ValueError, binascii.Error):
+        raise RuntimeError('Invalid session secret') from None
     config['host'] = host if host is not None else os.getenv('FACE_INFERENCE_HOST', config.get('host', '127.0.0.1'))
     port = port if port is not None else os.getenv('FACE_INFERENCE_PORT')
     if port is not None:

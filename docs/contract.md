@@ -7,7 +7,7 @@ actions such as attendance are callbacks for the consuming application.
 
 ## API
 
-All `/api/v1/` endpoints require `Authorization: Bearer <private API token>`.
+All `/api/v1/` endpoints require bearer authorization. The private admin token grants access to all routes; scoped session tokens grant access only to their specified enrollment or recognition route.
 `GET /health` is public and contains no credentials. Static files are explicitly
 allowlisted; the database, keys, datasets, original PHP and snapshots are private.
 JSON responses contain `error`, `error_msg`, `message`, and `data`. Errors also
@@ -16,6 +16,7 @@ contain a stable `code`. Mutation keys bind route, collection and exact payload.
 | Method and path | Input / response |
 | --- | --- |
 | GET `/api/v1/config` | Original safe browser contract, mode, policy readiness, provisional/approved distinction |
+| POST `/api/v1/session-tokens` | Admin only: `{collection_id,scope,ttl?,person_id?}` returns `{token,expires_at}`; scope is `enroll` or `recognize`, ttl is 1–3600 seconds (default 300), and person_id restricts enrollment |
 | GET/POST `/api/v1/collections` | List or create `{id,name,idempotency_key}`; arbitrary application-owned collection IDs |
 | GET/POST `/api/v1/collections/{id}/people` | Metadata/status list or create `{id,name,metadata,idempotency_key}`; no CCC member tables |
 | POST `/api/v1/collections/{id}/enrollments` | `{person_id,consent:true,capture_session,observations,template,model_version,preprocessing_version,idempotency_key}` |
@@ -90,3 +91,5 @@ the service/repository interface; the reference UI uses the original camera modu
 
 Existing exported datasets/models/docs remain available; original PHP is historical
 reference only and is never loaded, executed or required by the new runtime.
+
+Session-token verification returns `TOKEN_EXPIRED` or `TOKEN_INVALID` (401), or `TOKEN_SCOPE` (403). Session tokens cannot mint tokens or access other API routes.
