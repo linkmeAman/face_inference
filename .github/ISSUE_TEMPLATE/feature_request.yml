@@ -1,0 +1,42 @@
+name: Feature Request
+description: Suggest an idea or enhancement for face-inference
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ### Privacy & Security Notice
+        > **DO NOT attach real face images, personal photos, or identifiable biometric data.**
+        > **DO NOT post API tokens, private encryption keys, or passwords.**
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: Is your feature request related to a problem or limitation? Please describe clearly.
+      placeholder: I am frustrated when ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed Solution
+      description: Describe the solution or capability you would like to see added.
+      placeholder: Add support for ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Describe any alternative solutions or workarounds you've considered.
+      placeholder: An alternative approach was ...
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional Context
+      description: Add any other context, screenshots of diagrams/mockups (no real faces), or architectural references.
