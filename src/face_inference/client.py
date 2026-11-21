@@ -150,6 +150,27 @@ class FaceConnectionError(FaceError):
         return f"FaceConnectionError({self.message!r})"
 
 
+class _RedirectHandler(urllib.request.HTTPRedirectHandler):
+    @staticmethod
+    def _origin(url: str) -> tuple[str, str | None, int | None]:
+        parsed = urllib.parse.urlsplit(url)
+        port = parsed.port
+        if port is None:
+            port = {"http": 80, "https": 443}.get(parsed.scheme)
+        return parsed.scheme, parsed.hostname, port
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        source = self._origin(req.full_url)
+        target = self._origin(newurl)
+        if source[0] == "https" and target[0] == "http":
+            fp.close()
+            raise urllib.error.URLError("Redirect from HTTPS to HTTP is not permitted")
+        redirected = super().redirect_request(req, fp, code, msg, headers, newurl)
+        if redirected is not None and source != target:
+            redirected.remove_header("Authorization")
+        return redirected
+
+
 class FaceClient:
     """Typed stdlib HTTP client for the face_inference REST API."""
 
@@ -172,6 +193,7 @@ class FaceClient:
         self.timeout = float(timeout)
         self.retry_backoff = float(retry_backoff)
         self.pending: dict[str, Any] | None = None
+        self._opener = urllib.request.build_opener(_RedirectHandler())
 
     def __repr__(self) -> str:
         return f"FaceClient(base_url={self.base_url!r}, token='***', timeout={self.timeout!r})"
@@ -219,7 +241,7 @@ class FaceClient:
             headers["Content-Type"] = "application/json"
 
         req = urllib.request.Request(url, data=data, headers=headers, method=method)
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+        with self._opener.open(req, timeout=self.timeout) as resp:
             content = resp.read()
             return resp.status, content
 
