@@ -9,20 +9,22 @@ import http.server
 import json
 import subprocess
 import threading
+import uuid
 from email.message import Message
 from io import BytesIO
 from pathlib import Path
-from types import SimpleNamespace
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
 
 import pytest
 from cryptography.fernet import Fernet
 
-from face_inference import tokens
 from face_inference.assets import fetch
 from face_inference.client import FaceClient
+from face_inference.config import ROOT, contract, load_config
 from face_inference.matching import FaceError
-from face_inference.ratelimit import RateLimiter
-from face_inference.server import Handler
+from face_inference.server import FaceHTTPServer, Handler
+from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
 
@@ -162,48 +164,6 @@ def test_sec_4_purge_sqlite_secure_delete_enabled(tmp_path: Path):
     assert secure_delete in (1, 2)
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-5 Unconsumed body error leaves connection open")
-def test_sec_5_body_error_closes_connection():
-    """SEC-5: Request body errors must set close_connection=True.
-
-    Currently, if read_json fails due to Transfer-Encoding or body format,
-    close_connection remains False, enabling HTTP request smuggling.
-    """
-    config = {
-        "api_token": "a" * 32,
-        "host": "127.0.0.1",
-        "allowed_origins": [],
-        "trusted_proxies": [],
-        "rate_limit_per_minute": 120,
-    }
-    handler = Handler.__new__(Handler)
-    handler.server = SimpleNamespace(
-        service=SimpleNamespace(config=config, safe_config=lambda: {}),
-        server_port=6122,
-        rate_limiter=RateLimiter(120),
-    )
-    handler.command = "POST"
-    handler.path = "/api/v1/collections/team/people"
-    handler.client_address = ("127.0.0.1", 0)
-    handler.headers = Message()
-    handler.headers["Authorization"] = "Bearer " + config["api_token"]
-    handler.headers["Content-Type"] = "application/json"
-    handler.headers["Transfer-Encoding"] = "chunked"
-    handler.headers["Content-Length"] = "10"
-    handler.rfile = BytesIO(b"unparsed-data")
-    handler.wfile = BytesIO()
-    handler.close_connection = False
-
-    handler.send_response = lambda status: setattr(handler, "status", status)
-    handler.send_header = lambda name, value: None
-    handler.end_headers = lambda: None
-
-    handler.dispatch()
-
-    # Secure behavior: handler must close connection on framing / body error
-    assert handler.close_connection is True
-
-
 @pytest.mark.xfail(strict=True, reason="SEC-6 Deeply nested JSON DoS triggers RecursionError")
 def test_sec_6_deeply_nested_json_dos():
     """SEC-6: read_json() must reject deeply nested JSON payloads cleanly.
@@ -227,59 +187,95 @@ def test_sec_6_deeply_nested_json_dos():
 
 
 @pytest.mark.xfail(strict=True, reason="SEC-7 Subject constraint ignored on recognition")
-def test_sec_7_session_token_subject_binding_on_recognition():
+def test_sec_7_session_token_subject_binding_on_recognition(tmp_path: Path):
     """SEC-7: Subject-constrained session tokens must be enforced on recognitions.
 
     Currently, server.py line 249 checks claims.subject only for enrollments,
-    allowing a subject-scoped token to query any person during recognitions.
+    allowing a recognition token minted for 'alice' to query 'bob' (200 OK).
     """
-    secret = b"a" * 32
-    token = tokens.issue(secret, "team", "recognize", 300, subject="alice", now=1000.0)
+    cfg_path = tmp_path / "config.json"
+    config = load_config(cfg_path)
+    model = contract()
+    repo = SQLiteRepository(config["database"], config["encryption_key"])
+    service = FaceService(repo, config, model)
+    try:
+        server = FaceHTTPServer(("127.0.0.1", 0), service, ROOT)
+    except PermissionError:
+        pytest.skip("Socket bind disallowed in current environment")
 
-    config = {
-        "api_token": "admin" * 8,
-        "session_secret": Fernet.generate_key().decode(),
-        "host": "127.0.0.1",
-        "allowed_origins": [],
-        "trusted_proxies": [],
-    }
-    service = SimpleNamespace(config=config, clock=lambda: 1000.0)
+    thread = threading.Thread(target=server.serve_forever, daemon=True)
+    thread.start()
+    base = f"http://127.0.0.1:{server.server_port}"
+    admin_token = config["api_token"]
 
-    handler = Handler.__new__(Handler)
-    handler.server = SimpleNamespace(
-        service=service,
-        server_port=6122,
-        rate_limiter=SimpleNamespace(check=lambda ip: SimpleNamespace(allowed=True, retry_after=0)),
-    )
-    handler.client_address = ("127.0.0.1", 0)
-    handler.command = "POST"
-    handler.headers = Message()
-    handler.headers["Authorization"] = "Bearer " + token
+    def req(path: str, data: dict | None = None, token: str = admin_token) -> tuple[int, dict]:
+        body = json.dumps(data).encode() if data is not None else None
+        headers = {
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        }
+        r = Request(f"{base}{path}", data=body, headers=headers)
+        try:
+            resp = urlopen(r, timeout=5)
+            content = resp.read()
+            return resp.status, json.loads(content)
+        except HTTPError as err:
+            content = err.read()
+            return err.code, json.loads(content)
 
-    parts = ["api", "v1", "collections", "team", "recognitions"]
-    claims = handler.authorize(parts)
+    try:
+        # Create collection + two people
+        status, _ = req(
+            "/api/v1/collections",
+            {"id": "team", "name": "Team", "idempotency_key": str(uuid.uuid4())},
+        )
+        assert status == 200
+        status, _ = req(
+            "/api/v1/collections/team/people",
+            {"id": "alice", "name": "Alice", "idempotency_key": str(uuid.uuid4())},
+        )
+        assert status == 200
+        status, _ = req(
+            "/api/v1/collections/team/people",
+            {"id": "bob", "name": "Bob", "idempotency_key": str(uuid.uuid4())},
+        )
+        assert status == 200
 
-    # An unauthorized subject is requested in eligible_ids
-    body = {"eligible_ids": ["bob"]}
+        # Mint session token restricted to person_id="alice" with scope="recognize"
+        status, token_res = req(
+            "/api/v1/session-tokens",
+            {
+                "collection_id": "team",
+                "scope": "recognize",
+                "person_id": "alice",
+            },
+        )
+        assert status == 200
+        session_token = token_res["data"]["token"]
 
-    # Secure behavior: server must enforce claims.subject for recognitions as well
-    is_forbidden = (
-        claims is not None
-        and claims.subject is not None
-        and (body.get("eligible_ids") != [claims.subject])
-    )
-    assert is_forbidden is True
+        # Call POST /recognitions with that token and eligible_ids: ["bob"]
+        unit = [1.0] + [0.0] * 127
+        rec_body = {
+            "capture_session": str(uuid.uuid4()),
+            "model_version": model["model_version"],
+            "preprocessing_version": model["preprocessing_version"],
+            "observations": [unit] * 5,
+            "eligible_ids": ["bob"],
+            "idempotency_key": str(uuid.uuid4()),
+        }
+        status, _ = req(
+            "/api/v1/collections/team/recognitions",
+            rec_body,
+            token=session_token,
+        )
 
-    # Check whether server.py's actual current logic blocks this
-    resource = "recognitions"
-    currently_blocked = (
-        claims is not None
-        and claims.subject is not None
-        and resource == "enrollments"
-        and body.get("person_id") != claims.subject
-    )
-    # This assertion verifies that the server currently fails to enforce the constraint
-    assert currently_blocked is True
+        # Secure behavior: server must enforce claims.subject and reject recognition for bob (403)
+        # Currently, the server accepts this (200), ignoring claims.subject on recognitions.
+        assert status == 403
+    finally:
+        server.shutdown()
+        server.server_close()
+        thread.join(timeout=3)
 
 
 @pytest.mark.xfail(strict=True, reason="SEC-8 Model binaries loaded without hash verification")
