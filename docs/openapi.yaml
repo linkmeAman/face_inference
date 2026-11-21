@@ -9,8 +9,8 @@ info:
 
     ### Additional Endpoints and Static Assets (Not Operations)
     * `GET /health`: Public health check (no authentication required). Returns `{"status": "ok", "api_version": "1", "storage": "sqlite"}`.
-    * Static Frontend & Web Assets: Served directly from allowlisted files at `/`, `/index.html`, `/app.mjs`, `/client.mjs`, `/style.css`.
-    * Model and WASM Assets: Served under `/browser-face/*` (e.g., `capture.mjs`, `worker.mjs`, `model.mjs`, `math.mjs`) and `/vendor/browser-face/*` (e.g., `manifest.json`, `sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`).
+    * Static Frontend & Web Assets: Served directly from allowlisted files at `/`, `/app.mjs`, `/client.mjs`, `/style.css`.
+    * Model and WASM Assets: Served under `/browser-face/*` (e.g., `capture.mjs`, `continuity.mjs`, `contract.json`, `core.mjs`, `facing.mjs`, `worker.mjs`) and `/vendor/browser-face/*` (e.g., `manifest.json`, `sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`).
     All `/api/v1/` endpoints require HTTP Bearer token authentication.
 servers:
   - url: http://127.0.0.1:6122
@@ -195,7 +195,7 @@ paths:
     post:
       x-source: "src/face_inference/server.py:210"
       summary: Create or update person in collection
-      description: Register or update metadata for a person within a collection namespace.
+      description: Register or update name and metadata for a person within a collection namespace.
       operationId: upsertPerson
       requestBody:
         required: true

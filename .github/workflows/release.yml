@@ -62,7 +62,7 @@ jobs:
       - name: Install test dependencies
         run: |
           uv venv
-          uv pip install -e . pytest pytest-xdist ruff
+          uv pip install -e ".[dev]"
 
       - name: Run lint and tests
         run: |

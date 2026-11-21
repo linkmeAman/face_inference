@@ -28,7 +28,6 @@ from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-1 Path traversal in asset manifest")
 def test_sec_1_manifest_path_traversal(tmp_path: Path):
     """SEC-1: fetch() must reject manifest entries with relative path traversal.
 
@@ -148,7 +147,6 @@ def test_sec_3_model_base_url_untrusted_origin_rejected():
     assert res.get("code") in ("INVALID_CONFIG", "UNTRUSTED_MODEL_URL")
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-4 SQLite secure_delete disabled during purge")
 def test_sec_4_purge_sqlite_secure_delete_enabled(tmp_path: Path):
     """SEC-4: Storage repository must enable PRAGMA secure_delete.
 

@@ -2,6 +2,7 @@ from contextlib import contextmanager, closing
 import json
 from pathlib import Path
 import sqlite3
+import time
 
 from cryptography.fernet import Fernet, InvalidToken
 
@@ -37,6 +38,7 @@ class SQLiteRepository:
         db.row_factory = sqlite3.Row
         db.execute('PRAGMA foreign_keys=ON')
         db.execute('PRAGMA busy_timeout=10000')
+        db.execute('PRAGMA secure_delete=ON')
         return db
 
     @contextmanager
@@ -51,6 +53,16 @@ class SQLiteRepository:
             raise
         finally:
             db.close()
+
+    def checkpoint(self):
+        with closing(self.connect()) as db:
+            db.execute('PRAGMA busy_timeout=0')
+            for attempt in range(6):
+                if db.execute('PRAGMA wal_checkpoint(TRUNCATE)').fetchone()[0] == 0:
+                    return True
+                if attempt < 5:
+                    time.sleep(0.05)
+        return False
 
     def encrypt(self, value):
         return self.cipher.encrypt(json.dumps(value, separators=(',', ':'), allow_nan=False).encode())
