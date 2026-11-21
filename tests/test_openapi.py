@@ -2,6 +2,7 @@ import re
 from pathlib import Path
 
 import pytest
+import yaml
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SERVER_PY = REPO_ROOT / "src" / "face_inference" / "server.py"
@@ -183,7 +184,6 @@ def _normalize_path(path: str) -> str:
 
 def test_openapi_routes_match_server():
     """Parse openapi.yaml with yaml and assert every server route appears in spec and vice versa."""
-    yaml = pytest.importorskip("yaml")
     assert OPENAPI_YAML.is_file(), f"Missing OpenAPI specification at {OPENAPI_YAML}"
 
     spec = yaml.safe_load(OPENAPI_YAML.read_text(encoding="utf-8"))
@@ -212,7 +212,6 @@ def test_openapi_routes_match_server():
 
 def test_openapi_operations_have_source_citations():
     """Verify that every operation has an x-source field citing an existing file and line."""
-    yaml = pytest.importorskip("yaml")
     assert OPENAPI_YAML.is_file(), f"Missing OpenAPI specification at {OPENAPI_YAML}"
 
     spec = yaml.safe_load(OPENAPI_YAML.read_text(encoding="utf-8"))
@@ -236,7 +235,6 @@ def test_openapi_operations_have_source_citations():
 
 def test_openapi_security_scheme():
     """Verify that OpenAPI spec configures HTTP Bearer authentication."""
-    yaml = pytest.importorskip("yaml")
     assert OPENAPI_YAML.is_file(), f"Missing OpenAPI specification at {OPENAPI_YAML}"
 
     spec = yaml.safe_load(OPENAPI_YAML.read_text(encoding="utf-8"))
@@ -250,7 +248,6 @@ def test_openapi_security_scheme():
 
 def test_openapi_health_and_static_not_in_paths():
     """Verify /health and static asset paths are only in description, not in paths."""
-    yaml = pytest.importorskip("yaml")
     assert OPENAPI_YAML.is_file(), f"Missing OpenAPI specification at {OPENAPI_YAML}"
 
     spec = yaml.safe_load(OPENAPI_YAML.read_text(encoding="utf-8"))
@@ -270,7 +267,6 @@ def test_openapi_health_and_static_not_in_paths():
 
 def test_openapi_error_envelope_and_status_codes():
     """Verify error envelope schema matches server respond() structure and 401/403/413/429 cases."""
-    yaml = pytest.importorskip("yaml")
     assert OPENAPI_YAML.is_file(), f"Missing OpenAPI specification at {OPENAPI_YAML}"
 
     spec = yaml.safe_load(OPENAPI_YAML.read_text(encoding="utf-8"))

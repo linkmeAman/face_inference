@@ -31,7 +31,7 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
       - run: uv venv --python ${{ matrix.python }}
-      - run: uv pip install -e . pytest pytest-xdist ruff
+      - run: uv pip install -e ".[dev]"
       - run: uv pip install pytest-cov
         if: matrix.coverage
       - run: uv run --no-sync ruff check src tests

@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import re
 import tempfile
 from pathlib import Path
 from urllib.error import HTTPError, URLError
@@ -30,15 +31,52 @@ def digest(path: Path) -> str:
     return result.hexdigest()
 
 
+def _check_path(path: Path) -> None:
+    if path.is_symlink():
+        raise RuntimeError(f"Symlink in asset path: {path}")
+
+
+def _validate_manifest(manifest: dict) -> dict:
+    if not isinstance(manifest, dict) or not isinstance(manifest.get("files"), dict):
+        raise RuntimeError("Invalid asset manifest")
+    for name, info in manifest["files"].items():
+        if (not isinstance(name, str) or name in (".", "..")
+                or not re.fullmatch(r"[A-Za-z0-9._-]+", name)):
+            raise RuntimeError("Invalid asset manifest")
+        if (not isinstance(info, dict) or not isinstance(info.get("sha256"), str)
+                or not re.fullmatch(r"[0-9a-f]{64}", info["sha256"])
+                or ("size" in info and (type(info["size"]) is not int or info["size"] < 0))):
+            raise RuntimeError("Invalid asset manifest")
+    return manifest
+
+
+def _unique_pairs(pairs: list) -> dict:
+    result = {}
+    for key, value in pairs:
+        if key in result:
+            raise RuntimeError("Invalid asset manifest")
+        result[key] = value
+    return result
+
+
+def _read_manifest(path: Path) -> dict:
+    try:
+        return _validate_manifest(json.loads(path.read_text(), object_pairs_hook=_unique_pairs))
+    except (json.JSONDecodeError, UnicodeDecodeError) as err:
+        raise RuntimeError("Invalid asset manifest") from err
+
+
 def load_manifest(models_dir: Path | str | None = None) -> dict:
-    """Load asset manifest from models_dir or packaged vendor directory."""
+    """Load and validate the local or packaged asset manifest."""
     if models_dir is not None:
         local_manifest = Path(models_dir) / "manifest.json"
+        _check_path(local_manifest)
         if local_manifest.is_file():
-            return json.loads(local_manifest.read_text())
+            return _read_manifest(local_manifest)
     packaged_manifest = PACKAGED_VENDOR_DIR / "manifest.json"
+    _check_path(packaged_manifest)
     if packaged_manifest.is_file():
-        return json.loads(packaged_manifest.read_text())
+        return _read_manifest(packaged_manifest)
     raise RuntimeError(f"Asset manifest not found: {packaged_manifest}")
 
 
@@ -47,7 +85,7 @@ def _is_dir_valid(dir_path: Path, manifest: dict | None = None) -> bool:
     if not dir_path.is_dir():
         return False
     try:
-        manifest = manifest or load_manifest(dir_path)
+        manifest = _validate_manifest(manifest) if manifest is not None else load_manifest(dir_path)
     except Exception:
         return False
     files = manifest.get("files", {})
@@ -74,17 +112,17 @@ def models_dir(config: dict | None = None) -> Path:
     4. Default fallback: <config parent or default_home()>/models
     """
     if "FACE_INFERENCE_MODELS_DIR" in os.environ:
-        return Path(os.environ["FACE_INFERENCE_MODELS_DIR"]).resolve()
+        return Path(os.environ["FACE_INFERENCE_MODELS_DIR"]).absolute()
 
     if config and isinstance(config, dict) and "_path" in config:
-        home_models = (Path(config["_path"]).parent / "models").resolve()
+        home_models = (Path(config["_path"]).parent / "models").absolute()
     else:
         home_models = default_home() / "models"
 
     if _is_dir_valid(home_models):
         return home_models
 
-    packaged = PACKAGED_VENDOR_DIR.resolve()
+    packaged = PACKAGED_VENDOR_DIR
     if _is_dir_valid(packaged):
         return packaged
 
@@ -93,7 +131,7 @@ def models_dir(config: dict | None = None) -> Path:
 
 def verify(target_dir: Path | str) -> VerifyResult:
     """Verify that all assets in the manifest exist and match their checksums."""
-    target_path = Path(target_dir).resolve()
+    target_path = Path(target_dir).absolute()
     manifest = load_manifest(target_path)
     files = manifest.get("files", {})
     failures = []
@@ -123,26 +161,26 @@ def fetch(
     Downloads via HTTPS or copies from from_dir, verifying checksums and atomic rename.
     Never overwrites an existing file with a wrong hash.
     """
-    dest_path = Path(target_dir).resolve()
-    dest_path.mkdir(parents=True, exist_ok=True)
+    dest_path = Path(target_dir).absolute()
+    _check_path(dest_path / "manifest.json")
 
     if from_dir is not None:
-        src_manifest_path = Path(from_dir) / "manifest.json"
-        manifest = (
-            json.loads(src_manifest_path.read_text())
-            if src_manifest_path.is_file()
-            else load_manifest(dest_path)
-        )
+        source_path = Path(from_dir).absolute()
+        src_manifest_path = source_path / "manifest.json"
+        _check_path(src_manifest_path)
+        manifest = (load_manifest(source_path) if src_manifest_path.is_file()
+                    else load_manifest(dest_path))
     else:
         manifest = load_manifest(dest_path)
 
     files = manifest.get("files", {})
+    dest_path.mkdir(parents=True, exist_ok=True)
     resolved_base_url = base_url or manifest.get("base_url", DEFAULT_BASE_URL)
 
     # Pre-check: never overwrite an existing file whose hash is wrong
     for filename, info in files.items():
         existing_file = dest_path / filename
-        if existing_file.exists():
+        if existing_file.exists() or existing_file.is_symlink():
             if existing_file.is_symlink() or not existing_file.is_file():
                 raise RuntimeError(
                     f"Existing asset is not a regular file; refusing to overwrite: {existing_file}"
@@ -167,7 +205,7 @@ def fetch(
                 length = 0
 
                 if from_dir is not None:
-                    source_file = Path(from_dir) / filename
+                    source_file = source_path / filename
                     if not source_file.is_file() or source_file.is_symlink():
                         raise RuntimeError(f"Source asset missing or invalid: {source_file}")
                     with source_file.open("rb") as src_stream:
@@ -227,5 +265,6 @@ def fetch(
 
     # Save manifest into models_dir as well
     manifest_file = dest_path / "manifest.json"
+    _check_path(manifest_file)
     if not manifest_file.exists():
         manifest_file.write_text(json.dumps(manifest, indent=2) + "\n")
