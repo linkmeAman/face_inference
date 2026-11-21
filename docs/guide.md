@@ -18,7 +18,7 @@ original medoid/MAD aggregation, unit-vector validation, cosine score clamping,
 duplicate checks and unanimous unique identity rule. PHP/MySQL/Angular are absent
 from this runtime. Nothing writes CCC attendance or calls its login/session APIs.
 
-`standalone/service.py` contains the business-neutral operations;
+`src/face_inference/service.py` contains the business-neutral operations;
 `SQLiteRepository` owns encrypted storage and transactions. Applications can call
 the JSON API, import the service in Python, or consume the client event. Collection
 IDs define independent matching namespaces. The single API token is an operator
@@ -263,14 +263,13 @@ server-resolved collection population at capture time.
 ## Calibration evidence without PHP
 
 ```bash
-python3 run.py export --collection my-team --output /tmp/my-team-face-evidence.jsonl
-python3 evaluation/calibrate_thresholds.py /tmp/my-team-face-evidence.jsonl --output /tmp/my-team-face-report.json
-python3 run.py purge
+face-inference export --collection my-team --output /tmp/my-team-face-evidence.jsonl
+face-inference purge
 ```
 
 The export is exclusive mode 0600, contains decrypted vectors and must remain
 private. It includes original enrollment-reference flags and excludes duplicate
-label conflicts. The existing evaluator is pure Python. Its source/coverage/
+label conflicts. The evaluator is pure Python. Its source/coverage/
 independent-visit/workflow checks remain; it does not approve insufficient data.
 `capture_source` defaults to unvalidated, and omitted device/lighting labels are
 recorded as unreported rather than fabricated. Set the actual source and collect
@@ -282,20 +281,19 @@ visits. Check face on a previously used calibration date requests a later visit.
 ## Verification
 
 ```bash
-PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s standalone/tests -v
-node --test standalone/tests/client.test.mjs
-python3 run.py check
-python3 export_tools/verify_bundle.py
+pytest tests
+node --test tests/js/*.test.mjs
+face-inference check
 ```
 
 The included browser smoke test needs Playwright/Chromium and a synthetic Y4M
-camera fixture; `standalone/tests/browser-smoke.cjs` runs the actual UI, unchanged
+camera fixture; `tests/js/browser-smoke.cjs` runs the actual UI, unchanged
 worker/models, Python API and a disposable encrypted SQLite DB. It checks enrollment,
 duplicate rejection, recognition suggestions, response-loss recovery and persistence
 across a new Python process/browser document. No successful identity response is
-mocked. See `snapshot/STANDALONE_VERIFICATION.md` for the actual executed checks.
+mocked.
 
-The standalone adapter is new code. Original datasets, historical PHP implementation,
-Python PAD service, calibrations and methodology remain preserved in this bundle.
+The standalone adapter is new code. Legacy PHP code and old services have been
+removed from `main` and are preserved under Git tag `legacy-ccc-final`.
 Passing synthetic-camera tests demonstrates integration and recovery; physical-device
 accuracy, representative cohort evaluation and liveness remain separate evidence.

@@ -1,0 +1,37 @@
+services:
+  face:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: face-inference:latest
+    restart: unless-stopped
+    ports:
+      # Bind to loopback interface by default for privacy
+      - "127.0.0.1:6122:6122"
+    volumes:
+      - face-data:/data
+    environment:
+      # Environment passthrough for allowed origins (defaults to empty)
+      - FACE_INFERENCE_ALLOWED_ORIGINS=${FACE_INFERENCE_ALLOWED_ORIGINS:-}
+
+  # Commented Caddy reverse-proxy block for HTTPS termination.
+  # Note: Browser camera access (getUserMedia) requires a secure context (HTTPS)
+  # when accessed from any remote host outside localhost / 127.0.0.1.
+  #
+  # caddy:
+  #   image: caddy:2-alpine
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./Caddyfile:/etc/caddy/Caddyfile:ro
+  #     - caddy-data:/data
+  #     - caddy-config:/config
+  #   depends_on:
+  #     - face
+
+volumes:
+  face-data:
+  # caddy-data:
+  # caddy-config:
