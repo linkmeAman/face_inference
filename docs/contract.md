@@ -9,7 +9,7 @@ actions such as attendance are callbacks for the consuming application.
 
 All `/api/v1/` endpoints require bearer authorization. The private admin token grants access to all routes; scoped session tokens grant access only to their specified enrollment or recognition route.
 `GET /health` is public and contains no credentials. Static files are explicitly
-allowlisted; the database, keys, datasets, original PHP and snapshots are private.
+allowlisted; the database, keys, and datasets are private.
 JSON responses contain `error`, `error_msg`, `message`, and `data`. Errors also
 contain a stable `code`. Mutation keys bind route, collection and exact payload.
 
@@ -89,7 +89,7 @@ the service/repository interface; the reference UI uses the original camera modu
 * HTTP enrollment/recognition against SQLite and browser client cancellation/retry
   generation guards; actual-model browser smoke where Chromium is available.
 
-Existing exported datasets/models/docs remain available; original PHP is historical
-reference only and is never loaded, executed or required by the new runtime.
+Existing exported datasets and model assets remain available; legacy PHP
+code and services were removed from main and are preserved under Git tag legacy-ccc-final.
 
 Session-token verification returns `TOKEN_EXPIRED` or `TOKEN_INVALID` (401), or `TOKEN_SCOPE` (403). Session tokens cannot mint tokens or access other API routes.

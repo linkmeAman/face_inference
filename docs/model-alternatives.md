@@ -2,21 +2,15 @@
 
 Reviewed 2026-10-22. The installed baseline remains YuNet 2023mar INT8 detection
 plus SFace 2021dec INT8BQ recognition, with the existing browser preprocessing.
-See [MODEL_SETUP.md](MODEL_SETUP.md) for the complete installed asset inventory.
+See [model-setup.md](model-setup.md) for the complete installed asset inventory.
 
 ## What the project records actually establish
 
-* `services/face-inference/models/MODEL-MANIFEST.json` records the selected
-  YuNet/SFace/Intel anti-spoof bundle and exact source hashes.
-* `services/face-inference/models/MODEL-LICENSES.md` explicitly records that
-  InsightFace model packs require separate commercial-use permission before
-  substitution. This is a recorded alternative and licensing constraint, not a
-  measured accuracy rejection.
-* MediaPipe Face Landmarker is installed for the preserved guided workflow.
-  It provides capture/tracking evidence rather than the active identity embedding.
-* `docs/RECOGNITION_FAILURE_INVESTIGATION.md` records investigations using the same
-  YuNet/SFace models. Medoid/aggregate reference experiments reused fitting captures
-  and were not independent validation of a replacement.
+* Historical manifests (`MODEL-MANIFEST.json`, `MODEL-LICENSES.md`) and original
+  investigation records are preserved under Git tag `legacy-ccc-final`.
+* Upstream license notes record that InsightFace model packs require separate
+  commercial-use permission before substitution. This is a recorded alternative
+  and licensing constraint, not a measured accuracy rejection.
 
 The exported records do not contain a comparative benchmark of InsightFace,
 FaceNet, dlib or MiniFASNet. The additional options below were reviewed for this
@@ -81,7 +75,7 @@ and capture conditions. [Official Silent-Face-Anti-Spoofing guide](https://githu
    encoder and PAD adapters. Installing a package or editing an environment variable
    does not supply support for a new architecture.
 4. Version the model/preprocessing contract and register the new artifact checksums.
-   `standalone/math.py` currently validates 128-dimensional vectors. A model with a
+   `src/face_inference/matching.py` currently validates 128-dimensional vectors. A model with a
    different dimension requires coordinated schema/API/validation/client changes.
    Equal dimensions also do not imply that two models share an embedding space.
 5. Re-enroll for a different embedding space. Keep old and new galleries isolated;
@@ -108,5 +102,5 @@ and adapter when implementing an experiment; this guide changes no active model.
 `docs/PUBLIC_FACE_DATASET_EVALUATION.md` records ControlFace10K as the selected
 synthetic subset and HSFace/Vec2Face and LFW as assessed/deferred datasets. These
 are evaluation data sources, not alternative inference models. The synthetic
-experiment's limitations and error counts remain in that report and `DATASETS.md`;
+experiment's limitations and error counts remain in that report and `datasets.md`;
 they cannot establish production accuracy for any candidate listed here.

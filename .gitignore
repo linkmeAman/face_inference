@@ -1,14 +1,10 @@
 .venv/
 node_modules/
-runtime/
 __pycache__/
 *.pyc
 test-results/
 playwright-report/
 .env
-
-# Independent Python/SQLite private runtime
-.standalone/
 
 # Optional local model environments; keep model binaries tracked.
 .venv*/

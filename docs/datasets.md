@@ -8,21 +8,16 @@
   `a03589de1a9e028b2d16fa1eb0e019a6930e817c` of
   `HuMInGameLab/ControlFace10K`, with CC BY 4.0 attribution recorded in the manifest.
   Three generated views per identity; 24 development and 24 held-out identities.
-  Downloader: `evaluation/download_controlface_subset.py`.
 * `datasets/reports/`: original public inference vectors, evaluation reports,
   development/reference parity diagnostics and failure classification. These are
   synthetic research results, explicitly not installable live/pilot approval.
 * `datasets/development-diagnostics/`: development-only original raster and alignment
   artifacts used in the reference investigation. Their filenames map to the subset.
-* `services/face-inference/calibration/field-evaluation-dataset.json`: the existing
-  20-row score-only genuine/impostor fixture. Preserve its actual size and role;
-  it is not the underlying image dataset or independently verified field evidence.
-* `services/face-inference/calibration/`: existing identity v2/v3 and PAD artifacts,
-  with their recorded metrics, settings and source model bindings. This export
-  preserves their contents; it does not attest to historical claims in those files.
 * `tests/`: deterministic structural fixtures for quality, matching, duplicates,
   liveness policy, enrollment, lifecycle, recovery and integration. Structural unit
   vectors and mock classifiers are not biometric training/evaluation observations.
+* Historical calibration artifacts (`field-evaluation-dataset.json`, identity v2/v3, and PAD models)
+  are preserved under Git tag `legacy-ccc-final`.
 
 Attribution: Kassi Nzalasse, Rishav Raj, Eli Laird, Corey Clark, “SIG: A Synthetic
 Identity Generation Pipeline for Generating Evaluation Datasets for Face Recognition”
@@ -40,18 +35,15 @@ or independent real-world visits.
 
 | Artifact | Use | SHA-256 |
 | --- | --- | --- |
-| `services/face-inference/models/face_detection_yunet_2023mar_int8.onnx` | Original YuNet | `321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294` |
-| `services/face-inference/models/face_recognition_sface_2021dec_int8bq.onnx` | Original SFace | `fb143eea07838aa532d1c95df5f69899974ea0140e1fba05e94204be13ed74ee` |
-| `services/face-inference/models/anti-spoof-mn3.onnx` | Python anti-spoofing | `c4c99af04603b62d7e44f6f4daeb33e0daeccc696008c0b1d62f6f5cebbb3262` |
-| `pf/vendor/browser-face/sface.onnx` | Prepared SFace graph | `487a139eb85ccd5ff30aef7d0add7f12d2bb7abb90c5f08a7f481b452a660e00` |
-| `pf/vendor/browser-face/yunet.onnx` | Prepared YuNet | Same YuNet hash as above |
-| `pf/vendor/face-landmarker/0.10.34/face_landmarker.task` | Older MediaPipe tracker | Recorded in the export manifest |
+| `src/face_inference/web/vendor/browser-face/yunet.onnx` | Prepared YuNet | `321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294` |
+| `src/face_inference/web/vendor/browser-face/sface.onnx` | Prepared SFace graph | `487a139eb85ccd5ff30aef7d0add7f12d2bb7abb90c5f08a7f481b452a660e00` |
 
-Model source URLs/license references are in `MODEL-MANIFEST.json`,
-`MODEL-LICENSES.md`, and the bundled MediaPipe license. The PAD model provenance
-references CelebA-Spoof training; that corpus is not locally included. SFace/YuNet
-upstream training data likewise is not part of this source extraction. No model
-retraining or replacement was performed.
+Legacy original full-size ONNX weights (`face_detection_yunet_2023mar_int8.onnx`,
+`face_recognition_sface_2021dec_int8bq.onnx`), Intel anti-spoof-mn3, and MediaPipe
+tracker bundles were removed from `main` and are preserved under Git tag `legacy-ccc-final`.
+
+Model license notices and origins are documented in `THIRD_PARTY_NOTICES.md`
+and `src/face_inference/web/vendor/browser-face/manifest.json`.
 
 ## Data outside this reusable extraction
 
@@ -64,13 +56,9 @@ retraining or replacement was performed.
 * HSFace/Vec2Face and LFW were assessed but not downloaded for the recorded public
   experiment; they are not bundled. The full 3.1 GB ControlFace archive was not
   downloaded; the actual selected subset is bundled in full.
-* Older test-only Lena/Obama/Biden photo/video fixtures are described with their
-  source URLs and regeneration commands in `tests/browser-face/README.md`. They
-  are not included as a relicensable face dataset. Public availability alone does
+* Older test-only photo/video fixtures are described with their
+  source URLs and regeneration commands in `tests/README.md` (or preserved under `legacy-ccc-final`).
+  They are not included as a relicensable face dataset. Public availability alone does
   not establish photo redistribution rights.
-* Active policy/rollout metadata is captured as reference only under `snapshot/`.
+* Active policy/rollout metadata from historical deployments is preserved under Git tag `legacy-ccc-final`.
   Application logs, scan tokens, experiment credentials and sessions are excluded.
-
-Use `export_tools/evaluate_public.sh` to reproduce the synthetic experiment with
-an external temporary data/output directory. Keep this folder private; it is not
-an asset directory to publish with the frontend.

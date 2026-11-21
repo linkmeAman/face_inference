@@ -1,5 +1,5 @@
 """Application-independent enrollment, evidence and recognition decisions."""
-from datetime import datetime, timezone
+from datetime import datetime
 import hashlib
 import json
 import re

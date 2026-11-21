@@ -9,13 +9,13 @@
 This system is designed with privacy-by-design principles:
 - **No Photographs Stored by Default:**
   The server does **not** store or persist raw photographs, video streams, or facial imagery. In-browser WebAssembly (YuNet and SFace via `onnxruntime-web`) extracts numerical feature embeddings locally on the user's client machine.
-  - As defined in the relational database schema ([schema.sql](standalone/schema.sql#L4-L16)), the `people` table stores only `encrypted_template BLOB` and the `captures` table stores only `encrypted_observations BLOB NOT NULL`. There are no image or photo columns in the database.
-  - In [service.py](standalone/service.py#L208-L209), observation vectors submitted by the client are encrypted prior to insertion:
+  - As defined in the relational database schema ([schema.sql](src/face_inference/schema.sql#L4-L16)), the `people` table stores only `encrypted_template BLOB` and the `captures` table stores only `encrypted_observations BLOB NOT NULL`. There are no image or photo columns in the database.
+  - In [service.py](src/face_inference/service.py#L208-L209), observation vectors submitted by the client are encrypted prior to insertion:
     `self.repository.encrypt(values)`
-  - In [service.py](standalone/service.py#L219-L221), aggregate biometric templates are encrypted before persistence:
+  - In [service.py](src/face_inference/service.py#L219-L221), aggregate biometric templates are encrypted before persistence:
     `self.repository.encrypt(template)`
 - **Encryption at Rest:**
-  Biometric vectors are encrypted at rest using Fernet authenticated symmetric encryption ([storage.py](standalone/storage.py#L12-L13), [storage.py](standalone/storage.py#L54-L61)) using keys managed in server configuration. SQLite database file permissions are strictly locked to `0600` ([storage.py](standalone/storage.py#L34)).
+  Biometric vectors are encrypted at rest using Fernet authenticated symmetric encryption ([storage.py](src/face_inference/storage.py#L12-L13), [storage.py](src/face_inference/storage.py#L54-L61)) using keys managed in server configuration. SQLite database file permissions are strictly locked to `0600` ([storage.py](src/face_inference/storage.py#L34)).
 
 ---
 
@@ -23,22 +23,22 @@ This system is designed with privacy-by-design principles:
 
 - **Enforced Consent Check:**
   Capturing or enrolling biometric templates requires explicit user consent.
-  - In [service.py](standalone/service.py#L186-L187), the enrollment routine enforces affirmative consent:
+  - In [service.py](src/face_inference/service.py#L186-L187), the enrollment routine enforces affirmative consent:
     ```python
     if payload.get('consent') is not True:
         raise FaceError('CONSENT_REQUIRED', 'Confirm consent before capturing a face')
     ```
-  - Consent timestamps are recorded alongside the enrollment record in `consented_at` ([service.py](standalone/service.py#L202), [service.py](standalone/service.py#L220)).
+  - Consent timestamps are recorded alongside the enrollment record in `consented_at` ([service.py](src/face_inference/service.py#L202), [service.py](src/face_inference/service.py#L220)).
 
 ---
 
 ## 3. Retention & Automatic Purge
 
 - **Configurable Expiration:**
-  Each enrollment and capture observation is assigned an expiration timestamp computed based on the configured retention policy ([service.py](standalone/service.py#L196)):
+  Each enrollment and capture observation is assigned an expiration timestamp computed based on the configured retention policy ([service.py](src/face_inference/service.py#L196)):
   `expires = self.clock() + self.config['retention_days'] * 86400`
 - **Data Purge:**
-  The purge routine ([service.py](standalone/service.py#L57-L65)) automatically removes expired observations and invalidates expired templates:
+  The purge routine ([service.py](src/face_inference/service.py#L57-L65)) automatically removes expired observations and invalidates expired templates:
   - Deletes expired capture records: `DELETE FROM captures WHERE expires_at<=?`
   - Nullifies expired templates: `UPDATE people SET encrypted_template=NULL,state='RECAPTURE_REQUIRED' WHERE encrypted_template IS NOT NULL AND expires_at<=?`
 
@@ -47,11 +47,11 @@ This system is designed with privacy-by-design principles:
 ## 4. Subject Rights: Deletion & Export
 
 - **Right to Erasure (Deletion):**
-  When a person is deleted via the mutation API (`action == 'delete'`), all stored biometric observations and template data are purged from the database ([service.py](standalone/service.py#L121-L126)):
+  When a person is deleted via the mutation API (`action == 'delete'`), all stored biometric observations and template data are purged from the database ([service.py](src/face_inference/service.py#L121-L126)):
   - Captures are deleted: `DELETE FROM captures WHERE collection_id=? AND person_id=?`
   - Person template is cleared: `UPDATE people SET encrypted_template=NULL,state='NOT_ENROLLED',consented_at=NULL,expires_at=NULL,reference_capture_id=NULL WHERE collection_id=? AND id=?`
 - **Data Portability / Export:**
-  Authorized administrators can retrieve and export enrolled records via `export_records` ([service.py](standalone/service.py#L246-L258)) to fulfill data subject access requests.
+  Authorized administrators can retrieve and export enrolled records via `export_records` ([service.py](src/face_inference/service.py#L246-L258)) to fulfill data subject access requests.
 
 ---
 
@@ -80,5 +80,5 @@ Deployers must assess their legal obligations under relevant privacy statutes, i
 ## 7. Liveness & Presentation-Attack Caveat
 
 - **Absence of Presentation Attack Detection (PAD):**
-  As recorded in the system policy ([service.py](standalone/service.py#L34-L38)), `liveness_validated=False`.
+  As recorded in the system policy ([service.py](src/face_inference/service.py#L34-L38)), `liveness_validated=False`.
 - The embedded model pipeline does not distinguish between a live human face and a presentation attack (e.g., high-resolution photograph, screen playback, or mask). Deployers must not rely on this toolkit alone for unattended security boundaries or anti-spoofing verification.
