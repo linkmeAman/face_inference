@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile, mkdir, copyFile } from 'node:fs/promises';
+import { readFile, writeFile, mkdir, copyFile, rm } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -14,7 +14,8 @@ const distBrowserFaceDir = resolve(distVendorDir, 'browser-face');
 async function build() {
   console.log('Building face-capture package...');
 
-  // Ensure output directories exist
+  // Ensure fresh output directories
+  await rm(distDir, { recursive: true, force: true });
   await mkdir(distBrowserFaceDir, { recursive: true });
 
   // 1. Copy client.mjs
@@ -23,15 +24,20 @@ async function build() {
   await copyFile(clientSrc, clientDest);
   console.log(`Copied client.mjs -> dist/vendor-js/client.mjs`);
 
-  // 2. Copy browser-face/*.mjs and contract.json
+  // 2. Copy live browser-face/*.mjs and contract.json
+  const browserFaceFiles = [
+    'capture.mjs',
+    'continuity.mjs',
+    'contract.json',
+    'core.mjs',
+    'facing.mjs',
+    'worker.mjs',
+  ];
   const browserFaceSrcDir = resolve(srcWebDir, 'browser-face');
-  const browserFaceFiles = await readdir(browserFaceSrcDir);
   let copiedCount = 0;
   for (const file of browserFaceFiles) {
-    if (file.endsWith('.mjs') || file.endsWith('.json')) {
-      await copyFile(resolve(browserFaceSrcDir, file), resolve(distBrowserFaceDir, file));
-      copiedCount++;
-    }
+    await copyFile(resolve(browserFaceSrcDir, file), resolve(distBrowserFaceDir, file));
+    copiedCount++;
   }
   console.log(`Copied ${copiedCount} files from browser-face -> dist/vendor-js/browser-face/`);
 
