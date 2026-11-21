@@ -113,3 +113,12 @@ See [model-alternatives.md](model-alternatives.md) for the recorded InsightFace
 alternative, additional OpenCV/FaceNet/dlib/PAD candidates, upstream sources,
 licensing distinctions and the adapter/enrollment/calibration work needed to
 change models. Recorded decisions and newly reviewed options are labeled separately.
+
+## Maintainer note: how the prepared browser models were built
+
+`sface.onnx` and `yunet.onnx` in the model release are not raw upstream downloads. `tools/prepare_browser_face.py`
+verifies the original OpenCV Zoo weights against the pinned SHA-256 values in
+`src/face_inference/web/browser-face/contract.json`, strips SFace's stale weight inputs from the graph, and copies the pinned
+`onnxruntime-web` 1.24.3 runtime files from `node_modules` (`npm install`, then `npm run face:assets`). It needs the `onnx`
+Python package and the two original weight files in the working directory. Run it only to reproduce or audit the shipped
+files; ordinary users never need it, they run `face-inference models fetch`.
