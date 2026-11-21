@@ -8,6 +8,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      # The shipped ORT runtime files are checksum-pinned in manifest.json and prepared by
+      # tools/prepare_browser_face.py: upgrade them deliberately, never via an automatic bump.
+      - dependency-name: onnxruntime-web
   - package-ecosystem: npm
     directory: /packages/face-capture
     schedule:
