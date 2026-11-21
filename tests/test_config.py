@@ -377,3 +377,36 @@ def test_rate_environment_cli_error(config_file, monkeypatch, capsys, name, valu
     assert output.out == ''
     assert len(output.err.splitlines()) == 1
     assert 'Traceback' not in output.err
+
+
+def test_secret_migration_closes_its_lock_connection(home_environment, monkeypatch):
+    """The lock connection must be closed, not just committed (Windows cannot delete open files)."""
+    config = load_config()
+    path = Path(config['_path'])
+    stored = json.loads(path.read_text())
+    stored.pop('session_secret')
+    path.write_text(json.dumps(stored))
+
+    opened = []
+    real_connect = config_module.sqlite3.connect
+
+    class Spy:
+        def __init__(self, connection):
+            self.connection = connection
+            self.closed = False
+
+        def __getattr__(self, name):
+            return getattr(self.connection, name)
+
+        def close(self):
+            self.closed = True
+            self.connection.close()
+
+    def connect(*args, **kwargs):
+        spy = Spy(real_connect(*args, **kwargs))
+        opened.append(spy)
+        return spy
+
+    monkeypatch.setattr(config_module.sqlite3, 'connect', connect)
+    assert 'session_secret' in load_config(path)
+    assert opened and all(spy.closed for spy in opened)

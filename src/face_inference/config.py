@@ -1,5 +1,7 @@
 import base64
 import binascii
+from contextlib import closing
+
 import hashlib
 import ipaddress
 import json
@@ -59,7 +61,9 @@ def load_config(path=None, *, host=None, port=None):
             stream.write('\n')
     config = json.loads(path.read_text())
     if 'session_secret' not in config:
-        with sqlite3.connect(str(path) + '.lock', timeout=30) as lock:
+        # closing(): a sqlite3 connection used as a context manager only commits; it stays open,
+        # and on Windows an open connection keeps config.json.lock undeletable.
+        with closing(sqlite3.connect(str(path) + '.lock', timeout=30)) as lock:
             lock.execute('BEGIN EXCLUSIVE')
             config = json.loads(path.read_text())
             if 'session_secret' not in config:
