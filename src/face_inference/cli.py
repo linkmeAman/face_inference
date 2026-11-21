@@ -37,13 +37,20 @@ def main():
             print(str(target_dir))
             return 0
         if args.action == 'verify':
-            result = verify(target_dir)
+            try:
+                result = verify(target_dir)
+            except RuntimeError as error:
+                print(f"Error: {' '.join(str(error).splitlines())}", file=sys.stderr)
+                return 1
             print(json.dumps(result, indent=2))
             return 0 if result['status'] == 'PASS' else 1
         if args.action == 'fetch':
             try:
                 fetch(target_dir, base_url=args.base_url, from_dir=args.from_dir)
                 return 0
+            except RuntimeError as error:
+                print(f"Error: {' '.join(str(error).splitlines())}", file=sys.stderr)
+                return 1
             except Exception as error:
                 print(f'Error fetching models: {error}', file=sys.stderr)
                 return 1
