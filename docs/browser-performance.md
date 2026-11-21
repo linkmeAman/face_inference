@@ -3,9 +3,9 @@
 ## Overview
 
 The `face_inference` application performs client-side face detection and recognition entirely within the user's browser using ONNX Runtime Web (WASM).
-- Production automatic capture is initiated at [app.mjs:39](file:///Users/tr/Documents/TR/face_inference-lane-k/src/face_inference/web/app.mjs#L39).
-- Browser worker configuration and model graph loading are managed at [worker.mjs:6](file:///Users/tr/Documents/TR/face_inference-lane-k/src/face_inference/web/browser-face/worker.mjs#L6).
-- Model and binary assets are inventoried at [datasets.md:34](file:///Users/tr/Documents/TR/face_inference-lane-k/docs/datasets.md#L34) and in `src/face_inference/web/vendor/browser-face/manifest.json`.
+- Production automatic capture is initiated at [app.mjs:39](../src/face_inference/web/app.mjs).
+- Browser worker configuration and model graph loading are managed at [worker.mjs:6](../src/face_inference/web/browser-face/worker.mjs).
+- Model and binary assets are inventoried at [datasets.md:34](datasets.md) and in [manifest.json](../src/face_inference/web/vendor/browser-face/manifest.json).
 
 To measure and monitor real-world client performance without compromising user privacy, this repository provides a dedicated, opt-in browser performance measurement harness under `tools/browser_benchmark/`.
 
@@ -34,16 +34,16 @@ To measure and monitor real-world client performance without compromising user p
 
 ### 1. Asset Transfer & Memory Footprint
 
-Model and WASM assets are measured using standard browser `PerformanceResourceTiming` APIs (`performance.getEntriesByType('resource')`). The harness distinguishes between network transfer size and decoded memory size:
+Model and WASM assets are measured using standard browser `PerformanceResourceTiming` APIs (`performance.getEntriesByType('resource')`). The harness distinguishes between network transfer size and decoded memory size. Exact decoded byte sizes are defined in `src/face_inference/web/vendor/browser-face/manifest.json`:
 
-| Asset | Role | Transferred Size (Cold) | Decoded Body Size | Transferred Size (Warm) |
-|---|---|---|---|---|
-| `yunet.onnx` | Face detector graph | ~98 KB - 100 KB | 100,416 B | 0 B (from cache) |
-| `sface.onnx` | Feature recognizer graph | ~10.5 MB - 10.6 MB | 10,660,286 B | 0 B (from cache) |
-| `ort-wasm-simd-threaded.wasm` | ONNX Runtime WASM binary | ~12.0 MB - 12.3 MB | 12,361,745 B | 0 B (from cache) |
-| `ort.wasm.min.mjs` | ONNX Runtime loader | ~15 KB - 50 KB | 49,997 B | 0 B (from cache) |
-| `ort-wasm-simd-threaded.mjs` | Threading glue script | ~8 KB - 24 KB | 24,274 B | 0 B (from cache) |
-| **Total Bundle** | | **~22.7 MB - 23.1 MB** | **~23,196,718 B** | **0 B** |
+| Asset | Role | Exact Decoded Body Size (`manifest.json`) | Transferred Size |
+|---|---|---|---|
+| `yunet.onnx` | Face detector graph | 100,416 B | measured by the harness at run time (varies with compression and caching) |
+| `sface.onnx` | Feature recognizer graph | 10,660,286 B | measured by the harness at run time (varies with compression and caching) |
+| `ort-wasm-simd-threaded.wasm` | ONNX Runtime WASM binary | 12,361,745 B | measured by the harness at run time (varies with compression and caching) |
+| `ort.wasm.min.mjs` | ONNX Runtime loader | 49,997 B | measured by the harness at run time (varies with compression and caching) |
+| `ort-wasm-simd-threaded.mjs` | Threading glue script | 24,274 B | measured by the harness at run time (varies with compression and caching) |
+| **Total Bundle** | | **23,196,718 B** | measured by the harness at run time (varies with compression and caching) |
 
 - **Cold Cache**: Initial page load or cleared browser cache where `transferSize > 0`.
 - **Warm Cache**: Subsequent loads where assets are served from disk/memory cache (`transferSize === 0` and `decodedBodySize > 0`).
@@ -53,6 +53,7 @@ Model and WASM assets are measured using standard browser `PerformanceResourceTi
 
 - **Cold Startup Latency**: Wall-clock duration (`performance.now()`) required to fetch, compile WASM modules, and initialize initial `ort.InferenceSession` instances for both YuNet and SFace.
 - **Warm Startup Latency**: Wall-clock duration required to create subsequent inference sessions when WASM binaries and model weights are already compiled and cached in browser memory.
+- **Status**: Not measured on any device yet.
 
 ### 3. Inference Latency & Distribution
 
@@ -60,6 +61,7 @@ Inference latency is sampled across multiple iterations using high-resolution ti
 - **p50 (Median Latency)**: 50th percentile of frame inference duration.
 - **p95 (Tail Latency)**: 95th percentile of frame inference duration, capturing garbage collection pauses or thread scheduling jitter.
 - **Sample Count & Bounds**: Reports sample count, min, max, and mean alongside p50 and p95.
+- **Status**: Not measured on any device yet.
 
 Calculations follow standard linear interpolation across sorted samples to ensure deterministic verification in test fixtures.
 
@@ -87,6 +89,7 @@ Calculations follow standard linear interpolation across sorted samples to ensur
 ### 2. WebGPU Support
 - Evaluated via `Boolean(navigator.gpu)`.
 - If unavailable, the harness notes fallback to CPU WASM/SIMD execution (`"status": "fallback_wasm"`).
+- WebGPU acceleration status: not measured on any device yet.
 
 ---
 
@@ -116,15 +119,17 @@ node --test tools/browser_benchmark/*.test.mjs
 
 ## Sample Sanitized Benchmark Report
 
+> **Measurement Status**: Not measured on any device yet. The benchmark harness reports all capabilities, cache states, asset sizes, and latencies in a sanitized JSON schema. When a run has not yet been executed on a live browser or when APIs are unavailable, metrics report `null` values and `not_measured` status rather than fabricating numbers:
+
 ```json
 {
   "benchmarkVersion": "1.0.0",
-  "timestamp": "2026-11-22T00:10:00.000Z",
+  "timestamp": "2026-11-22T00:00:00.000Z",
   "browser": {
-    "name": "Chrome",
-    "majorVersion": "122"
+    "name": "Unknown",
+    "majorVersion": "Unknown"
   },
-  "os": "macOS",
+  "os": "Unknown",
   "deviceClass": "desktop",
   "platformCapabilities": {
     "crossOriginIsolated": false,
@@ -142,36 +147,44 @@ node --test tools/browser_benchmark/*.test.mjs
     "detector": "yunet640-similarity5-rgb255-v1",
     "recognizer": "sface-int8bq-fb143eea"
   },
-  "cacheState": "cold",
-  "sampleCount": 10,
+  "cacheState": "not_measured",
+  "sampleCount": 0,
   "latencies": {
-    "coldStartupMs": 1420.5,
-    "warmStartupMs": 210.2,
+    "coldStartupMs": null,
+    "warmStartupMs": null,
     "inference": {
-      "count": 10,
-      "min": 24.1,
-      "max": 38.6,
-      "mean": 27.4,
-      "p50": 26.2,
-      "p95": 36.8,
-      "status": "measured"
+      "count": 0,
+      "min": null,
+      "max": null,
+      "mean": null,
+      "p50": null,
+      "p95": null,
+      "status": "not_measured"
     }
   },
   "sizes": {
-    "totalTransferBytes": 22692286,
-    "totalDecodedBytes": 23172444,
+    "totalTransferBytes": 0,
+    "totalDecodedBytes": 23196718,
     "resources": {
       "yunet.onnx": {
-        "transferBytes": 100416,
+        "transferBytes": 0,
         "decodedBytes": 100416
       },
       "sface.onnx": {
-        "transferBytes": 10660286,
+        "transferBytes": 0,
         "decodedBytes": 10660286
       },
       "ort-wasm-simd-threaded.wasm": {
-        "transferBytes": 12361745,
+        "transferBytes": 0,
         "decodedBytes": 12361745
+      },
+      "ort.wasm.min.mjs": {
+        "transferBytes": 0,
+        "decodedBytes": 49997
+      },
+      "ort-wasm-simd-threaded.mjs": {
+        "transferBytes": 0,
+        "decodedBytes": 24274
       }
     }
   }
