@@ -30,6 +30,8 @@ python3 -m venv .venv
 .venv/bin/face-inference serve
 ```
 
+Note that `face-inference check` is not a read-only command: it verifies configuration and model assets, initializing `config.json` (with generated API token, encryption key, and session secret) and the database schema if they do not yet exist. Missing assets return `{"status": "assets-missing", ...}` before database initialization.
+
 Open `http://127.0.0.1:6122` and enter the token. Use an SSH tunnel for a remote
 server, or the HTTPS reverse-proxy setup in [docs/guide.md](guide.md).
 
@@ -88,15 +90,15 @@ Original sources and licenses are recorded locally in:
 
 ## 5. Model asset packaging and distribution
 
-Model binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`) total ~23 MB and are not bundled into the PyPI wheel.
+In the current build configuration (`pyproject.toml`), model and WASM binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`, totaling ~23 MB) located in `src/face_inference/web/vendor/browser-face/` are bundled directly into the package wheel.
 
-Assets are packaged for GitHub release using `tools/package_assets.py`:
+Unbundling these binaries from future release wheels—so that wheels remain lightweight and binaries are downloaded on first run or via CLI (`face-inference models fetch`)—remains a future distribution goal. The distribution packaging scripts (`tools/package_assets.py`) already support preparing asset archives for release hosting:
 
 ```bash
 python3 tools/package_assets.py
 ```
 
-This verifies `manifest.json` SHA-256 hashes, copies assets to `dist-assets/`, and writes `SHA256SUMS`. On first run or via CLI, `face-inference models fetch` downloads any missing assets from the pinned release and verifies their checksums.
+This verifies `manifest.json` SHA-256 hashes, copies assets to `dist-assets/`, and writes `SHA256SUMS`. When assets are unbundled or if local files are missing, `face-inference models fetch` downloads missing assets from the pinned release and verifies their checksums.
 
 ## 6. Local asset management
 
