@@ -9,9 +9,9 @@ current system.
 
 ```bash
 cd /var/www/face_inference
-python3 run.py check
-python3 run.py token
-python3 run.py
+python -m face_inference check
+python -m face_inference token
+python -m face_inference
 ```
 
 Open **http://127.0.0.1:6122**, enter the token printed by the second command,
@@ -23,9 +23,9 @@ This host already has the required Python cryptography package. On another machi
 
 ```bash
 python3 -m venv .venv
-.venv/bin/python -m pip install -r requirements-standalone.txt
-.venv/bin/python run.py check
-.venv/bin/python run.py
+.venv/bin/python -m pip install .
+.venv/bin/python -m face_inference check
+.venv/bin/python -m face_inference
 ```
 
 No Python model dependencies are required for this UI: the existing browser WASM
@@ -44,9 +44,9 @@ python3 tools/model_assets.py verify
 
 * Create arbitrary collections and people through the UI or JSON API. IDs can be
   your employee/customer/student/application identifiers; metadata is optional.
-* The private `.standalone/config.json` controls SQLite location, host/port,
+* The private `.face-inference/config.json` controls SQLite location, host/port,
   thresholds, retention, timezone, evidence source and approved collection scope.
-* `.standalone/faces.sqlite3` stores encrypted face templates and observations.
+* `.face-inference/faces.sqlite3` stores encrypted face templates and observations.
   Keys and the API token are independent of the original CCC application.
 * `FaceClient` and the `face-result` browser event let another application consume
   identity decisions. Recognition itself triggers no attendance or external action.
@@ -63,10 +63,10 @@ approved collections. Face quality and recognition do not establish liveness.
 | [STANDALONE_GUIDE.md](STANDALONE_GUIDE.md) | Configuration, API, embedding into another app, evidence/export and verification |
 | [MODEL_SETUP.md](MODEL_SETUP.md) | All models/runtime assets, local installation, checksum verification, recovery and Git instructions |
 | [MODEL_ALTERNATIVES.md](MODEL_ALTERNATIVES.md) | Recorded model alternatives, additional candidates, tradeoffs, sources and migration requirements |
-| [standalone/CONTRACT.md](standalone/CONTRACT.md) | API, schema, lifecycle and original test matrix |
-| `standalone/service.py`, `math.py` | PHP-free enrollment, aggregation, duplicate and unanimous matching logic |
-| `standalone/storage.py`, `schema.sql` | Authenticated encryption and SQLite persistence/transactions |
-| `standalone/server.py`, `web/` | Python HTTP API and plain JavaScript camera UI/client |
+| [docs/contract.md](docs/contract.md) | API, schema, lifecycle and original test matrix |
+| `src/face_inference/service.py`, `matching.py` | PHP-free enrollment, aggregation, duplicate and unanimous matching logic |
+| `src/face_inference/storage.py`, `schema.sql` | Authenticated encryption and SQLite persistence/transactions |
+| `src/face_inference/server.py`, `web/` | Python HTTP API and plain JavaScript camera UI/client |
 | [DATASETS.md](DATASETS.md) | Original synthetic dataset, model provenance, results and limitations |
 | [REUSE_GUIDE.md](REUSE_GUIDE.md) | Detailed original pipeline/method map and historical CCC integration context |
 

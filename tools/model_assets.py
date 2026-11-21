@@ -10,7 +10,7 @@ import base64
 import hashlib
 import json
 import os
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 import tarfile
 import tempfile
 from urllib.request import Request, urlopen
@@ -25,33 +25,18 @@ def digest(path):
 
 
 def records(root):
-    native = json.loads((root / 'services/face-inference/models/MODEL-MANIFEST.json').read_text())
-    prepared = json.loads((root / 'pf/vendor/browser-face/manifest.json').read_text())
-    tracker = json.loads((root / 'pf/vendor/face-landmarker/0.10.34/ASSET-MANIFEST.json').read_text())
-    provenance = json.loads((root / 'snapshot/export-manifest.json').read_text())
-    exported = {item['path']: item['sha256'] for item in provenance['original_files']}
+    prepared = json.loads((root / 'src/face_inference/web/vendor/browser-face/manifest.json').read_text())
+    required = {'sface.onnx', 'yunet.onnx', 'ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'}
+    if not required.issubset(prepared):
+        raise RuntimeError('Missing browser asset checksum')
     result = []
-    for role in ('detector', 'recognizer', 'pad'):
-        item = native[role]
-        if Path(item['file']).name != item['file']:
-            raise RuntimeError('Invalid original model filename')
-        result.append(dict(path='services/face-inference/models/' + item['file'], sha256=item['sha256'],
-            profile='python', role=role, source=item['source_url']))
     for filename, expected in prepared.items():
         if Path(filename).name != filename:
             raise RuntimeError('Invalid prepared model filename')
-        result.append(dict(path='pf/vendor/browser-face/' + filename, sha256=expected,
-            profile='browser', role='prepared-' + filename))
-    for filename in ('ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'):
-        path = 'pf/vendor/browser-face/' + filename
-        result.append(dict(path=path, sha256=exported[path], profile='browser', role='ort'))
-    for filename, expected in tracker['files_sha256'].items():
-        if '..' in PurePosixPath(filename).parts or PurePosixPath(filename).is_absolute():
-            raise RuntimeError('Invalid MediaPipe asset path')
-        result.append(dict(path='pf/vendor/face-landmarker/0.10.34/' + filename, sha256=expected,
-            profile='mediapipe', role='landmarker-model' if filename == 'face_landmarker.task' else 'landmarker-runtime',
-            source=tracker['model_source'] if filename == 'face_landmarker.task' else None))
-    return result, tracker
+        result.append(dict(path='src/face_inference/web/vendor/browser-face/' + filename,
+            sha256=expected, profile='browser', role='ort' if filename.startswith('ort') else 'prepared-' + filename))
+    return result
+
 
 
 def fetch(url, destination, sha256=None, integrity=None):
@@ -100,40 +85,32 @@ def install(data, target, expected):
         temporary.unlink()
 
 
-def restore(root, selected, all_records, tracker):
+def restore(root, selected):
     for item in selected:
         path = root / item['path']
         if path.exists() and digest(path) != item['sha256']:
             raise RuntimeError('Existing asset has a wrong checksum; no files replaced: ' + item['path'])
-    native = {item['role']: item for item in all_records if item['profile'] == 'python'}
+    contract = json.loads((root / 'src/face_inference/web/browser-face/contract.json').read_text())
+    native = {
+        'detector': ('https://huggingface.co/opencv/opencv_zoo/resolve/main/models/face_detection_yunet/face_detection_yunet_2023mar_int8.onnx', contract['detector_source_sha256']),
+        'recognizer': ('https://huggingface.co/opencv/opencv_zoo/resolve/main/models/face_recognition_sface/face_recognition_sface_2021dec_int8bq.onnx', contract['recognizer_source_sha256']),
+    }
     with tempfile.TemporaryDirectory(prefix='face-model-restore-') as staging:
         staging = Path(staging)
         archives = {}
 
         def original(role):
-            item = native[role]
-            path = root / item['path']
-            if path.exists():
-                if digest(path) != item['sha256']:
-                    raise RuntimeError('Original model checksum differs: ' + item['path'])
-            else:
-                downloaded = staging / (role + '.onnx')
-                fetch(item['source'], downloaded, sha256=item['sha256'])
-                install(downloaded.read_bytes(), path, item['sha256'])
-            return path
+            url, expected = native[role]
+            downloaded = staging / (role + '.onnx')
+            if not downloaded.exists():
+                fetch(url, downloaded, sha256=expected)
+            return downloaded
 
         def archive(kind):
             if kind not in archives:
                 destination = staging / (kind + '.tgz')
-                if kind == 'ort':
-                    package = json.loads((root / 'package-lock.json').read_text())['packages']['node_modules/onnxruntime-web']
-                    fetch(package['resolved'], destination, integrity=package['integrity'])
-                else:
-                    version = tracker['version']
-                    if not all(part.isdigit() for part in version.split('.')):
-                        raise RuntimeError('Invalid MediaPipe package version')
-                    fetch('https://registry.npmjs.org/@mediapipe/tasks-vision/-/tasks-vision-' + version + '.tgz',
-                        destination, sha256=tracker['package_archive_sha256'], integrity=tracker['npm_integrity'])
+                package = json.loads((root / 'package-lock.json').read_text())['packages']['node_modules/onnxruntime-web']
+                fetch(package['resolved'], destination, integrity=package['integrity'])
                 archives[kind] = destination
             return archives[kind]
 
@@ -142,9 +119,6 @@ def restore(root, selected, all_records, tracker):
             if target.exists():
                 continue
             role = item['role']
-            if item['profile'] == 'python':
-                original(role)
-                continue
             if role == 'prepared-yunet.onnx':
                 data = original('detector').read_bytes()
             elif role == 'prepared-sface.onnx':
@@ -162,16 +136,10 @@ def restore(root, selected, all_records, tracker):
                 output = staging / 'sface-prepared.onnx'
                 onnx.save(model, str(output))
                 data = output.read_bytes()
-            elif role == 'landmarker-model':
-                output = staging / 'face_landmarker.task'
-                fetch(item['source'], output, sha256=item['sha256'])
-                data = output.read_bytes()
             else:
-                kind = 'ort' if role == 'ort' else 'mediapipe'
-                relative = target.name if kind == 'ort' else item['path'].split('/0.10.34/', 1)[1]
-                names = ['package/dist/' + relative] if kind == 'ort' else ['package/' + relative]
-                if relative == 'vision_bundle.js':
-                    names.append('package/vision_bundle.mjs')
+                kind = 'ort'
+                relative = target.name
+                names = ['package/dist/' + relative]
                 data = None
                 with tarfile.open(archive(kind), 'r:gz') as package:
                     for candidate in names:
@@ -194,15 +162,15 @@ def restore(root, selected, all_records, tracker):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('command', choices=('verify', 'restore'))
-    parser.add_argument('--profile', choices=('all', 'browser', 'python', 'mediapipe'), default='all')
+    parser.add_argument('--profile', choices=('all', 'browser'), default='all')
     parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1], help='Project root; defaults to this script’s parent project')
     args = parser.parse_args()
     try:
         root = args.root.resolve()
-        inventory, tracker = records(root)
+        inventory = records(root)
         selected = [item for item in inventory if args.profile == 'all' or item['profile'] == args.profile]
         if args.command == 'restore':
-            restore(root, selected, inventory, tracker)
+            restore(root, selected)
         failed = []
         for item in selected:
             path = root / item['path']
