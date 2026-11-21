@@ -13,7 +13,7 @@ The `face-inference` container image is built using a multi-stage `python:3.12-s
 - **Security:** Runs as non-root user UID `10001` with minimal filesystem privileges.
 - **Host Binding:** Sets `ENV FACE_INFERENCE_HOST=0.0.0.0` inside the container so the HTTP server listens on all container network interfaces.
 - **Port:** Exposes private listener port `6122`.
-- **Models:** Model weights and ONNX runtime WASM assets are stored under `/data/models`. On startup, `serve` automatically runs `face-inference models fetch` to download and verify required model assets into `/data/models` (or verify pre-mounted assets).
+- **Models:** Model weights and ONNX runtime WASM assets are stored under `/data/models`. On startup the entrypoint runs `face-inference models verify`; only if that fails does it run `face-inference models fetch` into `/data/models`. Until the `models-v1` release is published (and while the wheel still bundles the model files) the bundled files are used and nothing is downloaded.
 
 ---
 

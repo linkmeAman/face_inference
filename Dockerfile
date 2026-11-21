@@ -17,7 +17,6 @@ FROM python:3.12-slim
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     FACE_INFERENCE_HOME=/data \
-    FACE_INFERENCE_MODELS_DIR=/data/models \
     FACE_INFERENCE_HOST=0.0.0.0
 
 # Create non-root system group and user with uid 10001
@@ -36,6 +35,7 @@ RUN printf '%s\n' \
     '#!/bin/sh' \
     'set -e' \
     'fetch_models() {' \
+    '  if face-inference models verify >/dev/null 2>&1; then return 0; fi' \
     '  if [ -n "$FACE_INFERENCE_MODELS_FROM_DIR" ]; then' \
     '    face-inference models fetch --from-dir "$FACE_INFERENCE_MODELS_FROM_DIR"' \
     '  else' \
