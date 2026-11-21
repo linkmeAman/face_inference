@@ -186,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
             if not isinstance(result, dict):
                 raise ValueError('Object required')
             return result
-        except (ValueError, UnicodeError):
+        except (ValueError, UnicodeError, RecursionError):
             raise FaceError('INVALID_JSON', 'A valid finite JSON object is required')
 
     def route(self):
@@ -248,6 +248,11 @@ class Handler(BaseHTTPRequestHandler):
                         body = self.read_json()
                         if claims and claims.subject is not None and resource == 'enrollments' and body.get('person_id') != claims.subject:
                             raise FaceError('TOKEN_SCOPE', 'Session token is not permitted', 403)
+                        if claims and claims.subject is not None and resource == 'recognitions':
+                            if 'eligible_ids' not in body:
+                                body['eligible_ids'] = [claims.subject]
+                            elif body['eligible_ids'] != [claims.subject]:
+                                raise FaceError('TOKEN_SCOPE', 'Session token is not permitted', 403)
                         self.respond(service.mutate(collection, actions[resource], body))
                         return
                     if self.command == 'DELETE' and len(parts) == 7 and resource == 'people' and parts[6] == 'face':
