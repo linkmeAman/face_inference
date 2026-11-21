@@ -355,14 +355,7 @@ export class FaceCaptureElement extends ElementBase {
     return text[result.state] || result.state;
   }
 
-  async _resolveCaptureClass(modelBaseUrl) {
-    if (modelBaseUrl) {
-      try {
-        const url = new URL('browser-face/capture.mjs', modelBaseUrl).href;
-        const mod = await import(/* @vite-ignore */ url);
-        if (mod.AutomaticCapture) return mod.AutomaticCapture;
-      } catch (_) {}
-    }
+  async _resolveCaptureClass() {
     return AutomaticCapture;
   }
 
@@ -437,7 +430,7 @@ export class FaceCaptureElement extends ElementBase {
 
     let CaptureClass;
     try {
-      CaptureClass = await this._resolveCaptureClass(config.modelBaseUrl);
+      CaptureClass = await this._resolveCaptureClass();
     } catch (err) {
       if (this._generation === generation) {
         const errorDetail = {
@@ -456,10 +449,20 @@ export class FaceCaptureElement extends ElementBase {
     }
 
     let held = '';
+    const modelBase = config.modelBaseUrl || (config.apiUrl ? (config.apiUrl.endsWith('/') ? config.apiUrl : config.apiUrl + '/') : '');
+    const contractAssetsBase = serverConfig?.contract?.assets_base || 'vendor/browser-face/';
+    const assetsUrl = modelBase
+      ? (modelBase.endsWith('vendor/browser-face/') ? modelBase : new URL(contractAssetsBase, modelBase).href)
+      : '';
+
     this._capture = new CaptureClass(
       this._video,
       this._canvas,
-      { ...serverConfig.contract, diagnostics: false },
+      {
+        ...(serverConfig?.contract || {}),
+        diagnostics: false,
+        ...(assetsUrl ? { assets_url: assetsUrl, assets_base: assetsUrl } : {}),
+      },
       {
         status: (val) => {
           if (this._generation === generation && !held) this._setStatus(val);

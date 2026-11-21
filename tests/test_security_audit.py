@@ -7,7 +7,7 @@ test fails, demonstrating the existence and mechanics of the weakness.
 
 import http.server
 import json
-import subprocess
+import re
 import threading
 import uuid
 from email.message import Message
@@ -117,34 +117,16 @@ def test_sec_2_client_redirect_strips_authorization():
         target_server.shutdown()
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-3 Untrusted model-base-url allowed in web component")
-def test_sec_3_model_base_url_untrusted_origin_rejected():
-    """SEC-3: validateConfig must reject untrusted remote model-base-url origins.
+def test_sec_3_component_never_imports_code_from_model_base_url():
+    """SEC-3 (closed): executable code must never be imported from an attribute-controlled origin.
 
-    Currently, validateConfig accepts arbitrary remote origins, which
-    face-capture then dynamically imports without validation.
+    `model-base-url` may point model/WASM assets at another origin (project decision D2), but the
+    component must always use its shipped capture implementation. A dynamic `import(...)` in the
+    element source is the mechanism that previously loaded remote code, so none may exist.
     """
-    script = """
-    import('./packages/face-capture/src/config.js').then(m => {
-      const cfg = m.parseConfig({
-        'api-url': 'http://127.0.0.1:6122',
-        collection: 'team',
-        'model-base-url': 'https://attacker.evil.com/models/'
-      });
-      const res = m.validateConfig(cfg);
-      process.stdout.write(JSON.stringify(res));
-    });
-    """
-    proc = subprocess.run(
-        ["node", "--input-type=module", "-e", script],
-        capture_output=True,
-        text=True,
-        check=True,
-    )
-    res = json.loads(proc.stdout)
-    # Secure behavior: validateConfig must reject untrusted external model-base-url
-    assert res.get("valid") is False
-    assert res.get("code") in ("INVALID_CONFIG", "UNTRUSTED_MODEL_URL")
+    component = Path(__file__).resolve().parents[1] / "packages/face-capture/src/face-capture.js"
+    source = component.read_text()
+    assert not re.search(r"\bimport\s*\(", source), "dynamic import() found in face-capture.js"
 
 
 def test_sec_4_purge_sqlite_secure_delete_enabled(tmp_path: Path):
