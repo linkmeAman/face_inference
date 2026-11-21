@@ -202,6 +202,12 @@ The client requires zero third-party dependencies (Python 3.10+ stdlib only).
 - **Token redaction**: The API credential is never exposed in `repr()`, `str()`, or exception messages.
 - **Error types**: Server-side error responses raise `FaceApiError(status, code, message)`; network failures or timeouts raise `FaceConnectionError`.
 
+## Examples
+
+Runnable example scripts and walkthroughs are available in the [`examples/`](../examples/README.md) directory:
+- [Python client quickstart](../examples/python/quickstart.py): health check, collection creation, adding people, listing people, and deletion using `FaceClient`.
+- [Web component embed](../examples/web/index.html): vanilla HTML/JS embed of `<face-capture>`, including [React](../examples/web/react.md) and [Vue](../examples/web/vue.md) snippets.
+
 ## Enrollment lifecycle and persistence
 
 The SQLite transaction covers duplicate comparison, face save, capture claim,
