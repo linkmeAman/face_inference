@@ -1,9 +1,15 @@
+import base64
+import binascii
 import hashlib
+import ipaddress
 import json
 import math
 import os
 from pathlib import Path
+import re
 import secrets
+import sqlite3
+import tempfile
 from zoneinfo import ZoneInfo
 from urllib.parse import urlsplit
 
@@ -12,7 +18,7 @@ from cryptography.fernet import Fernet
 ROOT = Path(__file__).resolve().parent / 'web'
 
 
-def load_config(path=None):
+def load_config(path=None, *, host=None, port=None):
     path = Path(path or os.getenv('FACE_STANDALONE_CONFIG', Path(os.getenv('FACE_INFERENCE_HOME', '.face-inference')) / 'config.json')).resolve()
     if not path.exists():
         path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
@@ -21,6 +27,7 @@ def load_config(path=None):
             raise RuntimeError('Existing database has no configuration; restore its original encryption key')
         config = dict(version=1, host='127.0.0.1', port=6122, database=str(database),
             api_token=secrets.token_urlsafe(32), encryption_key=Fernet.generate_key().decode(),
+            session_secret=base64.urlsafe_b64encode(secrets.token_bytes(32)).decode(),
             mode='EVALUATION', duplicate_threshold=0.85, recognition_threshold=0.65,
             retention_days=30, policy_file='', max_people=1000, timezone='Asia/Kolkata',
             capture_source='unvalidated-camera', approved_collection_ids=[], allowed_origins=[])
@@ -28,6 +35,50 @@ def load_config(path=None):
             json.dump(config, stream, indent=2)
             stream.write('\n')
     config = json.loads(path.read_text())
+    if 'session_secret' not in config:
+        with sqlite3.connect(str(path) + '.lock', timeout=30) as lock:
+            lock.execute('BEGIN EXCLUSIVE')
+            config = json.loads(path.read_text())
+            if 'session_secret' not in config:
+                config['session_secret'] = base64.urlsafe_b64encode(secrets.token_bytes(32)).decode()
+                fd, temporary = tempfile.mkstemp(dir=path.parent, prefix='.config-', suffix='.tmp')
+                try:
+                    with os.fdopen(fd, 'w') as stream:
+                        json.dump(config, stream, indent=2)
+                        stream.write('\n')
+                    os.replace(temporary, path)
+                finally:
+                    if os.path.exists(temporary):
+                        os.unlink(temporary)
+            config = json.loads(path.read_text())
+    try:
+        secret = config['session_secret']
+        if not isinstance(secret, str) or len(base64.b64decode(secret, altchars=b'-_', validate=True)) < 32:
+            raise ValueError
+    except (ValueError, binascii.Error):
+        raise RuntimeError('Invalid session secret') from None
+    config['host'] = host if host is not None else os.getenv('FACE_INFERENCE_HOST', config.get('host', '127.0.0.1'))
+    port = port if port is not None else os.getenv('FACE_INFERENCE_PORT')
+    if port is not None:
+        try:
+            config['port'] = int(port) if isinstance(port, str) else port
+        except ValueError:
+            raise RuntimeError('Invalid config: port') from None
+    config.setdefault('port', 6122)
+    origins = os.getenv('FACE_INFERENCE_ALLOWED_ORIGINS')
+    if origins is not None:
+        config['allowed_origins'] = [origin.strip() for origin in origins.split(',') if origin.strip()]
+    host = config['host']
+    if not isinstance(host, str):
+        raise RuntimeError('Invalid config: host')
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        labels = host.removesuffix('.').split('.')
+        if len(host.removesuffix('.')) > 253 or host.replace('.', '').isdigit() or any(
+            not re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?', label) for label in labels
+        ):
+            raise RuntimeError('Invalid config: host') from None
     if config.get('version') != 1 or config.get('mode') not in ('COLLECT', 'EVALUATION', 'APPROVED'):
         raise RuntimeError('Unsupported standalone configuration version or mode')
     if not isinstance(config.get('api_token'), str) or len(config['api_token']) < 32:
@@ -45,14 +96,23 @@ def load_config(path=None):
     for origin in origins:
         if not isinstance(origin, str):
             raise RuntimeError('Invalid allowed origin')
-        parsed = urlsplit(origin)
-        if parsed.scheme != 'https' or not parsed.netloc or parsed.username or parsed.path or parsed.query or parsed.fragment:
-            raise RuntimeError('Additional browser origins must be exact HTTPS origins')
+        try:
+            parsed = urlsplit(origin)
+            host = parsed.hostname
+            _ = parsed.port
+            valid_host = host and re.fullmatch(r'(?:\[[0-9a-fA-F:.]+\]|[a-zA-Z0-9.-]+)(?::[0-9]+)?', parsed.netloc)
+            valid_scheme = parsed.scheme == 'https' or (parsed.scheme == 'http' and host in ('localhost', '127.0.0.1', '::1'))
+            if (not valid_host or not valid_scheme or parsed.username is not None or parsed.password is not None
+                    or parsed.netloc.endswith(':') or origin != parsed.scheme + '://' + parsed.netloc
+                    or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in origin)):
+                raise ValueError('Invalid origin')
+        except ValueError:
+            raise RuntimeError('Additional browser origins must be exact HTTPS origins or local HTTP origins') from None
     for name in ('duplicate_threshold', 'recognition_threshold'):
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value) or not -1 <= value <= 1:
             raise RuntimeError('Invalid server threshold: ' + name)
-    for name, minimum, maximum in [('port', 1024, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000)]:
+    for name, minimum, maximum in [('port', 1, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000)]:
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, int) or not minimum <= value <= maximum:
             raise RuntimeError('Invalid config: ' + name)
@@ -69,16 +129,21 @@ def contract(root=ROOT):
 def verify_assets(root=ROOT):
     data = contract(root)
     assets = root / 'vendor/browser-face'
-    manifest = json.loads((assets / 'manifest.json').read_text())
+    manifest_path = assets / 'manifest.json'
+    if not manifest_path.is_file():
+        raise RuntimeError('Missing browser asset manifest')
+    manifest = json.loads(manifest_path.read_text())
+    files = manifest.get('files', {})
     required = {'sface.onnx', 'yunet.onnx', 'ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'}
-    if not required.issubset(manifest):
+    if not required.issubset(files):
         raise RuntimeError('Missing browser asset checksum')
-    for name, expected in manifest.items():
-        if Path(name).name != name or hashlib.sha256((assets / name).read_bytes()).hexdigest() != expected:
-            raise RuntimeError('Prepared face asset checksum mismatch')
-    for name in ('ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'):
-        if not (assets / name).is_file():
+    for name, info in files.items():
+        expected = info.get('sha256') if isinstance(info, dict) else info
+        target = assets / name
+        if not target.is_file() or target.is_symlink():
             raise RuntimeError('Missing browser runtime asset: ' + name)
+        if Path(name).name != name or hashlib.sha256(target.read_bytes()).hexdigest() != expected:
+            raise RuntimeError('Prepared face asset checksum mismatch')
     return data
 
 

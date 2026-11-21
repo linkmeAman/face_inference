@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    name: python ${{ matrix.python }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python: ["3.10", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+        with:
+          python-version: ${{ matrix.python }}
+      - run: uv venv --python ${{ matrix.python }}
+      - run: uv pip install -e . pytest pytest-xdist ruff
+      - run: uv run --no-sync ruff check src tests
+      - run: uv run --no-sync pytest -q -n auto
+
+  js:
+    name: js / node 22
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: node --test tests/js/*.test.mjs
+
+  build:
+    name: build / wheel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - run: uv build
+      - run: uv venv .venv-wheel
+      - run: uv pip install --python .venv-wheel dist/*.whl
+      - run: .venv-wheel/bin/face-inference --help
+      - run: .venv-wheel/bin/python -c "import face_inference; print(face_inference.__version__)"
+
+  packages:
+    name: packages / face-capture
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        if: hashFiles('packages/face-capture/package.json') != ''
+        with:
+          node-version: 22
+      - name: test package
+        if: hashFiles('packages/face-capture/package.json') != ''
+        working-directory: packages/face-capture
+        run: npm test

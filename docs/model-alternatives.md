@@ -98,7 +98,7 @@ and capture conditions. [Official Silent-Face-Anti-Spoofing guide](https://githu
 8. Promote only a validated model/contract/gallery/policy combination. Preserve the
    versioned baseline and enrollment data needed for an intentional rollback.
 
-The existing `tools/model_assets.py verify/restore` commands cover the installed
+The existing `face-inference models verify/fetch` commands cover the installed
 16-asset inventory only. They deliberately do not fetch unselected candidates or
 rewrite manifests to accept alternative bytes. Add a separately reviewed manifest
 and adapter when implementing an experiment; this guide changes no active model.

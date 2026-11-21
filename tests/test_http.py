@@ -1,4 +1,7 @@
 import json
+from email.message import Message
+from io import BytesIO
+from types import SimpleNamespace
 from pathlib import Path
 import tempfile
 import threading
@@ -8,7 +11,7 @@ from urllib.request import Request, urlopen
 import uuid
 
 from face_inference.config import ROOT, contract, load_config
-from face_inference.server import FaceHTTPServer
+from face_inference.server import FaceHTTPServer, Handler
 from face_inference.service import FaceService
 from face_inference.storage import SQLiteRepository
 
@@ -94,6 +97,153 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(deleted['data']['state'], 'DELETED')
         self.assertEqual(self.request('/api/v1/collections/team/people')[1]['data'][0]['state'], 'NOT_ENROLLED')
+
+
+class CrossOriginTests(unittest.TestCase):
+    def setUp(self):
+        self.config = {'api_token': 'a' * 32, 'host': '127.0.0.1', 'allowed_origins': []}
+
+    def response(self, origin=None, method='GET', path='/api/v1/config', authorized=True):
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(service=SimpleNamespace(config=self.config, safe_config=lambda: {}),
+                                         server_port=6122, check_rate=lambda _: None)
+        handler.command, handler.path, handler.client_address = method, path, ('127.0.0.1', 0)
+        handler.headers, handler.wfile = Message(), BytesIO()
+        if authorized:
+            handler.headers['Authorization'] = 'Bearer ' + self.config['api_token']
+        if origin is not None:
+            handler.headers['Origin'] = origin
+        headers = Message()
+        handler.send_response = lambda status: setattr(handler, 'status', status)
+        handler.send_header = lambda name, value: headers.__setitem__(name, value)
+        handler.end_headers = lambda: None
+        handler.dispatch()
+        return handler.status, headers, handler.wfile.getvalue()
+
+    def test_cors_and_csp(self):
+        origins = ['https://face-workspace.example', 'http://localhost:3000']
+        self.config['allowed_origins'] = origins
+        for origin, allowed in [(origins[0], True), ('https://other.example', False)]:
+            with self.subTest(origin=origin):
+                status, headers, _ = self.response(origin)
+                self.assertEqual(status, 200 if allowed else 403)
+                self.assertEqual(headers.get('Vary'), 'Origin')
+                self.assertEqual(headers.get('Access-Control-Allow-Origin'), origin if allowed else None)
+                self.assertEqual(headers.get('Access-Control-Expose-Headers'), 'Retry-After' if allowed else None)
+                self.assertIn("frame-ancestors 'self' " + ' '.join(origins), headers['Content-Security-Policy'])
+                self.assertEqual(headers['Permissions-Policy'], 'camera=(self), microphone=()')
+        self.config['allowed_origins'] = []
+        self.assertIn("frame-ancestors 'self';", self.response()[1]['Content-Security-Policy'])
+
+    def test_preflight(self):
+        self.config['allowed_origins'] = ['https://face-workspace.example']
+        for origin, status in [('https://face-workspace.example', 204), ('https://other.example', 403), (None, 403)]:
+            with self.subTest(origin=origin):
+                actual, headers, body = self.response(origin, 'OPTIONS', authorized=False)
+                self.assertEqual(actual, status)
+                self.assertEqual(headers.get('Vary'), 'Origin' if origin else None)
+                self.assertEqual(headers.get('Access-Control-Allow-Origin'), origin if status == 204 else None)
+                self.assertEqual(headers.get('Access-Control-Allow-Methods'), 'GET, POST, DELETE, OPTIONS' if status == 204 else None)
+                self.assertEqual(headers.get('Access-Control-Allow-Headers'), 'Authorization, Content-Type' if status == 204 else None)
+                self.assertEqual(headers.get('Access-Control-Max-Age'), '600' if status == 204 else None)
+                if status == 204:
+                    self.assertEqual(body, b'')
+
+
+class OriginConfigTests(unittest.TestCase):
+    def test_allowed_origins(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / 'config.json'
+            load_config(path)
+            config = json.loads(path.read_text())
+            valid = ['https://example.com', 'https://example.com:8443', 'https://[::1]:443',
+                     'http://localhost', 'http://127.0.0.1:3000', 'http://[::1]:3000']
+            invalid = ['*', 'null', 'http://example.com', 'https://example.com/path',
+                       'https://example.com?x=1', 'https://user@example.com', 'https://*.example.com',
+                       'https://example.com:bad', 'https://example.com:99999', 'https://example.com:',
+                       'https://[::1%bad;injection]', 'https://[::1]extra',
+                       'https://example.com\nX-Injected: yes', 'https://', 'https://[::1', 42]
+            for origin in valid + invalid:
+                with self.subTest(origin=origin):
+                    config['allowed_origins'] = [origin]
+                    path.write_text(json.dumps(config))
+                    if origin in valid:
+                        self.assertEqual(load_config(path)['allowed_origins'], [origin])
+                    else:
+                        with self.assertRaises(RuntimeError):
+                            load_config(path)
+
+
+class SessionTokenTests(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.path = Path(self.folder.name) / 'config.json'
+        self.config = load_config(self.path)
+        self.service = FaceService(SQLiteRepository(self.config['database'], self.config['encryption_key']), self.config, contract(), clock=lambda: 1000)
+        self.service.mutate('team', 'collection', {'id': 'team', 'name': 'Team', 'idempotency_key': str(uuid.uuid4())})
+        self.service.mutate = lambda collection, action, body: {'collection': collection, 'action': action}
+
+    def request(self, path, body=None, token=None, method=None):
+        handler = Handler.__new__(Handler)
+        handler.server = SimpleNamespace(service=self.service, server_port=6122, check_rate=lambda _: None)
+        handler.command, handler.path, handler.client_address = method or ('POST' if body is not None else 'GET'), path, ('127.0.0.1', 0)
+        handler.headers, handler.wfile = Message(), BytesIO()
+        handler.headers['Authorization'] = 'Bearer ' + (self.config['api_token'] if token is None else token)
+        raw = json.dumps(body).encode() if body is not None else b''
+        handler.headers['Content-Type'] = 'application/json'
+        handler.headers['Content-Length'] = str(len(raw))
+        handler.rfile = BytesIO(raw)
+        handler.send_response = lambda status: setattr(handler, 'status', status)
+        handler.send_header = lambda *_: None
+        handler.end_headers = lambda: None
+        handler.dispatch()
+        return handler.status, json.loads(handler.wfile.getvalue())
+
+    def test_mint_and_restrictions(self):
+        mint = '/api/v1/session-tokens'
+        body = {'collection_id': 'team', 'scope': 'enroll', 'person_id': 'a'}
+        status, result = self.request(mint, body)
+        self.assertEqual(status, 200, result)
+        token = result['data']['token']
+        self.assertEqual(result['data']['expires_at'], 1300)
+        self.assertEqual(self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token)[0], 200)
+        for path, payload, method in [('/api/v1/collections/team/enrollments', {'person_id': 'b'}, None),
+                                      ('/api/v1/collections/other/enrollments', {'person_id': 'a'}, None),
+                                      ('/api/v1/collections/team/recognitions', {}, None),
+                                      ('/api/v1/config', None, None), (mint, body, None),
+                                      ('/api/v1/collections/team/people/a/face', {}, 'DELETE'),
+                                      ('/api/v1/collections/team/export', None, None)]:
+            with self.subTest(path=path, payload=payload):
+                self.assertEqual(self.request(path, payload, token, method)[0], 403)
+        for ttl in (0, 3601, True, 1.5):
+            self.assertEqual(self.request(mint, {**body, 'ttl': ttl})[0], 400)
+        self.assertEqual(self.request(mint, {**body, 'collection_id': 'missing'})[0], 404)
+        self.assertEqual(self.request('/api/v1/config')[0], 200)
+        status, result = self.request('/api/v1/collections/other/enrollments', {'person_id': 'a'}, token)
+        self.assertEqual((status, result['code']), (403, 'TOKEN_SCOPE'))
+        self.service.clock = lambda: 1300
+        status, result = self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token)
+        self.assertEqual((status, result['code']), (401, 'TOKEN_EXPIRED'))
+        self.service.clock = lambda: 1000
+        status, result = self.request('/api/v1/collections/team/enrollments', {'person_id': 'a'}, token[:-1] + ('A' if token[-1] != 'A' else 'B'))
+        self.assertEqual((status, result['code']), (401, 'TOKEN_INVALID'))
+        status, result = self.request(mint, {'collection_id': 'team', 'scope': 'recognize', 'ttl': 1})
+        self.assertEqual(status, 200)
+        self.assertEqual(self.request('/api/v1/collections/team/recognitions', {}, result['data']['token'])[0], 200)
+
+    def test_secret_persisted_and_validated(self):
+        config = json.loads(self.path.read_text())
+        self.assertEqual(load_config(self.path)['session_secret'], config['session_secret'])
+        config.pop('session_secret')
+        self.path.write_text(json.dumps(config))
+        secret = load_config(self.path)['session_secret']
+        self.assertEqual(json.loads(self.path.read_text())['session_secret'], secret)
+        self.assertEqual(self.path.stat().st_mode & 0o777, 0o600)
+        config['session_secret'] = 'short'
+        self.path.write_text(json.dumps(config))
+        with self.assertRaises(RuntimeError):
+            load_config(self.path)
 
 
 if __name__ == '__main__':

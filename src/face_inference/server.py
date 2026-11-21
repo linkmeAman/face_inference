@@ -1,4 +1,5 @@
 """A bounded same-origin JSON API and explicit static asset server; no PHP."""
+import base64
 import hmac
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
@@ -10,9 +11,11 @@ import threading
 import time
 from urllib.parse import unquote, urlsplit
 
+from .assets import models_dir
 from .config import ROOT
 from .matching import FaceError
 from .service import identifier
+from . import tokens
 
 MAX_BODY = 128 * 1024
 LOGGER = logging.getLogger('face-standalone')
@@ -50,10 +53,14 @@ class FaceHTTPServer(ThreadingHTTPServer):
         for file in (self.root).iterdir():
             if file.suffix in ('.mjs', '.css'):
                 self.assets['/' + file.name] = file
-        for directory in ('browser-face', 'vendor/browser-face'):
-            for file in (self.root / directory).iterdir():
+        for file in (self.root / 'browser-face').iterdir():
+            if file.is_file() and not file.is_symlink() and file.suffix in ('.mjs', '.wasm', '.onnx', '.json'):
+                self.assets['/browser-face/' + file.name] = file
+        vendor_dir = models_dir(getattr(self.service, 'config', None))
+        if vendor_dir.is_dir():
+            for file in vendor_dir.iterdir():
                 if file.is_file() and not file.is_symlink() and file.suffix in ('.mjs', '.wasm', '.onnx', '.json'):
-                    self.assets['/' + directory + '/' + file.name] = file
+                    self.assets['/vendor/browser-face/' + file.name] = file
         super().__init__(address, Handler)
 
     def process_request(self, request, client_address):
@@ -104,8 +111,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('X-Content-Type-Options', 'nosniff')
         self.send_header('Referrer-Policy', 'no-referrer')
         self.send_header('Permissions-Policy', 'camera=(self), microphone=()')
-        self.send_header('Content-Security-Policy', "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' blob:; object-src 'none'; frame-ancestors 'none'; base-uri 'none'")
+        origins = self.server.service.config.get('allowed_origins', [])
+        ancestors = ' '.join(["'self'", *origins])
+        self.send_header('Content-Security-Policy', f"default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self'; worker-src 'self'; connect-src 'self'; img-src 'self' blob:; object-src 'none'; frame-ancestors {ancestors}; base-uri 'none'")
+        self.cors_headers()
         self.end_headers()
+
+    def cors_headers(self):
+        origin = self.headers.get('Origin')
+        if origin is not None:
+            self.send_header('Vary', 'Origin')
+        if origin in self.server.service.config.get('allowed_origins', []):
+            self.send_header('Access-Control-Allow-Origin', origin)
+            self.send_header('Access-Control-Expose-Headers', 'Retry-After')
+            if self.command == 'OPTIONS' and urlsplit(self.path).path.startswith('/api/'):
+                self.send_header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
+                self.send_header('Access-Control-Allow-Headers', 'Authorization, Content-Type')
+                self.send_header('Access-Control-Max-Age', '600')
 
     def respond(self, data, status=200, error=None):
         body = json.dumps(dict(error=1 if error else 0, error_msg=str(error) if error else '',
@@ -115,10 +137,24 @@ class Handler(BaseHTTPRequestHandler):
         self.headers_safe('application/json; charset=utf-8', len(body))
         self.wfile.write(body)
 
-    def authorize(self):
+    def authorize(self, parts):
         expected = 'Bearer ' + self.server.service.config['api_token']
-        if not hmac.compare_digest(self.headers.get('Authorization', '').encode(), expected.encode()):
-            raise FaceError('AUTH_REQUIRED', 'A valid API token is required', 401)
+        authorization = self.headers.get('Authorization', '')
+        claims = None
+        if not hmac.compare_digest(authorization.encode(), expected.encode()):
+            if not authorization.startswith('Bearer v1.'):
+                raise FaceError('AUTH_REQUIRED', 'A valid API token is required', 401)
+            if (self.command != 'POST' or len(parts) != 5 or parts[:3] != ['api', 'v1', 'collections']
+                    or parts[4] not in ('enrollments', 'recognitions')):
+                raise FaceError('TOKEN_SCOPE', 'Session token is not permitted', 403)
+            try:
+                claims = tokens.verify(base64.urlsafe_b64decode(self.server.service.config['session_secret']),
+                    authorization[7:], collection=identifier(parts[3]),
+                    scope={'enrollments': 'enroll', 'recognitions': 'recognize'}[parts[4]],
+                    now=self.server.service.clock())
+            except tokens.TokenError as error:
+                code = 'TOKEN_SCOPE' if error.reason in ('scope', 'collection') else 'TOKEN_EXPIRED' if error.reason == 'expired' else 'TOKEN_INVALID'
+                raise FaceError(code, 'Session token is not permitted', 403 if code == 'TOKEN_SCOPE' else 401) from None
         origin = self.headers.get('Origin')
         if origin:
             parsed = urlsplit(origin)
@@ -130,6 +166,7 @@ class Handler(BaseHTTPRequestHandler):
             if not (explicitly_allowed or local_origin):
                 raise FaceError('ORIGIN_REJECTED', 'Use the same-origin face service', 403)
         self.server.check_rate(self.client_address[0])
+        return claims
 
     def read_json(self):
         if self.headers.get('Transfer-Encoding'):
@@ -162,8 +199,30 @@ class Handler(BaseHTTPRequestHandler):
             self.respond(dict(status='ok', api_version='1', storage='sqlite'))
             return
         if path.startswith('/api/'):
-            self.authorize()
+            if self.command == 'OPTIONS':
+                if self.headers.get('Origin') not in service.config.get('allowed_origins', []):
+                    raise FaceError('ORIGIN_REJECTED', 'Use an allowed browser origin', 403)
+                self.send_response(204)
+                self.headers_safe('application/json; charset=utf-8', 0)
+                return
             parts = path.strip('/').split('/')
+            claims = self.authorize(parts)
+            if self.command == 'POST' and parts == ['api', 'v1', 'session-tokens']:
+                body = self.read_json()
+                if set(body) - {'collection_id', 'scope', 'ttl', 'person_id'}:
+                    raise FaceError('INVALID_BODY', 'Invalid session token request')
+                collection = identifier(body.get('collection_id'))
+                subject = identifier(body['person_id'], 'Person ID') if 'person_id' in body else None
+                now = service.clock()
+                try:
+                    token = tokens.issue(base64.urlsafe_b64decode(service.config['session_secret']), collection,
+                        body.get('scope'), body.get('ttl', 300), subject, now=now)
+                except ValueError:
+                    raise FaceError('INVALID_BODY', 'Invalid session token request') from None
+                with service.repository.transaction() as db:
+                    service.collection(db, collection)
+                self.respond(dict(token=token, expires_at=int(now) + body.get('ttl', 300)))
+                return
             if self.command == 'GET' and parts == ['api', 'v1', 'config']:
                 self.respond(service.safe_config())
                 return
@@ -187,7 +246,10 @@ class Handler(BaseHTTPRequestHandler):
                             return
                     actions = {'people': 'person', 'enrollments': 'enroll', 'recognitions': 'recognize', 'observations': 'observe'}
                     if self.command == 'POST' and len(parts) == 5 and resource in actions:
-                        self.respond(service.mutate(collection, actions[resource], self.read_json()))
+                        body = self.read_json()
+                        if claims and claims.subject is not None and resource == 'enrollments' and body.get('person_id') != claims.subject:
+                            raise FaceError('TOKEN_SCOPE', 'Session token is not permitted', 403)
+                        self.respond(service.mutate(collection, actions[resource], body))
                         return
                     if self.command == 'DELETE' and len(parts) == 7 and resource == 'people' and parts[6] == 'face':
                         self.respond(service.mutate(collection, 'delete', self.read_json(), identifier(parts[5])))

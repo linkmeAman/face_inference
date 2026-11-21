@@ -1,7 +1,30 @@
 {
-  "sface.onnx": "487a139eb85ccd5ff30aef7d0add7f12d2bb7abb90c5f08a7f481b452a660e00",
-  "yunet.onnx": "321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294",
-  "ort-wasm-simd-threaded.mjs": "5687566b1bc1c8cf628d76c2ddb16b2a3b81a7997273d4666564880495088e57",
-  "ort-wasm-simd-threaded.wasm": "be0e129949062ad50290ef94683fac8be5bb6156f709e030b7a5f1661a2f6c17",
-  "ort.wasm.min.mjs": "d5a6d7bc8ee587648fb3742dde8c0094d17cbd3822a68bbec8ddfcd4f2adb88e"
+  "version": 1,
+  "base_url": "https://github.com/linkmeAman/face_inference/releases/download/models-v1/",
+  "files": {
+    "ORT-LICENSE": {
+      "sha256": "84721d57d0dcf4c39fb17dcf3e56c522ef35d8f822173d92f4e315b22d857184",
+      "size": 93
+    },
+    "ort-wasm-simd-threaded.mjs": {
+      "sha256": "5687566b1bc1c8cf628d76c2ddb16b2a3b81a7997273d4666564880495088e57",
+      "size": 24274
+    },
+    "ort-wasm-simd-threaded.wasm": {
+      "sha256": "be0e129949062ad50290ef94683fac8be5bb6156f709e030b7a5f1661a2f6c17",
+      "size": 12361745
+    },
+    "ort.wasm.min.mjs": {
+      "sha256": "d5a6d7bc8ee587648fb3742dde8c0094d17cbd3822a68bbec8ddfcd4f2adb88e",
+      "size": 49997
+    },
+    "sface.onnx": {
+      "sha256": "487a139eb85ccd5ff30aef7d0add7f12d2bb7abb90c5f08a7f481b452a660e00",
+      "size": 10660286
+    },
+    "yunet.onnx": {
+      "sha256": "321aa5a6afabf7ecc46a3d06bfab2b579dc96eb5c3be7edd365fa04502ad9294",
+      "size": 100416
+    }
+  }
 }

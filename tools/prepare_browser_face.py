@@ -7,6 +7,7 @@ import hashlib
 import json
 import shutil
 from pathlib import Path
+
 import onnx
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -37,5 +38,22 @@ for name in ['ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-th
     shutil.copyfile(dist / name, destination / name)
     manifest[name] = hashlib.sha256((destination / name).read_bytes()).hexdigest()
 (destination / 'ORT-LICENSE').write_text('ONNX Runtime Web: MIT license. https://github.com/microsoft/onnxruntime/blob/v1.24.3/LICENSE\n')
-(destination / 'manifest.json').write_text(json.dumps(manifest, indent=2) + '\n')
+files_map = {}
+for name in sorted(manifest.keys()):
+    target_path = destination / name
+    files_map[name] = {
+        'sha256': hashlib.sha256(target_path.read_bytes()).hexdigest(),
+        'size': target_path.stat().st_size,
+    }
+license_path = destination / 'ORT-LICENSE'
+files_map['ORT-LICENSE'] = {
+    'sha256': hashlib.sha256(license_path.read_bytes()).hexdigest(),
+    'size': license_path.stat().st_size,
+}
+extended_manifest = {
+    'version': 1,
+    'base_url': 'https://github.com/linkmeAman/face_inference/releases/download/models-v1/',
+    'files': files_map,
+}
+(destination / 'manifest.json').write_text(json.dumps(extended_manifest, indent=2) + '\n')
 print('Prepared verified YuNet/SFace and ORT Web assets:', destination)

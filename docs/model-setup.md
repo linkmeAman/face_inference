@@ -34,7 +34,7 @@ Use Python 3.12 to match the captured host environment. From the cloned reposito
 ```bash
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements-standalone.txt
-.venv/bin/python tools/model_assets.py verify
+.venv/bin/face-inference models verify
 .venv/bin/python run.py check
 .venv/bin/python run.py token
 .venv/bin/python run.py
@@ -52,7 +52,7 @@ is stored by the standalone application.
 For a browser-only asset check:
 
 ```bash
-.venv/bin/python tools/model_assets.py verify --profile browser
+.venv/bin/face-inference models verify
 ```
 
 ## 3. Install the optional Python detector, recognizer and anti-spoofing service
@@ -63,7 +63,7 @@ the lightweight standalone environment:
 ```bash
 python3.12 -m venv .venv-inference
 .venv-inference/bin/python -m pip install -r snapshot/requirements.current-runtime.txt
-.venv-inference/bin/python tools/model_assets.py verify --profile python
+face-inference models verify
 .venv-inference/bin/python run_inference.py --prepare
 .venv-inference/bin/python run_inference.py --check
 .venv-inference/bin/python run_inference.py
@@ -100,34 +100,29 @@ service, apply a database migration or enable approved browser matching.
 First inspect what is missing:
 
 ```bash
-python3 tools/model_assets.py verify
+face-inference models verify
 ```
 
-The tool checks **16 assets** across the browser, Python and older MediaPipe
-workflows. It verifies their recorded SHA-256 values without network access.
+The tool checks the browser model and runtime assets. It verifies their recorded SHA-256 values without network access.
 
 If the files are tracked in Git, restore the local committed copy:
 
 ```bash
-git restore -- services/face-inference/models pf/vendor/browser-face pf/vendor/face-landmarker
-python3 tools/model_assets.py verify
+git restore -- src/face_inference/web/vendor/browser-face
+face-inference models verify
 ```
 
 `git restore` discards local changes in those directories; use it when you intend to
-recover the committed assets. Alternatively, restore only the missing files from
-the pinned official sources:
+recover the committed assets. Alternatively, fetch only the missing files from
+the pinned official release:
 
 ```bash
-.venv-inference/bin/python tools/model_assets.py restore
-.venv-inference/bin/python tools/model_assets.py verify
+face-inference models fetch
+face-inference models verify
 ```
 
-Available profiles: `--profile browser`, `--profile python`,
-`--profile mediapipe`, or `--profile all` (default).
-
-The restore command downloads only missing files. It refuses to overwrite a local
-file whose checksum differs. It verifies original model SHA-256 values, npm package
-archive integrity, and the exact extracted runtime asset hashes before publishing
+The fetch command downloads only missing files. It refuses to overwrite a local
+file whose checksum differs. It verifies model SHA-256 values and the exact runtime asset hashes before publishing.
 any reconstructed file. Only rebuilding a missing prepared SFace graph requires the
 optional `onnx` Python package; all other verification uses the standard library.
 
@@ -154,8 +149,8 @@ for this rebuild and browser test tooling:
 
 ```bash
 npm ci --no-audit --no-fund
-.venv-inference/bin/python scripts/prepare_browser_face.py
-python3 tools/model_assets.py verify --profile browser
+.venv-inference/bin/python tools/prepare_browser_face.py
+face-inference models verify
 ```
 
 The preparation script uses the original YuNet/SFace weights, keeps the SFace
@@ -176,7 +171,7 @@ files, ORT Web runtime files, and the complete MediaPipe task/runtime are alread
 Git-tracked. To stage them explicitly along with the setup instructions:
 
 ```bash
-git add README.md MODEL_SETUP.md tools/model_assets.py .gitignore
+git add README.md docs/model-setup.md .gitignore
 git add requirements-standalone.txt snapshot/requirements.current-runtime.txt package.json package-lock.json
 git add services/face-inference/models pf/vendor/browser-face pf/vendor/face-landmarker
 git status
@@ -193,7 +188,7 @@ that each installation should generate/install independently. Models are include
 explicitly, with their manifests and notices; they are not secrets. Do not use a
 broad `*.onnx`, `*.wasm` or `*.task` ignore rule in this exported project.
 
-After cloning on another computer, run `python3 tools/model_assets.py verify` to
+After cloning on another computer, run `face-inference models verify` to
 confirm that the full local model set arrived. Install the standalone dependencies
 and generate a fresh private configuration for that project. Existing live CCC
 enrollments and encryption keys were never included in this reusable repository.

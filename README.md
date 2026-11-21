@@ -34,10 +34,10 @@ The separately preserved Python ONNX/PAD inference service is still available
 through `run_inference.py` and its original requirements when needed.
 
 For every model, exact local paths, installation, offline use and missing-file recovery,
-see [MODEL_SETUP.md](MODEL_SETUP.md). Verify all 16 model/runtime assets with:
+see [docs/model-setup.md](docs/model-setup.md). Verify model/runtime assets with:
 
 ```bash
-python3 tools/model_assets.py verify
+face-inference models verify
 ```
 
 ## What is configurable
