@@ -1,4 +1,5 @@
 import hashlib
+import ipaddress
 import json
 import math
 import os
@@ -13,7 +14,7 @@ from cryptography.fernet import Fernet
 ROOT = Path(__file__).resolve().parent / 'web'
 
 
-def load_config(path=None):
+def load_config(path=None, *, host=None, port=None):
     path = Path(path or os.getenv('FACE_STANDALONE_CONFIG', Path(os.getenv('FACE_INFERENCE_HOME', '.face-inference')) / 'config.json')).resolve()
     if not path.exists():
         path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
@@ -29,6 +30,28 @@ def load_config(path=None):
             json.dump(config, stream, indent=2)
             stream.write('\n')
     config = json.loads(path.read_text())
+    config['host'] = host if host is not None else os.getenv('FACE_INFERENCE_HOST', config.get('host', '127.0.0.1'))
+    port = port if port is not None else os.getenv('FACE_INFERENCE_PORT')
+    if port is not None:
+        try:
+            config['port'] = int(port) if isinstance(port, str) else port
+        except ValueError:
+            raise RuntimeError('Invalid config: port') from None
+    config.setdefault('port', 6122)
+    origins = os.getenv('FACE_INFERENCE_ALLOWED_ORIGINS')
+    if origins is not None:
+        config['allowed_origins'] = [origin.strip() for origin in origins.split(',') if origin.strip()]
+    host = config['host']
+    if not isinstance(host, str):
+        raise RuntimeError('Invalid config: host')
+    try:
+        ipaddress.ip_address(host)
+    except ValueError:
+        labels = host.removesuffix('.').split('.')
+        if len(host.removesuffix('.')) > 253 or host.replace('.', '').isdigit() or any(
+            not re.fullmatch(r'[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?', label) for label in labels
+        ):
+            raise RuntimeError('Invalid config: host') from None
     if config.get('version') != 1 or config.get('mode') not in ('COLLECT', 'EVALUATION', 'APPROVED'):
         raise RuntimeError('Unsupported standalone configuration version or mode')
     if not isinstance(config.get('api_token'), str) or len(config['api_token']) < 32:
@@ -62,7 +85,7 @@ def load_config(path=None):
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value) or not -1 <= value <= 1:
             raise RuntimeError('Invalid server threshold: ' + name)
-    for name, minimum, maximum in [('port', 1024, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000)]:
+    for name, minimum, maximum in [('port', 1, 65535), ('retention_days', 1, 365), ('max_people', 1, 10000)]:
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, int) or not minimum <= value <= maximum:
             raise RuntimeError('Invalid config: ' + name)
