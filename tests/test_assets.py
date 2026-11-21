@@ -270,3 +270,20 @@ def test_cli_models_commands(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr('sys.argv', ['face-inference', 'models', 'verify'])
     ret = cli_main()
     assert ret == 1
+
+
+def test_cli_verify_failure_prints_the_failure_list(tmp_path, monkeypatch, capsys):
+    """A failed verification must show WHY: it used to print only `{}` (falsy dict subclass)."""
+    import json
+
+    from face_inference import cli
+
+    monkeypatch.setenv("FACE_INFERENCE_HOME", str(tmp_path / "home"))
+    monkeypatch.setenv("FACE_INFERENCE_MODELS_DIR", str(tmp_path / "empty-models"))
+    monkeypatch.setattr("sys.argv", ["face-inference", "models", "verify"])
+
+    assert cli.main() == 1
+    result = json.loads(capsys.readouterr().out)
+    assert result["status"] == "FAIL"
+    assert result["checked_assets"] > 0
+    assert result["failures"] and all(f["reason"] for f in result["failures"])
