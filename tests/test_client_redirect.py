@@ -1,5 +1,6 @@
 import io
 import json
+import sys
 import threading
 import urllib.parse
 import urllib.request
@@ -10,6 +11,9 @@ from urllib.response import addinfourl
 import pytest
 
 from face_inference.client import FaceApiError, FaceClient, FaceClientError, FaceConnectionError
+
+# urllib only follows HTTP 308 redirects from Python 3.11; on 3.10 a 308 surfaces as an error.
+FOLLOWS_308 = sys.version_info >= (3, 11)
 
 TOKEN = "redirect-test-secret"
 
@@ -66,6 +70,12 @@ def test_local_get_redirect(endpoints, status, cross_origin):
     routes[port, "/start"] = (status, f"{target}/end")
     client = FaceClient(urls[0], TOKEN, timeout=2, retry_backoff=0)
 
+    if status == 308 and not FOLLOWS_308:
+        with pytest.raises(FaceApiError) as error:
+            client.get("/start")
+        assert error.value.status == 308
+        assert requests == [("GET", "/start", f"Bearer {TOKEN}", b"")]
+        return
     assert client.get("/start") == {"ok": True}
     assert requests == [
         ("GET", "/start", f"Bearer {TOKEN}", b""),
@@ -192,9 +202,9 @@ def test_redirect_method_and_body_rules(wire, status, method):
     responses.append((status, "http://other.test/end"))
     client = FaceClient("http://example.test", TOKEN, retry_backoff=0)
 
-    if method == "POST" and status in (307, 308):
+    if (method == "POST" and status in (307, 308)) or (status == 308 and not FOLLOWS_308):
         with pytest.raises(FaceApiError) as error:
-            client.send("/start", {"value": 1})
+            client.send("/start", {"value": 1}) if method == "POST" else client.get("/start")
         assert error.value.status == status
         assert len(requests) == 1
     else:

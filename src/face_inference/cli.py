@@ -42,7 +42,8 @@ def main():
             except RuntimeError as error:
                 print(f"Error: {' '.join(str(error).splitlines())}", file=sys.stderr)
                 return 1
-            print(json.dumps(result, indent=2))
+            # dict(): VerifyResult is falsy on FAIL and json.dumps renders a falsy dict as {}
+            print(json.dumps(dict(result), indent=2))
             return 0 if result['status'] == 'PASS' else 1
         if args.action == 'fetch':
             try:
