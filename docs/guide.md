@@ -57,7 +57,7 @@ an independent deployment. The JSON config supports:
 | `capture_source` | `unvalidated-camera`; classify actual live evidence explicitly, never rename synthetic tests as live |
 | `approved_collection_ids` | Empty; exact authorized scopes required for APPROVED captures/recognition |
 | `policy_file` | Empty; private approved policy bound to a complete hash-verified evaluation report |
-| `allowed_origins` | Empty; add exact HTTPS origins or HTTP origins for localhost, 127.0.0.1, or [::1] |
+| `allowed_origins` | Empty; add exact HTTPS origin(s) only for an HTTPS reverse-proxy deployment |
 | `max_people` | 1000 per collection |
 | `api_token`, `encryption_key` | Independent generated credentials; keep private |
 
@@ -65,23 +65,6 @@ Restart to apply config changes. The approved report is revalidated on every new
 operation, so revoking/corrupting it cannot silently leave approved matching active.
 Exact idempotent retries can recover an earlier committed outcome after later
 configuration or gallery changes.
-
-## Cross-origin use
-
-Add the embedding page's exact origin to the private JSON configuration, then restart:
-
-```json
-"allowed_origins": ["https://app.example.com", "http://localhost:3000"]
-```
-
-Test preflight without sending the API token:
-
-```bash
-curl -i -X OPTIONS http://127.0.0.1:6122/api/v1/config \
-  -H 'Origin: https://app.example.com' \
-  -H 'Access-Control-Request-Method: GET' \
-  -H 'Access-Control-Request-Headers: authorization, content-type'
-```
 
 For a remote host, keep the listener private and use an SSH tunnel, for example
 `ssh -L 6122:127.0.0.1:6122 USER@SERVER`, then open localhost in your browser. An
@@ -144,6 +127,52 @@ window.addEventListener('face-result', ({detail}) => {
 An evaluation suggestion is `SUGGESTED` with `verified:false`; it must not be
 treated as an approved identity action. API calls return decisions only. Your
 application owns any subsequent action and its own permissions/idempotency.
+
+## Python client
+
+Applications can interact with the HTTP API using the typed standard-library client:
+
+```python
+from face_inference.client import FaceClient, FaceApiError, FaceConnectionError
+
+client = FaceClient("http://127.0.0.1:6122", token=operator_token, timeout=10.0)
+
+# Check service health
+health = client.health()
+
+# Manage collections and people
+client.create_collection("my-team", "My team")
+client.add_person("my-team", "employee-001", "Person One", metadata={"dept": "engineering"})
+
+# Enroll a person
+result = client.enroll(
+    collection_id="my-team",
+    person_id="employee-001",
+    observations=observations,
+    template=template,
+    capture_session=session_uuid,
+    model_version="sface-int8bq-fb143eea",
+    preprocessing_version="yunet640-similarity5-rgb255-v1",
+)
+
+# Recognize
+match = client.recognize(
+    collection_id="my-team",
+    observations=observations,
+    capture_session=session_uuid,
+    model_version="sface-int8bq-fb143eea",
+    preprocessing_version="yunet640-similarity5-rgb255-v1",
+)
+
+# Erase face data for subject
+client.delete_face("my-team", "employee-001")
+```
+
+The client requires zero third-party dependencies (Python 3.10+ stdlib only).
+- **Idempotency and retry**: Mutating calls (`POST`, `DELETE`) automatically attach a unique UUID `idempotency_key` and retry up to 3 times on transient network failures or 5xx/429 status codes with exponential backoff. Confirmed client errors (4xx) are raised immediately without retry.
+- **Unresolved request recovery**: If retries are exhausted on a mutation, the request state remains pending in `client.pending` and can be recovered with `client.retry()`.
+- **Token redaction**: The API credential is never exposed in `repr()`, `str()`, or exception messages.
+- **Error types**: Server-side error responses raise `FaceApiError(status, code, message)`; network failures or timeouts raise `FaceConnectionError`.
 
 ## Enrollment lifecycle and persistence
 

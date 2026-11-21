@@ -3,7 +3,6 @@ import json
 import math
 import os
 from pathlib import Path
-import re
 import secrets
 from zoneinfo import ZoneInfo
 from urllib.parse import urlsplit
@@ -46,18 +45,9 @@ def load_config(path=None):
     for origin in origins:
         if not isinstance(origin, str):
             raise RuntimeError('Invalid allowed origin')
-        try:
-            parsed = urlsplit(origin)
-            host = parsed.hostname
-            _ = parsed.port
-            valid_host = host and re.fullmatch(r'(?:\[[0-9a-fA-F:.]+\]|[a-zA-Z0-9.-]+)(?::[0-9]+)?', parsed.netloc)
-            valid_scheme = parsed.scheme == 'https' or (parsed.scheme == 'http' and host in ('localhost', '127.0.0.1', '::1'))
-            if (not valid_host or not valid_scheme or parsed.username is not None or parsed.password is not None
-                    or parsed.netloc.endswith(':') or origin != parsed.scheme + '://' + parsed.netloc
-                    or any(c.isspace() or ord(c) < 32 or ord(c) == 127 for c in origin)):
-                raise ValueError('Invalid origin')
-        except ValueError:
-            raise RuntimeError('Additional browser origins must be exact HTTPS origins or local HTTP origins') from None
+        parsed = urlsplit(origin)
+        if parsed.scheme != 'https' or not parsed.netloc or parsed.username or parsed.path or parsed.query or parsed.fragment:
+            raise RuntimeError('Additional browser origins must be exact HTTPS origins')
     for name in ('duplicate_threshold', 'recognition_threshold'):
         value = config.get(name)
         if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value) or not -1 <= value <= 1:
