@@ -6,6 +6,9 @@ test-results/
 playwright-report/
 .env
 
+# Build artifacts
+dist/
+*.egg-info/
 # Optional local model environments; keep model binaries tracked.
 .venv*/
 .face-inference/

@@ -5,16 +5,80 @@ build-backend = "hatchling.build"
 [project]
 name = "face-inference"
 dynamic = ["version"]
+description = "Browser-based face enrollment and recognition toolkit"
+readme = "README.md"
 requires-python = ">=3.10"
 dependencies = ["cryptography>=42"]
 license = "MIT"
+license-files = ["LICENSE", "NOTICE", "THIRD_PARTY_NOTICES.md"]
 authors = [{name = "Aman Singh"}]
+keywords = [
+    "face-recognition",
+    "face-enrollment",
+    "biometrics",
+    "onnxruntime-web",
+    "privacy",
+    "wasm",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Graphics :: Capture",
+    "Topic :: Scientific/Engineering :: Image Recognition",
+]
+
+[project.urls]
+Homepage = "https://github.com/linkmeAman/face_inference"
+Source = "https://github.com/linkmeAman/face_inference"
+Issues = "https://github.com/linkmeAman/face_inference/issues"
+Changelog = "https://github.com/linkmeAman/face_inference/blob/main/CHANGELOG.md"
 
 [project.scripts]
 face-inference = "face_inference.cli:main"
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-xdist",
+    "ruff",
+]
+
 [tool.hatch.version]
 path = "src/face_inference/__init__.py"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+    "/tests",
+    "/docs",
+    "/LICENSE",
+    "/NOTICE",
+    "/THIRD_PARTY_NOTICES.md",
+    "/README.md",
+    "/CHANGELOG.md",
+    "/SECURITY.md",
+    "/PRIVACY.md",
+    "/pyproject.toml",
+]
+exclude = [
+    "/datasets",
+    "/packages",
+    "/examples",
+    "/.github",
+    "/node_modules",
+    "/dist-assets",
+    "/.venv*",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/face_inference"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
