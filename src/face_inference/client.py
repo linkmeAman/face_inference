@@ -30,6 +30,7 @@ class ModelContract(TypedDict, total=False):
     input_order: str
     input_scale: float
     input_mean: float
+    target_landmarks: list[list[float]]
     detector_score: float
     nms_iou: float
     sample_interval_ms: int
@@ -77,35 +78,47 @@ class Person(TypedDict, total=False):
     name: str
     metadata: dict[str, Any]
     state: str
-    created_at: str
-    updated_at: str
+    expires_at: float | None
+
+
+class UpsertPersonResult(TypedDict, total=False):
+    state: str
+    person_id: str
+    person: Person
 
 
 class EnrollmentResult(TypedDict, total=False):
     state: str
     person_id: str
-    capture_session: str
-    collection_id: str
+    reference_preserved: bool
+    previous_reference_preserved: bool
+    duplicate_person_id: str | None
+    ambiguous: bool
+    verified: bool
+    evaluation_only: bool
 
 
 class RecognitionResult(TypedDict, total=False):
     state: str
     person_id: str | None
+    person_name: str | None
+    reason: str | None
     verified: bool
-    score: float | None
-    collection_id: str
+    business_action: bool
+    observation_count: int
+    model_version: str
+    preprocessing_version: str
 
 
 class ObservationResult(TypedDict, total=False):
-    recorded: bool
     state: str
-    capture_session: str
+    person_id: str
+    split: str
 
 
 class DeleteResult(TypedDict, total=False):
     state: str
     person_id: str
-    collection_id: str
 
 
 class Event(TypedDict, total=False):
@@ -387,7 +400,7 @@ class FaceClient:
         metadata: dict[str, Any] | None = None,
         *,
         idempotency_key: str | None = None,
-    ) -> Person:
+    ) -> UpsertPersonResult:
         """Create or update a person in a collection (POST /api/v1/collections/{id}/people)."""
         payload: dict[str, Any] = {"id": id, "name": name, "metadata": metadata or {}}
         if idempotency_key:
@@ -407,7 +420,7 @@ class FaceClient:
         preprocessing_version: str | None = None,
         consent: bool = True,
         device: str | None = None,
-        lighting: float | None = None,
+        lighting: str | None = None,
         *,
         idempotency_key: str | None = None,
     ) -> EnrollmentResult:
@@ -478,7 +491,7 @@ class FaceClient:
         preprocessing_version: str | None = None,
         consent: bool = True,
         device: str | None = None,
-        lighting: float | None = None,
+        lighting: str | None = None,
         *,
         idempotency_key: str | None = None,
     ) -> ObservationResult:

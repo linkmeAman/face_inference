@@ -27,3 +27,7 @@ CREATE TABLE IF NOT EXISTS events (
  id INTEGER PRIMARY KEY AUTOINCREMENT, collection_id TEXT NOT NULL, person_id TEXT,
  event TEXT NOT NULL, state TEXT NOT NULL, created_at REAL NOT NULL
 );
+CREATE INDEX IF NOT EXISTS events_collection_id ON events(collection_id,id);
+CREATE INDEX IF NOT EXISTS captures_expires_at ON captures(expires_at);
+CREATE INDEX IF NOT EXISTS people_expires_at ON people(expires_at);
+

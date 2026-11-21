@@ -6,6 +6,8 @@ import time
 
 from cryptography.fernet import Fernet, InvalidToken
 
+from face_inference.migrations import CURRENT_SCHEMA_VERSION, migrate
+
 
 class SQLiteRepository:
     """Storage boundary: service operations receive a transaction connection."""
@@ -13,24 +15,38 @@ class SQLiteRepository:
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, mode=0o700, exist_ok=True)
         self.cipher = Fernet(encryption_key.encode())
-        with closing(self.connect()) as db, db:
+        with closing(self.connect()) as db:
             db.execute('PRAGMA journal_mode=WAL')
-            db.executescript(Path(__file__).with_name('schema.sql').read_text())
-            version = db.execute("SELECT value FROM metadata WHERE key='schema_version'").fetchone()
-            if version and version[0] != '1':
-                raise RuntimeError('Unsupported face database schema version')
-            check = db.execute("SELECT value FROM metadata WHERE key='encryption_check'").fetchone()
-            if check:
-                try:
-                    if self.cipher.decrypt(check[0].encode()) != b'face-standalone-key-v1':
-                        raise RuntimeError('Wrong database encryption key')
-                except InvalidToken as error:
-                    raise RuntimeError('Wrong database encryption key; restore the original key') from error
+            has_metadata = db.execute(
+                "SELECT count(*) FROM sqlite_master WHERE type='table' AND name='metadata'"
+            ).fetchone()[0]
+            if has_metadata:
+                version = db.execute("SELECT value FROM metadata WHERE key='schema_version'").fetchone()
+                if version:
+                    try:
+                        v_num = int(version[0])
+                    except (ValueError, TypeError) as err:
+                        raise RuntimeError('Unsupported face database schema version') from err
+                    if v_num > CURRENT_SCHEMA_VERSION or v_num < 1:
+                        raise RuntimeError('Unsupported face database schema version')
+                check = db.execute("SELECT value FROM metadata WHERE key='encryption_check'").fetchone()
+                if check:
+                    try:
+                        if self.cipher.decrypt(check[0].encode()) != b'face-standalone-key-v1':
+                            raise RuntimeError('Wrong database encryption key')
+                    except InvalidToken as error:
+                        raise RuntimeError('Wrong database encryption key; restore the original key') from error
+                else:
+                    if db.execute('SELECT COUNT(*) FROM people').fetchone()[0]:
+                        raise RuntimeError('Existing face database has no encryption-key binding')
+                    with db:
+                        db.execute('INSERT INTO metadata VALUES(?,?)', ('encryption_check', self.cipher.encrypt(b'face-standalone-key-v1').decode()))
+                migrate(db)
             else:
-                if db.execute('SELECT COUNT(*) FROM people').fetchone()[0]:
-                    raise RuntimeError('Existing face database has no encryption-key binding')
-                db.execute('INSERT INTO metadata VALUES(?,?)', ('encryption_check', self.cipher.encrypt(b'face-standalone-key-v1').decode()))
-                db.execute("INSERT OR REPLACE INTO metadata VALUES('schema_version','1')")
+                with db:
+                    db.executescript(Path(__file__).with_name('schema.sql').read_text())
+                    db.execute('INSERT INTO metadata VALUES(?,?)', ('encryption_check', self.cipher.encrypt(b'face-standalone-key-v1').decode()))
+                    db.execute("INSERT OR REPLACE INTO metadata VALUES('schema_version', ?)", (str(CURRENT_SCHEMA_VERSION),))
         self.path.chmod(0o600)
 
     def connect(self):
