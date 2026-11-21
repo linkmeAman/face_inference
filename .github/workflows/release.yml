@@ -26,37 +26,17 @@ jobs:
       - name: Build package distributions
         run: uv build
 
-      - name: Verify tag matches package version
+      - name: Verify release metadata and tag consistency
         id: check-version
         run: |
           python -c '
-          import os, json, pathlib, sys
-          sys.path.insert(0, "src")
+          import os, sys, pathlib
+          sys.path.insert(0, ".")
+          from tests.test_release_metadata import verify_release_metadata
           tag = os.environ.get("GITHUB_REF_NAME", "")
-          version = tag.lstrip("v")
-
-          # 1. Check face_inference.__version__
-          import face_inference
-          py_ver = face_inference.__version__
-          if py_ver != version:
-              raise SystemExit(f"Tag version {version} does not match face_inference.__version__ {py_ver}")
-          print(f"Tag {tag} matches face_inference.__version__ ({py_ver})")
-
-          # 2. Check npm package.json version
-          pkg_file = pathlib.Path("packages/face-capture/package.json")
-          npm_match = False
-          if pkg_file.is_file():
-              pkg_data = json.loads(pkg_file.read_text(encoding="utf-8"))
-              npm_ver = pkg_data.get("version", "")
-              npm_match = (npm_ver == version)
-              print(f"npm package version ({npm_ver}) matches tag version ({version}): {npm_match}")
-          else:
-              print("packages/face-capture/package.json not found")
-
           output_file = os.environ.get("GITHUB_OUTPUT")
-          if output_file:
-              with open(output_file, "a", encoding="utf-8") as f:
-                  f.write(f"npm_publish={str(npm_match).lower()}\n")
+          res = verify_release_metadata(repo_root=pathlib.Path("."), tag=tag, output_file=output_file)
+          print(f"Release metadata verification succeeded: {res}")
           '
 
       - name: Install test dependencies
