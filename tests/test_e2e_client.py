@@ -312,60 +312,48 @@ def test_e2e_cors_preflight_is_not_clients_job(real_server: ServerContext) -> No
     assert exc_info.value.code == 403
 
 
-# Contract mismatch demonstration tests (xfail strict=True).
-# Documents discrepancy between client.py TypedDict expectations and service.py responses.
+# Contract parity tests.
+# Verifies client.py TypedDict expectations align with service.py responses and OpenAPI schema.
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Contract mismatch: client.py Event TypedDict defines event_type, but server "
-        "returns event (src/face_inference/client.py:80 vs src/face_inference/service.py:81)"
-    ),
-)
-def test_contract_mismatch_event_type_field(real_server: ServerContext) -> None:
-    """Demonstrate contract mismatch on event_type vs event field in Event model."""
+def test_contract_parity_event_type_field(real_server: ServerContext) -> None:
+    """Verify Event schema parity on event field in Event model."""
     client = real_server.client
-    client.create_collection("mismatch-events", "Mismatch Events")
-    events = client.list_events("mismatch-events")
+    client.create_collection("parity-events", "Parity Events")
+    events = client.list_events("parity-events")
     assert len(events) > 0
-    # TypedDict Event defines 'event_type', but SQLite/service.py returns 'event'
-    assert "event_type" in events[0]
+    # Service and schema return 'event', not 'event_type'
+    assert "event" in events[0]
+    assert events[0]["event"] == "collection"
+    assert "state" in events[0]
+    assert "id" in events[0]
+    assert "created_at" in events[0]
+    assert "event_type" not in events[0]
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Contract mismatch: client.py ConfigResponse TypedDict defines top-level "
-        "model_version, but server nests it under contract (src/face_inference/client.py:26 "
-        "vs src/face_inference/service.py:36)"
-    ),
-)
-def test_contract_mismatch_config_top_level_model_version(
+def test_contract_parity_config_top_level_model_version(
     real_server: ServerContext,
 ) -> None:
-    """Demonstrate contract mismatch on top-level model_version in ConfigResponse."""
+    """Verify ConfigResponse nests model_version under contract matching server safe_config."""
     client = real_server.client
     cfg = client.config()
-    # TypedDict ConfigResponse expects top-level 'model_version',
-    # but server returns it inside cfg['contract']['model_version']
-    assert "model_version" in cfg
+    assert "contract" in cfg
+    assert isinstance(cfg["contract"], dict)
+    assert "model_version" in cfg["contract"]
+    assert cfg["contract"]["model_version"] == "sface-int8bq-fb143eea"
+    assert "mode" in cfg
+    assert "approved" in cfg
+    assert "model_version" not in cfg
 
 
-@pytest.mark.xfail(
-    strict=True,
-    reason=(
-        "Contract mismatch: client.py Collection TypedDict defines id and name, but "
-        "create_collection returns state and collection_id (src/face_inference/client.py:35 "
-        "vs src/face_inference/service.py:116)"
-    ),
-)
-def test_contract_mismatch_create_collection_response_schema(
+def test_contract_parity_create_collection_response_schema(
     real_server: ServerContext,
 ) -> None:
-    """Demonstrate contract mismatch on create_collection response fields."""
+    """Verify create_collection returns state and collection_id matching server response."""
     client = real_server.client
-    created = client.create_collection("mismatch-col", "Mismatch Collection")
-    # TypedDict Collection expects 'id',
-    # but server returns {'state': 'CREATED', 'collection_id': 'mismatch-col'}
-    assert "id" in created
+    created = client.create_collection("parity-col", "Parity Collection")
+    assert "state" in created
+    assert created["state"] == "CREATED"
+    assert "collection_id" in created
+    assert created["collection_id"] == "parity-col"
+    assert "id" not in created
