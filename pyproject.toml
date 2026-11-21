@@ -47,6 +47,7 @@ face-inference = "face_inference.cli:main"
 dev = [
     "pytest>=8",
     "pytest-xdist",
+    "pyyaml",
     "ruff",
 ]
 

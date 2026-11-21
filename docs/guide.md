@@ -30,7 +30,7 @@ you later expose different collections to different users.
 
 ```bash
 face-inference init       # Generate independent config/token/key and empty SQLite DB
-face-inference check      # Validate configuration, models, encryption key and schema
+face-inference check      # Verify or initialize config/keys/DB; check model assets
 face-inference token      # Print the token only in your own terminal
 face-inference serve      # Serve the UI + API on 127.0.0.1:6122
 face-inference serve --host 0.0.0.0 --port 7001
@@ -46,8 +46,16 @@ The data directory is resolved in this order:
    - Linux: `$XDG_DATA_HOME/face-inference`, or `~/.local/share/face-inference`
    - Windows: `%APPDATA%\face-inference`, or `~\AppData\Roaming\face-inference`
 
-New data directories use mode `0700` on POSIX. `init` and `check` include the
-resolved directory in their JSON `home` field, even when models are missing.
+New data directories use mode `0700` on POSIX. Both `init` and `check` resolve the
+data directory and include its location in the JSON `home` field. Note that `check` is
+not a read-only command: if no configuration exists, `check` initializes `config.json`
+along with a generated API token, Fernet encryption key, and session secret. If an existing
+configuration lacks a session secret, `check` upgrades the file in place. Next, `check`
+verifies model and runtime assets; if assets are missing, it outputs
+`{"status": "assets-missing", ...}` before opening or initializing the database. When
+assets verify successfully, `check` initializes the encrypted SQLite database schema
+(if not already created) and outputs `{"status": "ready", ...}`. Neither command prints
+private secrets; use `face-inference token` to display the API token.
 An existing encryption key must remain stable across restarts and backups. Losing or
 replacing it makes encrypted records unreadable; the persisted key check rejects
 an incorrect key. The API never returns the key, token, stored face vectors or
@@ -142,7 +150,7 @@ Reusing a key with different data returns 409. The reference client handles this
 | GET `/api/v1/collections` | List collections |
 | POST `/api/v1/collections` | `id`, `name`, `idempotency_key` |
 | GET `/api/v1/collections/C/people` | Names, application metadata and enrollment state |
-| POST `/api/v1/collections/C/people` | `id`, `name`, optional `metadata`, `idempotency_key`; update changes metadata only |
+| POST `/api/v1/collections/C/people` | `id`, `name`, optional `metadata`, `idempotency_key`; update changes name and metadata |
 | POST `/api/v1/collections/C/enrollments` | `person_id`, `consent:true`, `capture_session`, `observations`, `template`, versions, optional `device`/`lighting`, key |
 | POST `/api/v1/collections/C/observations` | Same capture shape; labeled evidence only, no gallery update |
 | POST `/api/v1/collections/C/recognitions` | `observations`, `capture_session`, versions, key, optional `eligible_ids` within this collection |

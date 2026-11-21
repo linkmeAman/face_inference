@@ -57,7 +57,10 @@ class FaceService:
     def purge(self, db=None):
         if db is None:
             with self.repository.transaction() as connection:
-                return self.purge(connection)
+                count = self.purge(connection)
+            if count:
+                self.repository.checkpoint()
+            return count
         now = self.clock()
         count = db.execute('DELETE FROM captures WHERE expires_at<=?', (now,)).rowcount
         count += db.execute("UPDATE people SET encrypted_template=NULL,state='RECAPTURE_REQUIRED' WHERE encrypted_template IS NOT NULL AND expires_at<=?", (now,)).rowcount
@@ -71,8 +74,11 @@ class FaceService:
         identifier(collection)
         with self.repository.transaction() as db:
             self.collection(db, collection)
-            self.purge(db)
-            return [self.dto(row) for row in db.execute('SELECT * FROM people WHERE collection_id=? ORDER BY name,id', (collection,))]
+            purged = self.purge(db)
+            result = [self.dto(row) for row in db.execute('SELECT * FROM people WHERE collection_id=? ORDER BY name,id', (collection,))]
+        if purged:
+            self.repository.checkpoint()
+        return result
 
     def events(self, collection):
         identifier(collection)
@@ -106,7 +112,7 @@ class FaceService:
             policy = self.policy()
             if policy['ready'] and action in ('enroll', 'observe', 'recognize') and collection not in self.config.get('approved_collection_ids', []):
                 raise FaceError('SCOPE_NOT_APPROVED', 'This collection is outside the approved matching scope', 403)
-            self.purge(db)
+            purged = self.purge(db)
             if action == 'collection':
                 if payload.get('id') != collection:
                     raise FaceError('INVALID_ID', 'Collection ID must match the request')
@@ -138,7 +144,9 @@ class FaceService:
             db.execute('INSERT INTO events(collection_id,person_id,event,state,created_at) VALUES(?,?,?,?,?)',
                 (collection, person_id, action, result['state'], self.clock()))
             db.execute('INSERT INTO requests VALUES(?,?,?,?,?)', (namespace, key, fingerprint, json.dumps(result), self.clock()))
-            return result
+        if purged or action == 'delete':
+            self.repository.checkpoint()
+        return result
 
     def upsert_person(self, db, collection, payload):
         person = identifier(payload.get('id'), 'Person ID')
@@ -250,7 +258,7 @@ class FaceService:
         identifier(collection)
         with self.repository.transaction() as db:
             self.collection(db, collection)
-            self.purge(db)
+            purged = self.purge(db)
             result = []
             rows = db.execute("SELECT c.*,p.reference_capture_id FROM captures c JOIN people p ON p.collection_id=c.collection_id AND p.id=c.person_id WHERE c.collection_id=? AND c.purpose IN ('ENROLL','VALIDATION') ORDER BY c.visit,c.id", (collection,))
             for row in rows:
@@ -258,4 +266,6 @@ class FaceService:
                 result.append(dict(json.loads(row['metadata']), identity=row['person_id'], embedding=aggregate(values),
                     observations=values, visit=row['visit'], split=row['split'], purpose=row['purpose'],
                     capture_session=row['id'], enrollment_candidate=row['id'] == row['reference_capture_id']))
-            return result
+        if purged:
+            self.repository.checkpoint()
+        return result
