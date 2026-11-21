@@ -10,6 +10,7 @@ import threading
 import time
 from urllib.parse import unquote, urlsplit
 
+from .assets import models_dir
 from .config import ROOT
 from .matching import FaceError
 from .service import identifier
@@ -50,10 +51,14 @@ class FaceHTTPServer(ThreadingHTTPServer):
         for file in (self.root).iterdir():
             if file.suffix in ('.mjs', '.css'):
                 self.assets['/' + file.name] = file
-        for directory in ('browser-face', 'vendor/browser-face'):
-            for file in (self.root / directory).iterdir():
+        for file in (self.root / 'browser-face').iterdir():
+            if file.is_file() and not file.is_symlink() and file.suffix in ('.mjs', '.wasm', '.onnx', '.json'):
+                self.assets['/browser-face/' + file.name] = file
+        vendor_dir = models_dir(getattr(self.service, 'config', None))
+        if vendor_dir.is_dir():
+            for file in vendor_dir.iterdir():
                 if file.is_file() and not file.is_symlink() and file.suffix in ('.mjs', '.wasm', '.onnx', '.json'):
-                    self.assets['/' + directory + '/' + file.name] = file
+                    self.assets['/vendor/browser-face/' + file.name] = file
         super().__init__(address, Handler)
 
     def process_request(self, request, client_address):

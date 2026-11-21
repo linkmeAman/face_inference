@@ -69,16 +69,21 @@ def contract(root=ROOT):
 def verify_assets(root=ROOT):
     data = contract(root)
     assets = root / 'vendor/browser-face'
-    manifest = json.loads((assets / 'manifest.json').read_text())
+    manifest_path = assets / 'manifest.json'
+    if not manifest_path.is_file():
+        raise RuntimeError('Missing browser asset manifest')
+    manifest = json.loads(manifest_path.read_text())
+    files = manifest.get('files', {})
     required = {'sface.onnx', 'yunet.onnx', 'ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'}
-    if not required.issubset(manifest):
+    if not required.issubset(files):
         raise RuntimeError('Missing browser asset checksum')
-    for name, expected in manifest.items():
-        if Path(name).name != name or hashlib.sha256((assets / name).read_bytes()).hexdigest() != expected:
-            raise RuntimeError('Prepared face asset checksum mismatch')
-    for name in ('ort.wasm.min.mjs', 'ort-wasm-simd-threaded.mjs', 'ort-wasm-simd-threaded.wasm'):
-        if not (assets / name).is_file():
+    for name, info in files.items():
+        expected = info.get('sha256') if isinstance(info, dict) else info
+        target = assets / name
+        if not target.is_file() or target.is_symlink():
             raise RuntimeError('Missing browser runtime asset: ' + name)
+        if Path(name).name != name or hashlib.sha256(target.read_bytes()).hexdigest() != expected:
+            raise RuntimeError('Prepared face asset checksum mismatch')
     return data
 
 
