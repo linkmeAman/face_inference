@@ -109,7 +109,7 @@ def test_limit_rejection_and_cli_routes_100k_to_algorithm_only(monkeypatch, caps
         run_scenario(3, workers=0)
     scenarios = []
 
-    def record(size, *args, algorithm_only):
+    def record(size, *args, algorithm_only, gallery_cache=False):
         scenarios.append((size, algorithm_only))
         return {'templates': size}
 

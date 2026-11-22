@@ -4,8 +4,32 @@ import {
   checkConsentGating,
   mapCameraError,
 } from './config.js';
-import { FaceClient } from '../dist/vendor-js/client.mjs';
+import { FaceClient, buildCameraFingerprint } from '../dist/vendor-js/client.mjs';
 import { AutomaticCapture } from '../dist/vendor-js/browser-face/capture.mjs';
+
+export const DEFAULT_STRINGS = Object.freeze({
+  start: 'Start',
+  stop: 'Stop',
+  retry: 'Retry save',
+  ready: 'Ready',
+  connecting: 'Connecting to face service...',
+  retrying: 'Retrying save...',
+  cameraPreview: 'Camera preview',
+  captureProgress: 'Capture progress',
+  consentLabel: 'Confirm consent for face enrollment and template creation',
+  regionLabel: 'Face capture',
+  cameraStopped: 'Camera stopped.',
+  cameraStoppedPending: 'Camera stopped. A submitted request may have saved; use Retry save.',
+  resultPending: 'Face saved for evaluation. Approval is pending.',
+  resultActive: 'Face enrolled.',
+  resultDuplicate: 'This face is already registered to another person.',
+  resultDuplicateAmbiguous: 'This capture conflicts with multiple saved people.',
+  resultObservationSaved: 'Labeled observation saved without changing the enrolled reference.',
+  resultUnknown: 'Face not recognized.',
+  resultCollectionOnly: 'This workspace is configured for collection only.',
+  resultSuggested: 'Evaluation suggestion: {name} (unverified)',
+  resultMatched: 'Matched: {name}',
+});
 
 const template = `
 <style>
@@ -135,6 +159,16 @@ const template = `
   .btn-stop:hover:not(:disabled) {
     background: #374151;
   }
+  .btn-retry {
+    background: #d97706;
+    color: #fff;
+  }
+  .btn-retry:hover:not(:disabled) {
+    background: #b45309;
+  }
+  .btn-retry[hidden] {
+    display: none !important;
+  }
   button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
@@ -143,31 +177,42 @@ const template = `
     color: #ef4444 !important;
   }
 </style>
-<div class="container">
+<div class="container" role="region" aria-label="Face capture">
   <div class="video-stage">
-    <video playsinline muted></video>
-    <canvas></canvas>
+    <video playsinline muted aria-label="Camera preview"></video>
+    <canvas aria-hidden="true"></canvas>
   </div>
   <div class="status-bar">
-    <div class="status-text">Ready</div>
-    <progress max="1" value="0"></progress>
+    <div class="status-text" role="status" aria-live="polite" aria-atomic="true">Ready</div>
+    <progress max="1" value="0" aria-label="Capture progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></progress>
   </div>
   <div class="consent-panel" hidden>
-    <label class="consent-label">
-      <input type="checkbox" class="consent-checkbox">
-      <span>Confirm consent for face enrollment and template creation</span>
+    <label class="consent-label" for="consent-checkbox">
+      <input type="checkbox" id="consent-checkbox" class="consent-checkbox">
+      <span class="consent-text">Confirm consent for face enrollment and template creation</span>
     </label>
   </div>
   <div class="controls">
-    <button type="button" class="btn-start">Start</button>
-    <button type="button" class="btn-stop" disabled>Stop</button>
+    <button type="button" class="btn-start" aria-label="Start">Start</button>
+    <button type="button" class="btn-stop" disabled aria-label="Stop">Stop</button>
+    <button type="button" class="btn-retry" hidden aria-label="Retry save">Retry save</button>
   </div>
 </div>
 `;
 
-const ElementBase = typeof HTMLElement !== 'undefined' ? HTMLElement : class {};
+const ElementBase = typeof HTMLElement !== 'undefined'
+  ? HTMLElement
+  : (typeof EventTarget !== 'undefined' ? EventTarget : class {});
 
 export class FaceCaptureElement extends ElementBase {
+  static get template() {
+    return template;
+  }
+
+  get template() {
+    return template;
+  }
+
   static get observedAttributes() {
     return [
       'api-url',
@@ -192,6 +237,65 @@ export class FaceCaptureElement extends ElementBase {
     this._personId = '';
     this._modelBaseUrl = '';
     this._autostart = false;
+    this._strings = { ...DEFAULT_STRINGS };
+    this._retryPromise = null;
+  }
+
+  get strings() {
+    return { ...this._strings };
+  }
+
+  set strings(val) {
+    if (val && typeof val === 'object') {
+      this.setStrings(val);
+    }
+  }
+
+  setStrings(customStrings = {}) {
+    for (const [k, v] of Object.entries(customStrings)) {
+      if (typeof v === 'string') {
+        this._strings[k] = v;
+      }
+    }
+    this._applyStrings();
+  }
+
+  _getString(key, fallback = '') {
+    return this._strings[key] ?? DEFAULT_STRINGS[key] ?? fallback;
+  }
+
+  _applyStrings() {
+    if (this._container) {
+      this._container.setAttribute('aria-label', this._getString('regionLabel'));
+    }
+    if (this._video) {
+      this._video.setAttribute('aria-label', this._getString('cameraPreview'));
+    }
+    if (this._progress) {
+      this._progress.setAttribute('aria-label', this._getString('captureProgress'));
+    }
+    if (this._btnStart) {
+      this._btnStart.textContent = this._getString('start');
+      this._btnStart.setAttribute('aria-label', this._getString('start'));
+    }
+    if (this._btnStop) {
+      this._btnStop.textContent = this._getString('stop');
+      this._btnStop.setAttribute('aria-label', this._getString('stop'));
+    }
+    if (this._btnRetry) {
+      this._btnRetry.textContent = this._getString('retry');
+      this._btnRetry.setAttribute('aria-label', this._getString('retry'));
+    }
+    if (this._consentSpan) {
+      this._consentSpan.textContent = this._getString('consentLabel');
+    }
+    if (this._statusText && !this._statusText.classList.contains('error-text') && !this._generation) {
+      this._statusText.textContent = this._getString('ready');
+    }
+  }
+
+  get hasPendingSave() {
+    return Boolean(this._client?.pending);
   }
 
   // Properties mirroring attributes
@@ -290,14 +394,21 @@ export class FaceCaptureElement extends ElementBase {
 
   _bindElements() {
     if (!this.shadowRoot) return;
+    this._container = this.shadowRoot.querySelector('.container');
     this._video = this.shadowRoot.querySelector('video');
     this._canvas = this.shadowRoot.querySelector('canvas');
     this._statusText = this.shadowRoot.querySelector('.status-text');
     this._progress = this.shadowRoot.querySelector('progress');
     this._consentPanel = this.shadowRoot.querySelector('.consent-panel');
     this._consentCheckbox = this.shadowRoot.querySelector('.consent-checkbox');
+    this._consentSpan = this.shadowRoot.querySelector('.consent-text') ||
+      this.shadowRoot.querySelector('.consent-label span') ||
+      this.shadowRoot.querySelector('.consent-panel span');
     this._btnStart = this.shadowRoot.querySelector('.btn-start');
     this._btnStop = this.shadowRoot.querySelector('.btn-stop');
+    this._btnRetry = this.shadowRoot.querySelector('.btn-retry');
+
+    this._applyStrings();
 
     this._btnStart?.addEventListener('click', () => {
       this.start().catch((err) => {
@@ -313,6 +424,10 @@ export class FaceCaptureElement extends ElementBase {
 
     this._btnStop?.addEventListener('click', () => {
       this.stop();
+    });
+
+    this._btnRetry?.addEventListener('click', () => {
+      this.retry().catch(() => {});
     });
   }
 
@@ -330,27 +445,39 @@ export class FaceCaptureElement extends ElementBase {
     this._statusText.textContent = text;
     if (isError) {
       this._statusText.classList.add('error-text');
+      this._statusText.setAttribute('aria-live', 'assertive');
     } else {
       this._statusText.classList.remove('error-text');
+      this._statusText.setAttribute('aria-live', 'polite');
+    }
+  }
+
+  _setProgress(val) {
+    if (!this._progress) return;
+    this._progress.value = val;
+    if (typeof this._progress.setAttribute === 'function') {
+      this._progress.setAttribute('aria-valuenow', String(Math.round(val * 100)));
     }
   }
 
   _resultMessage(result) {
     const text = {
-      PENDING: 'Face saved for evaluation. Approval is pending.',
-      ACTIVE: 'Face enrolled.',
+      PENDING: this._getString('resultPending'),
+      ACTIVE: this._getString('resultActive'),
       REJECTED_DUPLICATE: result.ambiguous
-        ? 'This capture conflicts with multiple saved people.'
-        : 'This face is already registered to another person.',
-      OBSERVATION_SAVED: 'Labeled observation saved without changing the enrolled reference.',
-      UNKNOWN: 'Face not recognized. ' + (result.reason || ''),
-      COLLECTION_ONLY: 'This workspace is configured for collection only.',
+        ? this._getString('resultDuplicateAmbiguous')
+        : this._getString('resultDuplicate'),
+      OBSERVATION_SAVED: this._getString('resultObservationSaved'),
+      UNKNOWN: this._getString('resultUnknown') + (result.reason ? ' ' + result.reason : ''),
+      COLLECTION_ONLY: this._getString('resultCollectionOnly'),
     };
     if (result.state === 'SUGGESTED') {
-      return 'Evaluation suggestion: ' + result.person_name + ' (unverified)';
+      const tmpl = this._getString('resultSuggested');
+      return tmpl.replace('{name}', result.person_name || '');
     }
     if (result.state === 'MATCHED') {
-      return 'Matched: ' + result.person_name;
+      const tmpl = this._getString('resultMatched');
+      return tmpl.replace('{name}', result.person_name || '');
     }
     return text[result.state] || result.state;
   }
@@ -359,7 +486,92 @@ export class FaceCaptureElement extends ElementBase {
     return AutomaticCapture;
   }
 
+  async retry() {
+    if (!this.hasPendingSave) {
+      throw new Error('No unresolved request');
+    }
+    if (this._retryPromise) {
+      return this._retryPromise;
+    }
+
+    if (this._btnRetry) {
+      this._btnRetry.disabled = true;
+    }
+    this._setStatus(this._getString('retrying'));
+
+    this._retryPromise = (async () => {
+      try {
+        const result = await this._client.retry();
+        if (this._btnRetry) {
+          this._btnRetry.hidden = true;
+          this._btnRetry.disabled = false;
+        }
+        const held = this._resultMessage(result);
+        this._setStatus(held);
+        this.dispatchEvent(new CustomEvent('face-result', {
+          bubbles: true,
+          composed: true,
+          detail: result,
+        }));
+
+        if (this.mode === 'enroll') {
+          this.stop();
+        } else if (this._capture && this._capture.active) {
+          if (['MATCHED', 'SUGGESTED'].includes(result.state)) {
+            this._capture.waitForDeparture = true;
+          }
+          if (typeof this._capture.resumeAfterRequest === 'function') {
+            this._capture.resumeAfterRequest();
+          }
+        }
+        return result;
+      } catch (failure) {
+        const errorDetail = {
+          code: failure.code || 'REQUEST_FAILED',
+          message: failure.message || 'Request failed',
+        };
+        this._setStatus(errorDetail.message, true);
+        this.dispatchEvent(new CustomEvent('face-error', {
+          bubbles: true,
+          composed: true,
+          detail: errorDetail,
+        }));
+
+        if (this.hasPendingSave) {
+          if (this._btnRetry) {
+            this._btnRetry.hidden = false;
+            this._btnRetry.disabled = false;
+          }
+        } else {
+          if (this._btnRetry) {
+            this._btnRetry.hidden = true;
+            this._btnRetry.disabled = false;
+          }
+        }
+        throw failure;
+      } finally {
+        this._retryPromise = null;
+      }
+    })();
+
+    return this._retryPromise;
+  }
+
   async start() {
+    if (this.hasPendingSave) {
+      const errorDetail = {
+        code: 'PENDING_SAVE_UNRESOLVED',
+        message: 'Resolve the previous request with Retry save before starting another',
+      };
+      this._setStatus(errorDetail.message, true);
+      this.dispatchEvent(new CustomEvent('face-error', {
+        bubbles: true,
+        composed: true,
+        detail: errorDetail,
+      }));
+      return;
+    }
+
     const config = parseConfig({
       apiUrl: this.apiUrl,
       token: this.token,
@@ -399,7 +611,7 @@ export class FaceCaptureElement extends ElementBase {
 
     if (this._btnStart) this._btnStart.disabled = true;
     if (this._btnStop) this._btnStop.disabled = false;
-    this._setStatus('Connecting to face service...');
+    this._setStatus(this._getString('connecting'));
 
     const generation = ++this._generation;
     const captureSession = typeof crypto !== 'undefined' && crypto.randomUUID
@@ -468,7 +680,7 @@ export class FaceCaptureElement extends ElementBase {
           if (this._generation === generation && !held) this._setStatus(val);
         },
         progress: (val) => {
-          if (this._generation === generation && this._progress) this._progress.value = val;
+          if (this._generation === generation) this._setProgress(val);
         },
         camera: () => {},
         running: () => {
@@ -504,19 +716,7 @@ export class FaceCaptureElement extends ElementBase {
           };
           if (isEnroll) {
             const settings = this._video?.srcObject?.getVideoTracks?.()[0]?.getSettings?.() || {};
-            let device = 'camera-default';
-            try {
-              const bytes = await crypto.subtle.digest(
-                'SHA-256',
-                new TextEncoder().encode(JSON.stringify({
-                  deviceId: settings.deviceId || '',
-                  width: settings.width,
-                  height: settings.height,
-                  facing: settings.facingMode || '',
-                }))
-              );
-              device = 'camera-' + Array.from(new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
-            } catch (_) {}
+            const device = await buildCameraFingerprint(settings);
             Object.assign(body, {
               person_id: config.personId,
               consent: true,
@@ -532,6 +732,7 @@ export class FaceCaptureElement extends ElementBase {
             if (this._generation !== generation) return false;
             held = this._resultMessage(result);
             this._setStatus(held);
+            if (this._btnRetry) this._btnRetry.hidden = true;
             this.dispatchEvent(new CustomEvent('face-result', {
               bubbles: true,
               composed: true,
@@ -557,6 +758,10 @@ export class FaceCaptureElement extends ElementBase {
                 composed: true,
                 detail: errorDetail,
               }));
+              if (this.hasPendingSave && this._btnRetry) {
+                this._btnRetry.hidden = false;
+                this._btnRetry.disabled = false;
+              }
             }
             return this._client?.pending ? { pending: true } : false;
           }
@@ -596,7 +801,19 @@ export class FaceCaptureElement extends ElementBase {
     }
     if (this._btnStart) this._btnStart.disabled = false;
     if (this._btnStop) this._btnStop.disabled = true;
-    if (this._progress) this._progress.value = 0;
+    if (this._progress) this._setProgress(0);
+
+    if (this.hasPendingSave) {
+      if (this._btnRetry) {
+        this._btnRetry.hidden = false;
+        this._btnRetry.disabled = false;
+      }
+      this._setStatus(this._getString('cameraStoppedPending'));
+    } else {
+      if (this._btnRetry) {
+        this._btnRetry.hidden = true;
+      }
+    }
   }
 }
 

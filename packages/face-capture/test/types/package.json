@@ -1,0 +1,6 @@
+{
+  "name": "face-capture-types-consumer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module"
+}

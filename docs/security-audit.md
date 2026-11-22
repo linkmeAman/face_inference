@@ -16,13 +16,13 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 ### Summary of Audit Findings
 | Severity | Finding ID | Title | Component / Location | Proof Test |
 |---|---|---|---|---|
-| Medium | SEC-1 | Arbitrary File Write via Path Traversal in Asset Manifest | `src/face_inference/assets.py:125` | `tests/test_security_audit.py::test_sec_1_manifest_path_traversal` |
-| Medium | SEC-2 | Python Client Forwards Sensitive Authorization Header on HTTP Redirects | `src/face_inference/client.py:221-222` | `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization` |
+| Medium (closed) | SEC-1 | Arbitrary File Write via Path Traversal in Asset Manifest | `src/face_inference/assets.py:125` | `tests/test_security_audit.py::test_sec_1_manifest_path_traversal` |
+| Medium (closed) | SEC-2 | Python Client Forwards Sensitive Authorization Header on HTTP Redirects | `src/face_inference/client.py:221-222` | `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization` |
 | Medium (closed) | SEC-3 | Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component | `packages/face-capture/src/face-capture.js:361-363`, `packages/face-capture/src/config.js:24-31` | `tests/test_security_audit.py::test_sec_3_model_base_url_untrusted_origin_rejected` |
-| Medium | SEC-4 | Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete` | `src/face_inference/storage.py:17`, `src/face_inference/service.py:57-64` | `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled` |
-| Medium | SEC-7 | Session Token Subject Constraint Ignored on Face Recognition Endpoint | `src/face_inference/server.py:249-251` | `tests/test_security_audit.py::test_sec_7_session_token_subject_binding_on_recognition` |
-| Low | SEC-6 | Worker Thread Denial of Service via Deeply Nested JSON Payloads | `src/face_inference/server.py:185`, `src/face_inference/server.py:189-191` | `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos` |
-| Low | SEC-8 | Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries | `src/face_inference/web/browser-face/worker.mjs:9-10` | `tests/test_security_audit.py::test_sec_8_worker_model_hash_verification` |
+| Medium (closed) | SEC-4 | Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete` | `src/face_inference/storage.py:17`, `src/face_inference/service.py:57-64` | `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled` |
+| Medium (closed) | SEC-7 | Session Token Subject Constraint Ignored on Face Recognition Endpoint | `src/face_inference/server.py:249-251` | `tests/test_security_audit.py::test_sec_7_session_token_subject_binding_on_recognition` |
+| Low (closed) | SEC-6 | Worker Thread Denial of Service via Deeply Nested JSON Payloads | `src/face_inference/server.py:185`, `src/face_inference/server.py:189-191` | `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos` |
+| Low (closed) | SEC-8 | Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries | `src/face_inference/web/browser-face/worker.mjs:9-10` | `tests/test_security_audit.py::test_sec_8_worker_model_hash_verification` |
 | Info | SEC-5 (Refuted) | HTTP/1.0 Connection Semantics & Request-Body Framing Note | `src/face_inference/server.py:171-180`, `src/face_inference/server.py:273-274` | N/A (Refuted via live pipelining socket test) |
 | Info | SEC-9 | Client-Side Biometric Embedding Trust (Crafted Templates) | `src/face_inference/service.py:188-190, 224` | N/A (Consistency verified server-side; client embedding trust is architectural) |
 | Info | SEC-10 | Plaintext Biometric Embeddings in Calibration and Research Data Exports | `src/face_inference/cli.py:70-73`, `src/face_inference/service.py:249-261` | N/A (Documentation / Operational guidance) |
@@ -33,7 +33,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 
 ### Medium Severity
 
-#### SEC-1: Arbitrary File Write via Path Traversal in Asset Manifest
+#### SEC-1 (closed): Arbitrary File Write via Path Traversal in Asset Manifest
+- **Status**: Closed. Manifest entries are strictly validated before asset I/O or downloading; any entry with path traversals (`..`), absolute paths, path separators, invalid characters, null bytes, or duplicate entries is rejected. Regression test: `tests/test_manifest_paths.py` and `tests/test_security_audit.py::test_sec_1_manifest_path_traversal`.
 - **Location**: `src/face_inference/assets.py:125`
 - **Severity Note**: Rated Medium because exploitation requires the operator to point `models fetch` (`--from-dir` or `--base-url`) to an attacker-controlled manifest directory or URL.
 - **Attack**: An attacker supplying an untrusted directory (`--from-dir`) or custom asset repository provides a `manifest.json` containing relative path traversal keys (e.g., `{"../escaped.txt": {"sha256": ...}}`). During `fetch()`, the target path is constructed via `target = dest_path / filename` without verifying that the resolved target is contained within `dest_path`.
@@ -41,7 +42,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Validate all manifest keys before processing. Ensure `filename` is a clean relative path and verify that `(dest_path / filename).resolve().is_relative_to(dest_path.resolve())`. Reject any entry containing parent directory references (`..`), leading slashes, or backslashes.
 - **Proof Test**: `tests/test_security_audit.py::test_sec_1_manifest_path_traversal`
 
-#### SEC-2: Python Client Forwards Sensitive Authorization Header on HTTP Redirects
+#### SEC-2 (closed): Python Client Forwards Sensitive Authorization Header on HTTP Redirects
+- **Status**: Closed. The Python client now passes the `Authorization` header via `unredirected_hdrs` in `urllib.request.Request`, ensuring headers are automatically stripped on HTTP redirect hops across origins, and refuses `https` to `http` downgrade redirects. Regression test: `tests/test_client_redirect.py` and `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization`.
 - **Location**: `src/face_inference/client.py:221-222`
 - **Severity Note**: Rated Medium because exploitation requires a redirecting or compromised server/proxy in the request path.
 - **Attack**: When `FaceClient._execute_once` sends requests via `urllib.request.urlopen(req)`, it places `Authorization: Bearer <token>` in `headers`, which populates `req.headers`. If an endpoint issues an HTTP 301, 302, 307, or 308 redirect pointing to a third-party domain, Python's default `HTTPRedirectHandler` preserves all non-content headers across origins.
@@ -50,7 +52,7 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Proof Test**: `tests/test_security_audit.py::test_sec_2_client_redirect_strips_authorization`
 
 #### SEC-3 (closed): Remote Script Execution via Unvalidated `model-base-url` Dynamic Import in Web Component
-- **Status**: Closed. The component now always uses its shipped capture code; `model-base-url` only supplies model/WASM asset URLs (project decision: assets may come from a CDN, code may not). Regression test: `tests/test_security_audit.py::test_sec_3_component_never_imports_code_from_model_base_url` and `packages/face-capture/test/import-trust.test.mjs`.
+- **Status**: Closed in two steps. (1) The component always uses its shipped capture code. (2) A later review found ONNX Runtime still imported its own JavaScript glue from the `model-base-url` prefix, so an asset origin could run code; the worker now selects the shipped glue explicitly and verifies the WASM bytes (see SEC-8). Verified in real Chrome against a hostile origin: before the second fix the booby-trapped glue was requested and executed, after it the glue is never requested. `model-base-url` only supplies model/WASM asset bytes (project decision: assets may come from a CDN, code may not). Regression test: `tests/test_security_audit.py::test_sec_3_component_never_imports_code_from_model_base_url` and `packages/face-capture/test/import-trust.test.mjs`.
 - **Location**: `packages/face-capture/src/face-capture.js:361-363`, `packages/face-capture/src/config.js:24-31`
 - **Severity Note**: Rated Medium because exploitation requires an attacker to control or influence DOM attributes on the hosting web page (`<face-capture model-base-url="...">`).
 - **Attack**: An attacker who can influence DOM attributes sets `<face-capture model-base-url="https://attacker.evil.com/models/">`. When `start()` executes, `_resolveCaptureClass` resolves `new URL('browser-face/capture.mjs', modelBaseUrl).href` and directly invokes dynamic `import(/* @vite-ignore */ url)`.
@@ -58,7 +60,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Enforce strict origin validation in `validateConfig` to ensure `modelBaseUrl` is restricted to same-origin or an explicit trusted domain allowlist. Avoid dynamic runtime `import()` of unpinned remote scripts.
 - **Proof Test**: `tests/test_security_audit.py::test_sec_3_model_base_url_untrusted_origin_rejected`
 
-#### SEC-4: Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete`
+#### SEC-4 (closed): Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete`
+- **Status**: Closed. Every database connection enables `PRAGMA secure_delete = ON` to zero deleted content in SQLite database pages, and purge/deletion service methods execute `PRAGMA wal_checkpoint(TRUNCATE)` after transaction commit to scrub old WAL frames. **Honest residual**: Physical SSD wear-leveling, unmanaged backups, replicas, and snapshots are not covered; raw-file deletion checks do not guarantee forensic erasure from physical flash storage hardware, and WAL truncation is best-effort under concurrent read load (`docs/deletion.md`). Regression test: `tests/test_deletion_storage.py` and `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled`.
 - **Location**: `src/face_inference/storage.py:17`, `src/face_inference/service.py:57-64`
 - **Severity Note**: Rated Medium because exploitation requires forensic access to the database file or backup media.
 - **Attack**: When retention expires or a subject deletion is requested, `service.purge()` runs `DELETE FROM captures WHERE expires_at<=?` and nulls templates in `people`. Because `SQLiteRepository` connects with default settings (`PRAGMA secure_delete=0`), deleted rows and nullified BLOBs are not zeroed on disk; they remain in SQLite unallocated free pages and WAL frames.
@@ -66,7 +69,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Configure `PRAGMA secure_delete = ON` (or `FAST`) in `SQLiteRepository.connect()`, and execute `VACUUM` or WAL checkpoints following purge operations.
 - **Proof Test**: `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled`
 
-#### SEC-7: Session Token Subject Constraint Ignored on Face Recognition Endpoint
+#### SEC-7 (closed): Session Token Subject Constraint Ignored on Face Recognition Endpoint
+- **Status**: Closed. The recognition endpoint (`POST /api/v1/collections/{id}/recognitions`) strictly enforces that when a session token contains a subject claim (`claims.subject`), `body.get('eligible_ids')` must equal `[claims.subject]`, returning HTTP 403 otherwise. Regression test: `tests/test_recognition_scope.py` and `tests/test_security_audit.py::test_sec_7_session_token_subject_binding_on_recognition`.
 - **Location**: `src/face_inference/server.py:249-251`
 - **Severity Note**: Rated Medium because a session token restricted to a specific subject (e.g., alice) allows querying recognitions against any other subject (e.g., bob).
 - **Attack**: An administrator issues a session token restricted to a specific subject (`scope="recognize"`, `person_id="alice"`). A client using this token sends a recognition request to `POST /api/v1/collections/{id}/recognitions` specifying `eligible_ids: ["bob"]`. Line 249 of `server.py` validates `claims.subject` only when `resource == 'enrollments'`.
@@ -78,7 +82,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 
 ### Low Severity
 
-#### SEC-6: Worker Thread Denial of Service via Deeply Nested JSON Payloads
+#### SEC-6 (closed): Worker Thread Denial of Service via Deeply Nested JSON Payloads
+- **Status**: Closed. `read_json()` catches `RecursionError` alongside `(ValueError, UnicodeError)` and converts it to `FaceError('INVALID_JSON', 'A valid finite JSON object is required', 400)`, preventing recursion crashes from killing worker thread processing. Regression test: `tests/test_json_depth.py` and `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos`.
 - **Location**: `src/face_inference/server.py:185`, `src/face_inference/server.py:189-191`
 - **Severity Note**: Rated Low because the unhandled exception is confined to the individual worker thread handling the request; live verification confirms the server daemon stays up and subsequent requests (e.g., `/health`) continue to succeed with HTTP 200.
 - **Attack**: An attacker submits a POST request containing a 100 KiB body with 15,000 nested JSON object brackets (`{"a":{"a":...}}`). In Python 3.12, `json.loads` exceeds the maximum recursion depth and raises `RecursionError`.
@@ -86,7 +91,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Explicitly catch `RecursionError` in `read_json()` and translate it to `FaceError('INVALID_JSON', 'Payload exceeds maximum nesting depth', 400)`, or enforce a maximum parsing depth check before deserialization.
 - **Proof Test**: `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos`
 
-#### SEC-8: Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries
+#### SEC-8 (closed): Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries
+- **Status**: Closed for the YuNet and SFace model files. The worker fetches each model, verifies its SHA-256 against pins shipped in `model-pins.mjs` (checked against `manifest.json` at build time), and passes the verified bytes to ONNX Runtime; any failure is fatal (`docs/asset-trust.md`). The ONNX Runtime `.wasm` binary is verified the same way, and ONNX Runtime's JavaScript glue is loaded only from the shipped package, never from the asset origin. Remaining limit: compromised shipped JavaScript or package contents are out of scope. Regression test: `tests/test_security_audit.py::test_sec_8_worker_verifies_model_bytes_before_creating_sessions`.
 - **Location**: `src/face_inference/web/browser-face/worker.mjs:9-10`
 - **Severity Note**: Rated Low because exploitation requires CDN infrastructure compromise or unauthenticated network modification.
 - **Attack**: The model contract specifies `detector_source_sha256` and `recognizer_source_sha256`. However, in `worker.mjs`, `ort.InferenceSession.create(assets + config.detector_file)` passes the URL directly to the ONNX runtime without computing or checking the file's SHA-256 digest in the browser.

@@ -40,3 +40,63 @@ export class FaceClient {
     }
     async retry(){if(!this.pending)throw Error('No unresolved request');return this.perform(this.pending);}
 }
+
+/**
+ * Shared camera fingerprint builder.
+ *
+ * Computes a deterministic camera label 'camera-<hex24>' from MediaTrackSettings.
+ * Hashing uses SHA-256 over JSON with consistent key order:
+ *   1. deviceId: settings.deviceId || ''
+ *   2. width: settings.width
+ *   3. height: settings.height
+ *   4. facing: settings.facingMode || ''
+ *
+ * NOTE ON HISTORICAL EVIDENCE:
+ * Prior versions of the web application (app.mjs) hashed an object using the key
+ * 'device' instead of 'deviceId'. Stored captures in database evidence retain
+ * these historical labels and are not rewritten. Future application labels align
+ * to 'deviceId' (matching <face-capture>), yielding hashes that cannot be
+ * automatically correlated with legacy app hashes.
+ *
+ * NOTE ON FALLBACK BEHAVIOR:
+ * When crypto.subtle.digest is unavailable (e.g. non-secure HTTP contexts) or when
+ * digest computation fails, falls back to 'camera-default'. This deliberate fallback
+ * preserves existing component failure behavior rather than silently broadening it.
+ *
+ * @param {MediaTrackSettings|object|null|undefined} settings
+ * @returns {Promise<string>}
+ */
+export async function buildCameraFingerprint(settings = {}) {
+    let device = 'camera-default';
+    try {
+        const s = (typeof settings?.getSettings === 'function'
+            ? settings.getSettings()
+            : typeof settings?.srcObject?.getVideoTracks === 'function'
+                ? settings.srcObject.getVideoTracks()[0]?.getSettings?.()
+                : typeof settings?.getVideoTracks === 'function'
+                    ? settings.getVideoTracks()[0]?.getSettings?.()
+                    : settings) || {};
+        const payload = JSON.stringify({
+            deviceId: s.deviceId || '',
+            width: s.width,
+            height: s.height,
+            facing: s.facingMode || '',
+        });
+        const cryptoObj = typeof crypto !== 'undefined' ? crypto : globalThis.crypto;
+        if (!cryptoObj?.subtle?.digest) {
+            return 'camera-default';
+        }
+        const bytes = await cryptoObj.subtle.digest(
+            'SHA-256',
+            new TextEncoder().encode(payload)
+        );
+        device = 'camera-' + Array.from(new Uint8Array(bytes))
+            .map(b => b.toString(16).padStart(2, '0'))
+            .join('')
+            .slice(0, 24);
+    } catch (_) {}
+    return device;
+}
+
+export const cameraFingerprint = buildCameraFingerprint;
+

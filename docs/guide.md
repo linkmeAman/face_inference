@@ -77,6 +77,7 @@ list for that run. The JSON config supports:
 | `database` | — | — | Absolute `<home>/faces.sqlite3` path; another private path is supported |
 | `host` | `FACE_INFERENCE_HOST` | `--host H` | `127.0.0.1`; IP literal or hostname |
 | `port` | `FACE_INFERENCE_PORT` | `--port P` | `6122`; integer from 1 through 65535 |
+| — | `FACE_INFERENCE_LOG_LEVEL` | `--log-level LEVEL` | `WARNING`; `DEBUG`, `INFO`, `WARNING` or `ERROR`, case-insensitive; flag overrides environment |
 | `mode` | — | — | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
 | `duplicate_threshold`, `recognition_threshold` | — | — | `0.85`, `0.65`, original browser shadow values; provisional |
 | `retention_days` | — | — | 30; expired face/evidence ciphertext is excluded and erased during mutations or CLI purge |
@@ -88,11 +89,24 @@ list for that run. The JSON config supports:
 | `rate_limit_per_minute` | `FACE_INFERENCE_RATE_LIMIT` | — | 120; integer from 1 through 100000 per client IP |
 | `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IP addresses or CIDR networks, comma-separated in the environment |
 | `max_people` | — | — | 1000 per collection |
+| `gallery_cache_enabled` | — | — | `false`; set to JSON `true` to cache decrypted gallery vectors in each process |
+| `encryption_key_next` | — | — | Pending key managed by offline [key rotation](key-rotation.md); do not edit manually |
 | `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 
 Invalid listener/origin values exit with status 1 and a one-line error. A listener
 other than `127.0.0.1`, `::1` or `localhost` prints this warning to stderr:
 `listening on a non-loopback address: put TLS in front (camera needs HTTPS)`.
+
+When enabled, the gallery cache holds at most 10,000 validated 128-number vectors per
+service instance and accepts encrypted tokens up to 16 KiB each. It clears after at
+most five seconds or the earliest known reference expiry, with FIFO eviction.
+Every use rechecks the caller’s database snapshot, including consent, state, expiry,
+model and ciphertext. A deletion or change in another process does not immediately
+remove a previously cached vector from memory; it remains until eviction or the
+next scheduled clear. Python cannot guarantee secure erasure of memory, and a
+suspended or overloaded process can delay the timer. Memory inspection, swap,
+crash dumps and copies made during matching can expose plaintext. Leave this option
+off when that exposure is unacceptable. Stored templates remain encrypted.
 
 Restart to apply config changes. The approved report is revalidated on every new
 operation, so revoking/corrupting it cannot silently leave approved matching active.

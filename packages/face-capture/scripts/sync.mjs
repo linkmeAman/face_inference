@@ -1,6 +1,7 @@
 import { readFile, writeFile, mkdir, copyFile, rm } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { modelPins } from '../../../src/face_inference/web/browser-face/model-pins.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,6 +44,13 @@ export const patchFaceCaptureImports = patchFaceCapture;
 export async function build() {
   console.log('Building face-capture package...');
 
+  const manifest = JSON.parse(await readFile(resolve(srcWebDir, 'vendor/browser-face/manifest.json'), 'utf8'));
+  for (const name of ['sface.onnx', 'yunet.onnx', 'ort-wasm-simd-threaded.wasm']) {
+    if (!/^[a-f0-9]{64}$/.test(modelPins[name] || '') || modelPins[name] !== manifest.files[name]?.sha256) {
+      throw new Error(`Model pin does not match manifest: ${name}`);
+    }
+  }
+
   // Ensure fresh output directories
   await rm(distDir, { recursive: true, force: true });
   await mkdir(distBrowserFaceDir, { recursive: true });
@@ -61,6 +69,7 @@ export async function build() {
     'contract.json',
     'core.mjs',
     'facing.mjs',
+    'model-pins.mjs',
   ];
   const browserFaceSrcDir = resolve(srcWebDir, 'browser-face');
   let copiedCount = 0;

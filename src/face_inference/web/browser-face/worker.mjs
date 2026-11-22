@@ -1,13 +1,20 @@
 import * as ort from '../vendor/browser-face/ort.wasm.min.mjs';
+import {verifyModel} from './model-pins.mjs';
 import {normalize, similarityTransform, alignRGB, quality, decodeYuNet, selectGuideFace} from './core.mjs?v=stability-20261010-final';
 let config, detector, recognizer, canvas, context, input, aligned, gray, busy = false;
 async function init(contract) {
     config = contract;
     const assets = new URL('../'+config.assets_base, import.meta.url).href;
-    ort.env.wasm.wasmPaths = assets;
+    ort.env.wasm.wasmPaths = {mjs: new URL('../vendor/browser-face/ort-wasm-simd-threaded.mjs', import.meta.url).href};
     ort.env.wasm.numThreads = 1; // Works without SharedArrayBuffer/COOP/COEP, including Safari.
-    detector = await ort.InferenceSession.create(assets+config.detector_file,{executionProviders:['wasm']});
-    recognizer = await ort.InferenceSession.create(assets+config.recognizer_file,{executionProviders:['wasm']});
+    const [detectorBytes, recognizerBytes, wasmBytes] = await Promise.all([
+        verifyModel(assets+config.detector_file, config.detector_file),
+        verifyModel(assets+config.recognizer_file, config.recognizer_file),
+        verifyModel(assets+'ort-wasm-simd-threaded.wasm', 'ort-wasm-simd-threaded.wasm'),
+    ]);
+    ort.env.wasm.wasmBinary = wasmBytes;
+    detector = await ort.InferenceSession.create(detectorBytes,{executionProviders:['wasm']});
+    recognizer = await ort.InferenceSession.create(recognizerBytes,{executionProviders:['wasm']});
     canvas = new OffscreenCanvas(config.detector_size, config.detector_size);
     context = canvas.getContext('2d',{willReadFrequently:true});
     input = new Float32Array(3*config.detector_size**2);
@@ -59,7 +66,10 @@ self.onmessage = async ({data}) => {
     try {
         if (data.type === 'init') { await init(data.config); self.postMessage({type:'ready'}); }
         else if (data.type === 'frame') self.postMessage({type:'observation',epoch:data.epoch,guide_key:data.guide_key,...await process(data.bitmap,data.guide,data.recognize)});
-    } catch (error) { self.postMessage({type:'error',epoch:data.epoch,message:'Face processing failed; restart the camera'}); }
+    } catch (error) {
+        if (error.message === 'Model integrity verification failed') self.postMessage({type:'error',epoch:data.epoch,code:'MODEL_INTEGRITY'});
+        else self.postMessage({type:'error',epoch:data.epoch,message:'Face processing failed; restart the camera'});
+    }
     finally { data.bitmap?.close(); busy = false; }
 };
 

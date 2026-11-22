@@ -1,5 +1,5 @@
 import {AutomaticCapture as DefaultAutomaticCapture} from './browser-face/capture.mjs';
-import {FaceClient as DefaultFaceClient} from './client.mjs';
+import {FaceClient as DefaultFaceClient, buildCameraFingerprint} from './client.mjs';
 
 /**
  * Initializes the Face workspace browser application.
@@ -210,19 +210,7 @@ export function initApp(options = {}) {
 
                 if (person) {
                     const settings = $('video').srcObject?.getVideoTracks()[0]?.getSettings() || {};
-                    const bytes = await crypto.subtle.digest(
-                        'SHA-256',
-                        new TextEncoder().encode(JSON.stringify({
-                            device: settings.deviceId || '',
-                            width: settings.width,
-                            height: settings.height,
-                            facing: settings.facingMode || ''
-                        }))
-                    );
-                    const device = 'camera-' + Array.from(new Uint8Array(bytes))
-                        .map(value => value.toString(16).padStart(2, '0'))
-                        .join('')
-                        .slice(0, 24);
+                    const device = await buildCameraFingerprint(settings);
 
                     const lighting = batch.brightness < 70
                         ? 'measured-dark'
