@@ -1,3 +1,4 @@
+import http.client
 import os
 import json
 from email.message import Message
@@ -72,7 +73,14 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.request('/api/v1/config', headers={'Origin': 'https://face-workspace.example'})[0], 200)
         for raw in (b'[]', b'{"x":NaN}', b'{"x":1e999}', b'{"x":1,"x":2}', b'not-json'):
             self.assertEqual(self.request('/api/v1/collections', raw=raw)[0], 400)
-        self.assertEqual(self.request('/api/v1/collections', raw=b'x' * (128*1024+1))[0], 413)
+        # The limit is decided from Content-Length alone; sending the body would race the server closing the socket (reset on macOS).
+        oversize = http.client.HTTPConnection('127.0.0.1', self.server.server_port, timeout=5)
+        oversize.putrequest('POST', '/api/v1/collections')
+        for name, value in (('Authorization', 'Bearer ' + self.config['api_token']), ('Content-Type', 'application/json'), ('Content-Length', str(128 * 1024 + 1))):
+            oversize.putheader(name, value)
+        oversize.endheaders()
+        self.assertEqual(oversize.getresponse().status, 413)
+        oversize.close()
         self.assertEqual(self.request('/api/v1/collections', {'id': 'team', 'name': 'Team', 'idempotency_key': str(uuid.uuid4()), 'recognition_threshold': 0})[0], 400)
 
     def test_complete_php_free_enrollment_recognition_retry_delete(self):
