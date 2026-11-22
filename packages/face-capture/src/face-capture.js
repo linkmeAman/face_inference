@@ -4,7 +4,7 @@ import {
   checkConsentGating,
   mapCameraError,
 } from './config.js';
-import { FaceClient } from '../dist/vendor-js/client.mjs';
+import { FaceClient, buildCameraFingerprint } from '../dist/vendor-js/client.mjs';
 import { AutomaticCapture } from '../dist/vendor-js/browser-face/capture.mjs';
 
 const template = `
@@ -504,19 +504,7 @@ export class FaceCaptureElement extends ElementBase {
           };
           if (isEnroll) {
             const settings = this._video?.srcObject?.getVideoTracks?.()[0]?.getSettings?.() || {};
-            let device = 'camera-default';
-            try {
-              const bytes = await crypto.subtle.digest(
-                'SHA-256',
-                new TextEncoder().encode(JSON.stringify({
-                  deviceId: settings.deviceId || '',
-                  width: settings.width,
-                  height: settings.height,
-                  facing: settings.facingMode || '',
-                }))
-              );
-              device = 'camera-' + Array.from(new Uint8Array(bytes)).map(b => b.toString(16).padStart(2, '0')).join('').slice(0, 24);
-            } catch (_) {}
+            const device = await buildCameraFingerprint(settings);
             Object.assign(body, {
               person_id: config.personId,
               consent: true,
