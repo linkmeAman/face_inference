@@ -81,6 +81,16 @@ When `mode="enroll"`, the component automatically renders an accessible consent 
 
 ---
 
+## Camera Fingerprinting & Compatibility
+
+`<face-capture>` and the `face_inference` web application share a single camera fingerprint builder (exported via `client.mjs`).
+
+- **Consistent Payload & Key Order**: The fingerprint is computed as a SHA-256 digest of `{ deviceId, width, height, facing }` (`deviceId: settings.deviceId || ''`, `width: settings.width`, `height: settings.height`, `facing: settings.facingMode || ''`) and formatted as `camera-<hex24>`.
+- **Unavailable Digest Fallback**: If Web Crypto digest is unavailable (e.g. non-secure contexts) or digest computation throws, the fingerprint deliberately falls back to `'camera-default'`. This failure behavior is preserved intentionally rather than silently broadening to dynamic or unconstrained alternatives.
+- **Historical Evidence Compatibility**: Early revisions of the standalone web application hashed a payload with the property key `device` rather than `deviceId`. Existing capture records and metadata stored in database evidence retain their historical labels and must not be rewritten. Future web application labels use `deviceId` (aligning with `<face-capture>`), which produces distinct hashes that cannot be correlated automatically with legacy app hashes.
+
+---
+
 ## Building and Testing
 
 ```bash
