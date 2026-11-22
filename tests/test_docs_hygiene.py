@@ -124,3 +124,17 @@ def test_docs_hygiene_refactor_v1(tmp_path: Path):
         f"Found {len(violations)} docs hygiene violation(s) on refactor/v1:\n"
         + "\n".join(violations)
     )
+
+
+def test_no_merge_conflict_markers_in_documentation():
+    """Leftover conflict markers (including diff3 `|||||||` lines) must never be committed."""
+    import re
+
+    marker = re.compile(r"^(<{7}|>{7}|\|{7})( |$)")
+    repo_root = Path(__file__).resolve().parents[1]
+    hits = []
+    for path in collect_target_doc_files(repo_root):
+        for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+            if marker.match(line):
+                hits.append(f"{path.relative_to(repo_root)}:{number}: {line[:20]}")
+    assert not hits, "merge conflict markers found:\n" + "\n".join(hits)
