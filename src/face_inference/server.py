@@ -8,7 +8,9 @@ import math
 from pathlib import Path
 import sqlite3
 import threading
+import time
 from urllib.parse import unquote, urlsplit
+import uuid
 
 from .assets import models_dir
 from .config import ROOT
@@ -94,6 +96,10 @@ class Handler(BaseHTTPRequestHandler):
     def log_message(self, *_):
         # The default access logger can expose user-supplied URLs/query strings.
         pass
+
+    def send_response(self, code, message=None):
+        self._response_status = code if type(code) is int and 100 <= code <= 599 else None
+        super().send_response(code, message)
 
     def headers_safe(self, content_type, length):
         self.send_header('Content-Type', content_type)
@@ -273,16 +279,32 @@ class Handler(BaseHTTPRequestHandler):
         raise FaceError('NOT_FOUND', 'Route not found', 404)
 
     def dispatch(self):
+        request_id = uuid.uuid4().hex
+        started = time.monotonic()
+        self._response_status = None
+        disconnected = False
+        server_error = False
         try:
             self.route()
         except FaceError as error:
             self.respond({}, error.status, error)
         except (BrokenPipeError, ConnectionResetError, TimeoutError):
             self.close_connection = True
+            disconnected = True
         except sqlite3.OperationalError:
+            server_error = True
             self.respond({}, 503, FaceError('STORAGE_BUSY', 'Storage is temporarily unavailable; retry with the same request key', 503))
         except Exception:
-            LOGGER.error('Face operation failed; no request payload logged')
+            server_error = True
             self.respond({}, 500, FaceError('SERVICE_UNAVAILABLE', 'Face operation unavailable; check private configuration and storage', 500))
+        finally:
+            status = self._response_status
+            outcome = ('server_error' if server_error else 'disconnected' if disconnected or status is None
+                       else 'server_error' if status >= 500
+                       else 'client_error' if status >= 400 else 'success')
+            duration = min(3600000, max(0, int((time.monotonic() - started) * 1000)))
+            LOGGER.log(logging.ERROR if outcome == 'server_error' else logging.INFO, json.dumps({
+                'request_id': request_id, 'outcome': outcome, 'status': status, 'duration_ms': duration,
+            }))
 
     do_GET = do_POST = do_DELETE = do_OPTIONS = dispatch

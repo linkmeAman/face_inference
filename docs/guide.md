@@ -77,6 +77,7 @@ list for that run. The JSON config supports:
 | `database` | — | — | Absolute `<home>/faces.sqlite3` path; another private path is supported |
 | `host` | `FACE_INFERENCE_HOST` | `--host H` | `127.0.0.1`; IP literal or hostname |
 | `port` | `FACE_INFERENCE_PORT` | `--port P` | `6122`; integer from 1 through 65535 |
+| — | `FACE_INFERENCE_LOG_LEVEL` | `--log-level LEVEL` | `WARNING`; `DEBUG`, `INFO`, `WARNING` or `ERROR`, case-insensitive; flag overrides environment |
 | `mode` | — | — | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
 | `duplicate_threshold`, `recognition_threshold` | — | — | `0.85`, `0.65`, original browser shadow values; provisional |
 | `retention_days` | — | — | 30; expired face/evidence ciphertext is excluded and erased during mutations or CLI purge |

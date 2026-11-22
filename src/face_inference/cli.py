@@ -2,6 +2,7 @@
 """Run the independent face application; uses Python, SQLite and browser WASM."""
 import argparse
 import json
+import logging
 import os
 import sqlite3
 import sys
@@ -19,12 +20,24 @@ def main():
     parser.add_argument('--config', help='Private standalone JSON configuration path')
     parser.add_argument('--host', help='Override listener IP address or hostname for this run')
     parser.add_argument('--port', help='Override listener port for this run (1–65535)')
+    parser.add_argument('--log-level', help='Request log level: DEBUG, INFO, WARNING or ERROR')
     parser.add_argument('--collection', help='Collection to export for calibration')
     parser.add_argument('--output', help='New private export or backup file')
     parser.add_argument('--input', help='Database backup to restore')
     parser.add_argument('--base-url', help='Override base download URL for model assets')
     parser.add_argument('--from-dir', help='Copy model assets from a local directory')
     args = parser.parse_args()
+    if args.command == 'serve':
+        level = (args.log_level if args.log_level is not None else os.environ.get('FACE_INFERENCE_LOG_LEVEL', 'WARNING')).upper()
+        if level not in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):
+            print('Invalid log level; use DEBUG, INFO, WARNING or ERROR', file=sys.stderr)
+            return 1
+        logger = logging.getLogger('face-standalone')
+        handler = logging.StreamHandler(sys.stderr)
+        handler.setFormatter(logging.Formatter('%(message)s'))
+        logger.handlers[:] = [handler]
+        logger.setLevel(level)
+        logger.propagate = False
     if args.command in ('backup', 'restore'):
         filename = args.output if args.command == 'backup' else args.input
         if not filename:
