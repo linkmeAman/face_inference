@@ -7,7 +7,7 @@
     "test:types": "node --test packages/face-capture/test/types/runner.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.65.1",
     "typescript": "5.7.3"
   },
   "dependencies": {
