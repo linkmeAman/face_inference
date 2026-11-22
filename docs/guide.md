@@ -90,6 +90,7 @@ list for that run. The JSON config supports:
 | `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IP addresses or CIDR networks, comma-separated in the environment |
 | `max_people` | — | — | 1000 per collection |
 | `gallery_cache_enabled` | — | — | `false`; set to JSON `true` to cache decrypted gallery vectors in each process |
+| `encryption_key_next` | — | — | Pending key managed by offline [key rotation](key-rotation.md); do not edit manually |
 | `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 
 Invalid listener/origin values exit with status 1 and a one-line error. A listener

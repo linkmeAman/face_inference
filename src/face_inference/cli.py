@@ -8,6 +8,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+from cryptography.fernet import InvalidToken
+
 from .assets import fetch, models_dir, verify
 from .config import contract, load_config
 
@@ -15,7 +17,7 @@ from .config import contract, load_config
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', nargs='?', default='serve', choices=('init', 'serve', 'check', 'token', 'purge', 'export', 'models', 'backup', 'restore'))
+    parser.add_argument('command', nargs='?', default='serve', choices=('init', 'serve', 'check', 'token', 'purge', 'export', 'models', 'backup', 'restore', 'rotate-key'))
     parser.add_argument('action', nargs='?', choices=('fetch', 'verify', 'path'))
     parser.add_argument('--config', help='Private standalone JSON configuration path')
     parser.add_argument('--host', help='Override listener IP address or hostname for this run')
@@ -26,7 +28,18 @@ def main():
     parser.add_argument('--input', help='Database backup to restore')
     parser.add_argument('--base-url', help='Override base download URL for model assets')
     parser.add_argument('--from-dir', help='Copy model assets from a local directory')
+    parser.add_argument('--no-backup', action='store_true', help='Skip the pre-rotation snapshot')
     args = parser.parse_args()
+    if args.command in ('init', 'serve', 'check', 'purge', 'export', 'backup', 'restore', 'rotate-key'):
+        from .rotation import recover, rotate
+        try:
+            recover(args.config)
+            if args.command == 'rotate-key':
+                rotate(args.config, no_backup=args.no_backup)
+                return 0
+        except (OSError, ValueError, KeyError, TypeError, sqlite3.Error, RuntimeError, InvalidToken) as error:
+            print(' '.join(str(error).splitlines()) or 'Rotation failed: invalid encrypted data', file=sys.stderr)
+            return 1
     if args.command == 'serve':
         level = (args.log_level if args.log_level is not None else os.environ.get('FACE_INFERENCE_LOG_LEVEL', 'WARNING')).upper()
         if level not in ('DEBUG', 'INFO', 'WARNING', 'ERROR'):

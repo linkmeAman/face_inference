@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added offline, crash-recoverable `rotate-key` with a verified pre-rotation snapshot; see `docs/key-rotation.md`.
+
 - Added the `src/face_inference/` package layout and `face-inference` CLI with `serve`, `init`, `check`, `token`, `purge`, `export`, and `models` commands.
 - Added `face-inference models fetch|verify|path` with a checksum-pinned asset manifest for YuNet, SFace, and onnxruntime-web browser assets.
 - Added per-OS default data directories with `FACE_INFERENCE_HOME` override and legacy `./.face-inference` fallback.
