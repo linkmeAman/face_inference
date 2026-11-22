@@ -63,7 +63,7 @@ PYTHONPATH=src python3 -m face_inference token
 Web camera access (`navigator.mediaDevices.getUserMedia`) and ES module imports require serving the page over HTTP/HTTPS rather than `file://`:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
 Open your browser to:
