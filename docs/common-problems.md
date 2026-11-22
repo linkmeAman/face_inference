@@ -12,14 +12,14 @@ A quick-reference guide for resolving common errors when installing, running, or
 | `command not found: git` | Git command-line tool is not installed | [Command not found: git](#command-not-found-git) |
 | `command not found: face-inference` | Package was not installed or command run without environment path | [Command not found: face-inference](#command-not-found-face-inference) |
 | Python version is older than 3.10 | Installed Python version lacks required modern runtime features | [Python too old (< 3.10)](#python-too-old) |
-| `pip install .` fails | Missing C compiler, build tool, or outdated pip packaging utility | [pip install fails](#pip-install-fails) |
+| `pip install .` fails | Missing build tool or outdated pip packaging utility | [pip install fails](#pip-install-fails) |
 | `OSError: [Errno 48] Address already in use` | Another instance or application is already using port 6122 | [Port already in use](#port-already-in-use) |
 | Web browser says "Unable to connect" | The background service is not running or running on a different port | [The page will not load](#page-will-not-load) |
 | `HTTP 401: A valid API token is required` | Wrong or missing token passed in request or web UI input | [Invalid token (HTTP 401)](#invalid-token-or-401) |
 | `Allow camera access, then retry` | Browser camera permission denied or blocked by security policy | [Camera blocked or permission denied](#camera-blocked-or-permission-denied) |
 | Camera preview shows black box | Webcam is in use by another application or hardware stream frozen | [Black camera screen](#black-camera-screen) |
-| Models missing / verification fails | Onnx or WASM model weights were corrupted or deleted | [Models missing or verify failure](#models-missing-or-run-face-inference-models-fetch) |
-| `HTTP 403: Use an allowed browser origin` | Calling web page origin is not in the server's allowlist | [Origin rejected (HTTP 403)](#origin-rejected-403) |
+| Models missing / verification fails | Onnx or WASM model weights were accidentally removed | [Models missing or verify failure](#models-missing-or-run-face-inference-models-fetch) |
+| `HTTP 403: Use an allowed browser origin` or `Use the same-origin face service` | Calling web page origin is not in the server's allowlist | [Origin rejected (HTTP 403)](#origin-rejected-403) |
 | `HTTP 429: Too many requests; wait a minute` | Rate limit exceeded (more than 120 requests in 60 seconds) | [Too many requests (HTTP 429)](#too-many-requests-429) |
 | Forgot or misplaced administrative token | Token string was not saved when service initialized | [Forgot API token](#forgot-api-token) |
 | Lost or deleted `config.json` | Master encryption key removed; existing templates unreadable | [Lost config.json](#lost-config-json) |
@@ -49,7 +49,8 @@ Your operating system does not know where to find Python because it is either no
    ```bash
    python3 --version
    ```
-   *(Windows PowerShell: `python --version`)*
+   *(Windows PowerShell: `python --version`)*  
+   You should see a version string like `Python 3.12.x` (numbers may differ).
 
 ---
 
@@ -103,6 +104,7 @@ Run the executable directly from your project's `.venv` directory instead of typ
 Python 3.9.7
 ERROR: Package 'face-inference' requires a different Python: 3.9.7 not in '>=3.10'
 ```
+*(Version numbers may differ.)*
 
 **Plain-English cause:**  
 `face_inference` uses modern Python features introduced in Python 3.10 (such as union types and standard library timezone improvements). Older versions of Python cannot run it.
@@ -214,7 +216,7 @@ The token entered in the browser UI or in an API request does not match the toke
    .venv/bin/face-inference token
    ```
 2. Copy the full 43-character token string output by that command.
-3. In the web interface, paste it into the **Enter your private API token** field and click **Connect**.
+3. In the web interface, paste it into the **API token** field (placeholder *Private token from your terminal*) and click **Connect**.
 
 ---
 
@@ -262,38 +264,65 @@ Running `.venv/bin/face-inference models verify` reports missing files:
 {
   "status": "FAIL",
   "checked_assets": 6,
-  "failures": ["sface.onnx: file not found"]
+  "failures": [
+    {"path": "sface.onnx", "reason": "MISSING_OR_SYMLINK"}
+  ]
 }
 ```
 
 **Plain-English cause:**  
-The neural network weights (`sface.onnx`, `yunet.onnx`) or WebAssembly files were accidentally removed or failed integrity checksum checks.
+The neural network weights (`sface.onnx`, `yunet.onnx`) or WebAssembly binaries were deleted, incompletely downloaded, or modified. Normally, all 6 model assets are already pre-bundled inside the downloaded repository clone and inside the installed package under `src/face_inference/web/browser-face` and `src/face_inference/web/vendor/browser-face`, so a beginner never needs to download them separately.
 
-**Exact fix:**  
-Run the asset fetch command to verify and restore all model weights:
+**The fix that works today:**  
+If files were accidentally deleted in your local clone, restore them directly from your git repository history and re-install the package:
+- **macOS / Linux:**
+  ```bash
+  git checkout -- src/face_inference/web/vendor
+  .venv/bin/python -m pip install .
+  .venv/bin/face-inference models verify
+  ```
+- **Windows PowerShell:**
+  ```powershell
+  git checkout -- src/face_inference/web/vendor
+  .\.venv\Scripts\python.exe -m pip install .
+  .\.venv\Scripts\face-inference.exe models verify
+  ```
+
+If your local clone is corrupted beyond recovery, simply delete the folder and clone a fresh copy from GitHub:
 ```bash
-.venv/bin/face-inference models fetch
-.venv/bin/face-inference models verify
+git clone https://github.com/linkmeAman/face_inference.git
 ```
-*(Windows PowerShell: `.\.venv\Scripts\face-inference.exe models fetch`)*
+
+> [!NOTE]
+> *`face-inference models fetch` is the automated remote download command; it will become active after the official `models-v1` GitHub release is published by the project maintainers.*
 
 ---
 
 ### Origin rejected (HTTP 403)
 <a id="origin-rejected-403"></a>
 
-**Real server response:**
+Depending on how the request was sent, the server returns one of two distinct messages:
+
+**1. During browser preflight checks (OPTIONS request):**  
 ```json
 HTTP/1.0 403 Forbidden
 {"error": 1, "error_msg": "Use an allowed browser origin", "message": "Use an allowed browser origin", "code": "ORIGIN_REJECTED", "data": {}}
 ```
+*Where you see this:* In your web browser's developer tools console (press F12 -> Console / Network tab) when a web page hosted on another origin (such as `http://127.0.0.1:8000`) tries to connect to the API on port 6122. The browser automatically sends an HTTP `OPTIONS` preflight request before making the actual request.
+
+**2. During direct API calls (GET or POST request):**  
+```json
+HTTP/1.0 403 Forbidden
+{"error": 1, "error_msg": "Use the same-origin face service", "message": "Use the same-origin face service", "code": "ORIGIN_REJECTED", "data": {}}
+```
+*Where you see this:* When testing requests using `curl` or HTTP clients with a custom `Origin` header that does not match an allowed origin or the loopback server address.
 
 **Plain-English cause:**  
-You embedded the face capture component into a web page hosted on a custom port or domain (such as `http://127.0.0.1:8000`), but that address is not in the server's list of allowed origins.
+You embedded the face capture component into a web page hosted on a custom port or domain (such as `http://127.0.0.1:8000`), but that address was not allowlisted in the server's `FACE_INFERENCE_ALLOWED_ORIGINS` configuration.
 
 **Exact fix:**  
 Start the server with the `FACE_INFERENCE_ALLOWED_ORIGINS` environment variable set to your web page's origin:
-- **macOS/Linux:**
+- **macOS / Linux:**
   ```bash
   export FACE_INFERENCE_ALLOWED_ORIGINS="http://127.0.0.1:8000"
   .venv/bin/face-inference serve
@@ -355,9 +384,17 @@ The `config.json` file in your data directory was deleted or moved.
 
 **Exact fix:**  
 1. Restore `config.json` from your latest backup.
-2. If no backup exists, you must delete the old database and re-enroll people:
-   - macOS/Linux: `rm -f ~/.face-inference/faces.sqlite3*`
-   - Run `.venv/bin/face-inference token` to create a fresh configuration.
+2. If no backup exists, find your data directory by running:
+   ```bash
+   .venv/bin/face-inference check
+   ```
+   *(Windows PowerShell: `.\.venv\Scripts\face-inference.exe check`)*  
+   Look at the `"database"` path in the output JSON.
+3. Remove the old encrypted database files:
+   - **macOS:** `rm -f "$HOME/Library/Application Support/face-inference/faces.sqlite3"*`
+   - **Linux:** `rm -f "${XDG_DATA_HOME:-$HOME/.local/share}/face-inference/faces.sqlite3"*`
+   - **Windows PowerShell:** `Remove-Item "$env:APPDATA\face-inference\faces.sqlite3*"`
+4. Run `.venv/bin/face-inference token` to create a fresh configuration and start fresh enrollments.
 
 ---
 
@@ -399,4 +436,5 @@ When requests arrive, you will see structured JSON lines:
 ```json
 {"request_id": "e0c7ddd7c5674d008558bf1921078f2f", "outcome": "success", "status": 200, "duration_ms": 0}
 ```
+*(Numbers and identifiers will differ.)*  
 If a request fails with an error code (such as 401 or 403), the line will display the exact status and duration.
