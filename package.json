@@ -3,10 +3,12 @@
   "private": true,
   "scripts": {
     "face:assets": "python3 tools/prepare_browser_face.py",
-    "test:face": "node --test tests/js/*.test.mjs"
+    "test:face": "node --test tests/js/*.test.mjs",
+    "test:types": "node --test packages/face-capture/test/types/runner.mjs"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2"
+    "@playwright/test": "1.58.2",
+    "typescript": "5.7.3"
   },
   "dependencies": {
     "onnxruntime-web": "1.24.3"
