@@ -77,6 +77,7 @@ list for that run. The JSON config supports:
 | `database` | — | — | Absolute `<home>/faces.sqlite3` path; another private path is supported |
 | `host` | `FACE_INFERENCE_HOST` | `--host H` | `127.0.0.1`; IP literal or hostname |
 | `port` | `FACE_INFERENCE_PORT` | `--port P` | `6122`; integer from 1 through 65535 |
+| — | `FACE_INFERENCE_LOG_LEVEL` | `--log-level LEVEL` | `WARNING`; `DEBUG`, `INFO`, `WARNING` or `ERROR`, case-insensitive; flag overrides environment |
 | `mode` | — | — | `EVALUATION`; alternatives `COLLECT`, `APPROVED` |
 | `duplicate_threshold`, `recognition_threshold` | — | — | `0.85`, `0.65`, original browser shadow values; provisional |
 | `retention_days` | — | — | 30; expired face/evidence ciphertext is excluded and erased during mutations or CLI purge |
@@ -89,6 +90,7 @@ list for that run. The JSON config supports:
 | `trusted_proxies` | `FACE_INFERENCE_TRUSTED_PROXIES` | — | Empty; list of trusted proxy IP addresses or CIDR networks, comma-separated in the environment |
 | `max_people` | — | — | 1000 per collection |
 | `gallery_cache_enabled` | — | — | `false`; set to JSON `true` to cache decrypted gallery vectors in each process |
+| `encryption_key_next` | — | — | Pending key managed by offline [key rotation](key-rotation.md); do not edit manually |
 | `api_token`, `encryption_key`, `session_secret` | — | — | Independent generated credentials; keep private |
 
 Invalid listener/origin values exit with status 1 and a one-line error. A listener

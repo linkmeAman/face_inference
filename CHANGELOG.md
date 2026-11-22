@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added offline, crash-recoverable `rotate-key` with a verified pre-rotation snapshot; see `docs/key-rotation.md`.
+
 - Added the `src/face_inference/` package layout and `face-inference` CLI with `serve`, `init`, `check`, `token`, `purge`, `export`, and `models` commands.
 - Added `face-inference models fetch|verify|path` with a checksum-pinned asset manifest for YuNet, SFace, and onnxruntime-web browser assets.
 - Added per-OS default data directories with `FACE_INFERENCE_HOME` override and legacy `./.face-inference` fallback.
@@ -23,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added CI, release, and models-release workflows, along with maintainer release guidance.
 - Added an opt-in, default-off cache of decrypted templates (`gallery_cache_enabled`), keyed by each template's ciphertext so deleted, expired or re-enrolled records are never served stale; plaintext stays in memory for at most 5 seconds. At 1,000 templates a recognition measured about 142 ms without it and about 44 ms with it. See `docs/guide.md` and `PRIVACY.md`.
 - Added `face-inference backup --output PATH` and `restore --input PATH`: consistent SQLite snapshots that verify integrity and the encryption key, never overwrite, and write files at 0600. A snapshot is unusable without its `config.json` key, so back up both and store them separately (`docs/backup.md`).
+- Added `FACE_INFERENCE_LOG_LEVEL` and `serve --log-level` to control redacted request logging.
 - Added transactional SQLite schema migrations to v2 with indexes and deferred transactions for pure collection and event reads.
 - Added an optional fail-closed PAD provider contract with no liveness model.
 - Added documentation for architecture, troubleshooting, deployment, privacy, security, compliance templates, export safety, deletion, API versioning, browser performance, and performance baselines.
