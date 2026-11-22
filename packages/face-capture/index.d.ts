@@ -29,6 +29,33 @@ export interface FaceErrorDetail {
   message: string;
 }
 
+export interface FaceCaptureStrings {
+  start?: string;
+  stop?: string;
+  retry?: string;
+  ready?: string;
+  connecting?: string;
+  retrying?: string;
+  cameraPreview?: string;
+  captureProgress?: string;
+  consentLabel?: string;
+  regionLabel?: string;
+  cameraStopped?: string;
+  cameraStoppedPending?: string;
+  resultPending?: string;
+  resultActive?: string;
+  resultDuplicate?: string;
+  resultDuplicateAmbiguous?: string;
+  resultObservationSaved?: string;
+  resultUnknown?: string;
+  resultCollectionOnly?: string;
+  resultSuggested?: string;
+  resultMatched?: string;
+  [key: string]: string | undefined;
+}
+
+export const DEFAULT_STRINGS: Readonly<Record<string, string>>;
+
 export function parseConfig(input?: Record<string, unknown>): ParsedConfig;
 export function validateConfig(config: ParsedConfig): ConfigValidationResult;
 export function checkConsentGating(params: { mode: string; consentChecked: boolean }): ConsentGatingResult;
@@ -50,6 +77,9 @@ export interface FaceCaptureCustomEventMap {
 }
 
 export class FaceCaptureElement extends HTMLElement {
+  static readonly template: string;
+  readonly template: string;
+
   apiUrl: string;
   token: string;
   collection: string;
@@ -57,9 +87,13 @@ export class FaceCaptureElement extends HTMLElement {
   personId: string;
   modelBaseUrl: string;
   autostart: boolean;
+  strings: FaceCaptureStrings;
+  readonly hasPendingSave: boolean;
 
+  setStrings(customStrings?: Partial<FaceCaptureStrings>): void;
   start(): Promise<void>;
   stop(): void;
+  retry(): Promise<FaceResultDetail>;
 
   addEventListener<K extends keyof FaceCaptureCustomEventMap>(
     type: K,

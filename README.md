@@ -3,7 +3,7 @@
 [![CI](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml/badge.svg)](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-A browser-based face enrollment and recognition toolkit with local in-browser inference, encrypted storage, and one runtime dependency (`cryptography`); inference runs in the browser.
+A browser-based face enrollment and recognition toolkit with local in-browser inference, encrypted storage, and two runtime dependencies (`cryptography` and `tzdata`); inference runs in the browser.
 
 - **In-browser inference**: Face detection (YuNet) and recognition feature extraction (SFace) run locally via WebAssembly (`onnxruntime-web`)—no video or raw facial images leave the client browser.
 - **Encrypted persistence**: 128-dimensional biometric embeddings are encrypted at rest with Fernet in SQLite, with automated retention expiry and consent gating.

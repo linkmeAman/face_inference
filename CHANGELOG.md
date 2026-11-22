@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added offline, crash-recoverable `rotate-key` with a verified pre-rotation snapshot; see `docs/key-rotation.md`.
+
 - Added the `src/face_inference/` package layout and `face-inference` CLI with `serve`, `init`, `check`, `token`, `purge`, `export`, and `models` commands.
 - Added `face-inference models fetch|verify|path` with a checksum-pinned asset manifest for YuNet, SFace, and onnxruntime-web browser assets.
 - Added per-OS default data directories with `FACE_INFERENCE_HOME` override and legacy `./.face-inference` fallback.
@@ -24,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an opt-in, default-off cache of decrypted templates (`gallery_cache_enabled`), keyed by each template's ciphertext so deleted, expired or re-enrolled records are never served stale; plaintext stays in memory for at most 5 seconds. At 1,000 templates a recognition measured about 142 ms without it and about 44 ms with it. See `docs/guide.md` and `PRIVACY.md`.
 - Added `face-inference backup --output PATH` and `restore --input PATH`: consistent SQLite snapshots that verify integrity and the encryption key, never overwrite, and write files at 0600. A snapshot is unusable without its `config.json` key, so back up both and store them separately (`docs/backup.md`).
 - Added `FACE_INFERENCE_LOG_LEVEL` and `serve --log-level` to control redacted request logging.
+- The `<face-capture>` component is now accessible (labelled region, live status, labelled progress, keyboard-operable controls), has overridable text via a typed `strings` property, and a `retry()` that re-sends an unconfirmed save with its original idempotency key so a retry cannot create a duplicate.
 - Added transactional SQLite schema migrations to v2 with indexes and deferred transactions for pure collection and event reads.
 - Added an optional fail-closed PAD provider contract with no liveness model.
 - Added documentation for architecture, troubleshooting, deployment, privacy, security, compliance templates, export safety, deletion, API versioning, browser performance, and performance baselines.
@@ -41,9 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stopped forwarding `Authorization` headers across redirect origins in the Python client and refused `https` to `http` redirects.
 - Bound recognition session tokens to their subject and returned HTTP 400 for over-deep JSON payloads.
 - Enabled SQLite `secure_delete` and WAL checkpointing after purge and delete operations to reduce retained biometric data exposure.
-- Ensured the face-capture component never imports code from `model-base-url`; that attribute only selects model and WASM asset URLs.
-- The browser worker now verifies the SHA-256 of the YuNet and SFace model bytes against pins shipped with the package before creating inference sessions (SEC-8); a mismatch is fatal.
-- Known limitations: the ONNX Runtime WASM binary and its script glue are not yet hash-verified when served from a configured asset origin. No liveness/PAD is provided, and the system is not intended for unattended security gates.
+- Ensured the face-capture component never loads executable code from `model-base-url`: the capture module and ONNX Runtime's JavaScript glue come from the shipped package, and that attribute only selects model and WASM asset locations (verified in a browser against a hostile origin).
+- The browser worker now verifies the SHA-256 of the YuNet and SFace model bytes and of the ONNX Runtime WASM binary against pins shipped with the package before creating inference sessions (SEC-8); a mismatch is fatal.
+- Known limitations: no liveness/PAD is provided, and the system is not intended for unattended security gates.
 
 ### Removed
 

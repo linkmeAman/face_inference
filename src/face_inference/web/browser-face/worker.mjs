@@ -5,12 +5,14 @@ let config, detector, recognizer, canvas, context, input, aligned, gray, busy = 
 async function init(contract) {
     config = contract;
     const assets = new URL('../'+config.assets_base, import.meta.url).href;
-    ort.env.wasm.wasmPaths = assets;
+    ort.env.wasm.wasmPaths = {mjs: new URL('../vendor/browser-face/ort-wasm-simd-threaded.mjs', import.meta.url).href};
     ort.env.wasm.numThreads = 1; // Works without SharedArrayBuffer/COOP/COEP, including Safari.
-    const [detectorBytes, recognizerBytes] = await Promise.all([
+    const [detectorBytes, recognizerBytes, wasmBytes] = await Promise.all([
         verifyModel(assets+config.detector_file, config.detector_file),
         verifyModel(assets+config.recognizer_file, config.recognizer_file),
+        verifyModel(assets+'ort-wasm-simd-threaded.wasm', 'ort-wasm-simd-threaded.wasm'),
     ]);
+    ort.env.wasm.wasmBinary = wasmBytes;
     detector = await ort.InferenceSession.create(detectorBytes,{executionProviders:['wasm']});
     recognizer = await ort.InferenceSession.create(recognizerBytes,{executionProviders:['wasm']});
     canvas = new OffscreenCanvas(config.detector_size, config.detector_size);
