@@ -20,7 +20,7 @@ This document outlines the release process for `face-inference`, including PyPI 
    - Automatically extracts changelog notes for the release version from `CHANGELOG.md` (with `--generate-notes` fallback).
    - Attaches built Python distribution artifacts (`.whl` and `.tar.gz`).
 4. **Model Assets Release (`models-release.yml`)**:
-   - Model binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`) total ~23 MB and are **not** bundled into the PyPI wheel.
+   - Model binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`) total ~23 MB and are currently still bundled into the PyPI wheel until the `models-v1` release is published.
    - A dedicated workflow packages assets using `tools/package_assets.py` (which verifies `manifest.json` SHA-256 hashes and writes `SHA256SUMS`) and attaches them to a GitHub release tag (default `models-v1`).
    - `face-inference models fetch` downloads from:
      `https://github.com/linkmeAman/face_inference/releases/download/models-v1/`
@@ -170,8 +170,8 @@ When tag `v*.*.*` is pushed, `.github/workflows/release.yml` executes:
 
 3. **`npm` Job**:
    - Condition: Only runs if `needs.verify.outputs.npm_publish == 'true'`.
-   - Sets up Node.js 22 (`actions/setup-node@v7`).
-   - Runs `npm ci`, `npm test`, and `npm run build`.
+   - Sets up Node.js 22 (`actions/setup-node@v7`) configured for the npm registry.
+   - Runs `npm test` in `packages/face-capture` (which builds the package via `pretest` before testing; no `npm ci` is needed as the package has no external dependencies).
    - Executes `npm publish --provenance --access public` using secret `NPM_TOKEN`.
 
 4. **`github-release` Job**:
@@ -208,7 +208,7 @@ gh workflow run models-release.yml -f tag=models-v1
 Once the workflow completes, test fetching model assets using the CLI:
 ```bash
 FACE_INFERENCE_HOME=/tmp/test-models face-inference models fetch
-FACE_INFERENCE_HOME=/tmp/test-models face-inference models check
+FACE_INFERENCE_HOME=/tmp/test-models face-inference models verify
 ```
 
 ---
