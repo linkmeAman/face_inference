@@ -255,22 +255,17 @@ def test_sec_7_session_token_subject_binding_on_recognition(tmp_path: Path):
         thread.join(timeout=3)
 
 
-@pytest.mark.xfail(strict=True, reason="SEC-8 Model binaries loaded without hash verification")
-def test_sec_8_worker_model_hash_verification():
-    """SEC-8: Browser worker must verify SHA-256 hashes before loading ONNX models.
+def test_sec_8_worker_verifies_model_bytes_before_creating_sessions():
+    """SEC-8 (closed): the worker must verify model bytes against shipped pins first.
 
-    Currently, worker.mjs directly passes URLs to InferenceSession.create
-    without verifying hashes against contract.json.
+    Verified bytes, not URLs, must reach ONNX Runtime (no check-then-use gap), and the digest
+    must be computed in the browser with SubtleCrypto.
     """
-    worker_script = (
-        Path(__file__).resolve().parent.parent
-        / "src"
-        / "face_inference"
-        / "web"
-        / "browser-face"
-        / "worker.mjs"
-    ).read_text(encoding="utf-8")
-
-    # Secure behavior: worker.mjs should compute crypto.subtle.digest to verify model hash
-    assert "crypto.subtle.digest" in worker_script
-    assert "detector_source_sha256" in worker_script
+    web = Path(__file__).resolve().parents[1] / "src" / "face_inference" / "web" / "browser-face"
+    worker = (web / "worker.mjs").read_text(encoding="utf-8")
+    pins = (web / "model-pins.mjs").read_text(encoding="utf-8")
+    assert "verifyModel" in worker
+    assert not re.search(r"InferenceSession\.create\(\s*assets", worker), "URL passed to ORT"
+    assert "InferenceSession.create(detectorBytes" in worker
+    assert "InferenceSession.create(recognizerBytes" in worker
+    assert "crypto.subtle.digest" in pins

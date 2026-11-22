@@ -38,7 +38,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bound recognition session tokens to their subject and returned HTTP 400 for over-deep JSON payloads.
 - Enabled SQLite `secure_delete` and WAL checkpointing after purge and delete operations to reduce retained biometric data exposure.
 - Ensured the face-capture component never imports code from `model-base-url`; that attribute only selects model and WASM asset URLs.
-- Known limitations: in-browser cryptographic hash verification for ONNX/WASM model binaries is still open (SEC-8). No liveness/PAD is provided, and the system is not intended for unattended security gates.
+- The browser worker now verifies the SHA-256 of the YuNet and SFace model bytes against pins shipped with the package before creating inference sessions (SEC-8); a mismatch is fatal.
+- Known limitations: the ONNX Runtime WASM binary and its script glue are not yet hash-verified when served from a configured asset origin. No liveness/PAD is provided, and the system is not intended for unattended security gates.
 
 ### Removed
 
