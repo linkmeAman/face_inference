@@ -297,7 +297,7 @@ git clone https://github.com/linkmeAman/face_inference.git
 ```
 
 > [!NOTE]
-> *`face-inference models fetch` is the automated remote download command; it will become active after the official `models-v1` GitHub release is published by the project maintainers.*
+> *`face-inference models fetch` downloads the model files again from the project's `models-v1` GitHub release and checks every file against its stored checksum (a file that fails the check is never used). It is a second way to repair a broken install if you cannot re-clone. It needs an internet connection.*
 
 ---
 

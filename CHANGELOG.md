@@ -36,7 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Model assets can now be downloaded and checksum-verified on first run (`face-inference models fetch`), with offline install from a local directory. The model and WASM binaries are still bundled in the wheel until the `models-v1` release is published.
+- Model assets can now be downloaded and checksum-verified on first run (`face-inference models fetch`), with offline install from a local directory. The `models-v1` release is published (six files plus `SHA256SUMS`), so `models fetch` works; the binaries are still bundled in the wheel for now, so a normal install never needs to download them.
 - The web app and the `<face-capture>` component now derive the camera label with one shared helper (hash key `deviceId`), so the same camera gets the same label from both. Labels already stored by the previous app keep their old value and cannot be correlated with new ones.
 - Changed Python client behavior to align response models and lighting parameters with the server contract.
 
