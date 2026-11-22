@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `face-inference backup --output PATH` and `restore --input PATH`: consistent SQLite snapshots that verify integrity and the encryption key, never overwrite, and write files at 0600. A snapshot is unusable without its `config.json` key, so back up both and store them separately (`docs/backup.md`).
 - Added `FACE_INFERENCE_LOG_LEVEL` and `serve --log-level` to control redacted request logging.
 - The `<face-capture>` component is now accessible (labelled region, live status, labelled progress, keyboard-operable controls), has overridable text via a typed `strings` property, and a `retry()` that re-sends an unconfirmed save with its original idempotency key so a retry cannot create a duplicate.
+- CI now compiles a TypeScript consumer against the packed `<face-capture>` typings (`npm run test:types`, TypeScript 5.7.3 pinned as a dev dependency), so a typing regression fails the build.
 - Added transactional SQLite schema migrations to v2 with indexes and deferred transactions for pure collection and event reads.
 - Added an optional fail-closed PAD provider contract with no liveness model.
 - Added documentation for architecture, troubleshooting, deployment, privacy, security, compliance templates, export safety, deletion, API versioning, browser performance, and performance baselines.
