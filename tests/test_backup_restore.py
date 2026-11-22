@@ -44,14 +44,16 @@ def test_wal_round_trip_and_private_files(source, tmp_path, monkeypatch):
     assert Path(config['database'] + '-wal').stat().st_size > 0
     backup = tmp_path / 'backup.sqlite3'
     assert run(monkeypatch, 'backup', '--config', config_path, '--output', backup) == 0
-    assert backup.stat().st_mode & 0o777 == 0o600
+    if os.name != 'nt':  # POSIX mode bits do not exist on a real Windows filesystem
+        assert backup.stat().st_mode & 0o777 == 0o600
     assert config['api_token'].encode() not in backup.read_bytes()
     assert config['encryption_key'].encode() not in backup.read_bytes()
     destination = tmp_path / 'restored.sqlite3'
     config['database'] = str(destination)
     config_path.write_text(json.dumps(config))
     assert run(monkeypatch, 'restore', '--config', config_path, '--input', backup) == 0
-    assert destination.stat().st_mode & 0o777 == 0o600
+    if os.name != 'nt':  # POSIX mode bits do not exist on a real Windows filesystem
+        assert destination.stat().st_mode & 0o777 == 0o600
     with sqlite3.connect(destination) as restored:
         encrypted = restored.execute('SELECT encrypted_template FROM people').fetchone()[0]
         observation = restored.execute('SELECT encrypted_observations FROM captures').fetchone()[0]

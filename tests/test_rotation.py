@@ -1,4 +1,5 @@
 import json
+import os
 import sqlite3
 import sys
 import uuid
@@ -57,7 +58,8 @@ def test_rotates_populated_database_and_retains_snapshot(tmp_path, monkeypatch, 
     assert len(snapshots) == 1
     assert payloads(dict(config, database=str(snapshots[0]))) == before
     assert json.loads(old_config)['encryption_key'] == config['encryption_key']
-    assert path.stat().st_mode & 0o777 == snapshots[0].stat().st_mode & 0o777 == 0o600
+    if os.name != 'nt':  # POSIX mode bits do not exist on a real Windows filesystem
+        assert path.stat().st_mode & 0o777 == snapshots[0].stat().st_mode & 0o777 == 0o600
     output = capsys.readouterr()
     for key in (config['encryption_key'], new['encryption_key']):
         assert key not in output.out + output.err + caplog.text
