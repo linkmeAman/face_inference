@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added beginner onboarding documentation including the complete step-by-step walkthrough in [docs/START-HERE.md](docs/START-HERE.md), beginner troubleshooting guide in [docs/common-problems.md](docs/common-problems.md), and terminology definitions in [docs/glossary.md](docs/glossary.md).
 - Added offline, crash-recoverable `rotate-key` with a verified pre-rotation snapshot; see `docs/key-rotation.md`.
 
 - Added the `src/face_inference/` package layout and `face-inference` CLI with `serve`, `init`, `check`, `token`, `purge`, `export`, and `models` commands.
