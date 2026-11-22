@@ -76,7 +76,7 @@ The web component (`<face-capture>`) runs client-side inference using YuNet + SF
 cd packages/face-capture && npm run build && cd ../..
 
 # 2. Serve the repository
-python3 -m http.server 8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
 Open [http://127.0.0.1:8000/examples/web/index.html](http://127.0.0.1:8000/examples/web/index.html) in your browser.

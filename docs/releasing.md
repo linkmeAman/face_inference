@@ -20,7 +20,7 @@ This document outlines the release process for `face-inference`, including PyPI 
    - Automatically extracts changelog notes for the release version from `CHANGELOG.md` (with `--generate-notes` fallback).
    - Attaches built Python distribution artifacts (`.whl` and `.tar.gz`).
 4. **Model Assets Release (`models-release.yml`)**:
-   - Model binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`) total ~23 MB and are currently still bundled into the PyPI wheel until the `models-v1` release is published.
+   - Model binaries (`sface.onnx`, `yunet.onnx`, `ort-wasm-simd-threaded.wasm`) total ~23 MB and are currently still bundled into the PyPI wheel. The `models-v1` release is published, so a later release can stop bundling them and rely on `face-inference models fetch`.
    - A dedicated workflow packages assets using `tools/package_assets.py` (which verifies `manifest.json` SHA-256 hashes and writes `SHA256SUMS`) and attaches them to a GitHub release tag (default `models-v1`).
    - `face-inference models fetch` downloads from:
      `https://github.com/linkmeAman/face_inference/releases/download/models-v1/`

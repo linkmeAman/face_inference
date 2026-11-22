@@ -142,6 +142,8 @@ When `mode="enroll"`, the component automatically renders an accessible consent 
 
 ## Building and Testing
 
+Real-browser end-to-end tests verify enrollment flows and prove that hostile model asset origins cannot execute untrusted code or bypass WASM integrity verification.
+
 ```bash
 # Run unit tests (Node.js test runner)
 npm test

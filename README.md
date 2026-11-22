@@ -3,6 +3,9 @@
 [![CI](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml/badge.svg)](https://github.com/linkmeAman/face_inference/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> [!TIP]
+> **New here?** Start with the beginner step-by-step guide: [docs/START-HERE.md](docs/START-HERE.md).
+
 A browser-based face enrollment and recognition toolkit with local in-browser inference, encrypted storage, and two runtime dependencies (`cryptography` and `tzdata`); inference runs in the browser.
 
 - **In-browser inference**: Face detection (YuNet) and recognition feature extraction (SFace) run locally via WebAssembly (`onnxruntime-web`)—no video or raw facial images leave the client browser.
@@ -137,11 +140,14 @@ Configuration and data live in `<home>`. Back up `config.json` AND `faces.sqlite
 
 | Document | Purpose |
 | --- | --- |
+| [docs/START-HERE.md](docs/START-HERE.md) | Beginner step-by-step walkthrough: install, run, enroll, recognize, and backup in 10 minutes |
 | [docs/architecture.md](docs/architecture.md) | Two-tier architecture, sequence diagrams, data model, trust boundaries |
+| [docs/common-problems.md](docs/common-problems.md) | Beginner troubleshooting and error fix guide |
 | [docs/contract.md](docs/contract.md) | Model contracts, preprocessing specs, and lifecycle states |
 | [docs/datasets.md](docs/datasets.md) | Synthetic dataset inventory, model provenance, and evaluation caveats |
 | [docs/deployment.md](docs/deployment.md) | Production deployment (TLS, reverse proxy, systemd, launchd) |
 | [docs/docker.md](docs/docker.md) | Containerization with Docker & Docker Compose, offline deployment |
+| [docs/glossary.md](docs/glossary.md) | Plain-English definitions of biometric, server, and networking terms |
 | [docs/guide.md](docs/guide.md) | Configuration reference, REST API, session tokens, and clients |
 | [docs/model-alternatives.md](docs/model-alternatives.md) | Evaluation of alternative models and future upgrade paths |
 | [docs/model-setup.md](docs/model-setup.md) | Model weight verification, checksums, and offline setup |
