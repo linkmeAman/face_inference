@@ -98,7 +98,7 @@ export class AutomaticCapture {
                 this.callbacks.metrics?.({engine_ready:true});
                 if(this.mode==='attendance' || this.needsVerification)clearTimeout(this.deadline);
                 this.schedule(0);
-            }else if(data.type==='error')this.recover('worker');
+            }else if(data.type==='error'){if(data.code==='MODEL_INTEGRITY')this.fail('Model integrity verification failed. Check model assets and retry.');else this.recover('worker');}
             else if(data.type==='observation' && data.epoch===this.epoch){
                 if(this.jobRevision!==(this.selectionRevision || 0)){this.busy=false;this.schedule(0);return;}
                 const now=performance.now();this.health.last_detection=now;

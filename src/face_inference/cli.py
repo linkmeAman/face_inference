@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import sqlite3
 import sys
 from pathlib import Path
 
@@ -13,16 +14,28 @@ from .config import contract, load_config
 def main():
     os.umask(0o077)
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('command', nargs='?', default='serve', choices=('init', 'serve', 'check', 'token', 'purge', 'export', 'models'))
+    parser.add_argument('command', nargs='?', default='serve', choices=('init', 'serve', 'check', 'token', 'purge', 'export', 'models', 'backup', 'restore'))
     parser.add_argument('action', nargs='?', choices=('fetch', 'verify', 'path'))
     parser.add_argument('--config', help='Private standalone JSON configuration path')
     parser.add_argument('--host', help='Override listener IP address or hostname for this run')
     parser.add_argument('--port', help='Override listener port for this run (1–65535)')
     parser.add_argument('--collection', help='Collection to export for calibration')
-    parser.add_argument('--output', help='New private JSONL export file')
+    parser.add_argument('--output', help='New private export or backup file')
+    parser.add_argument('--input', help='Database backup to restore')
     parser.add_argument('--base-url', help='Override base download URL for model assets')
     parser.add_argument('--from-dir', help='Copy model assets from a local directory')
     args = parser.parse_args()
+    if args.command in ('backup', 'restore'):
+        filename = args.output if args.command == 'backup' else args.input
+        if not filename:
+            parser.error(f'{args.command} requires ' + ('--output' if args.command == 'backup' else '--input'))
+        from .backup import snapshot
+        try:
+            snapshot(args.command, args.config, filename)
+        except (OSError, ValueError, KeyError, TypeError, sqlite3.Error, RuntimeError) as error:
+            print(' '.join(str(error).splitlines()), file=sys.stderr)
+            return 1
+        return 0
     try:
         config = load_config(args.config, host=args.host, port=args.port)
     except (RuntimeError, ValueError) as error:

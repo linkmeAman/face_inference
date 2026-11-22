@@ -1,13 +1,21 @@
 """Application-independent enrollment, evidence and recognition decisions."""
+from collections import OrderedDict
+from contextlib import closing
 from datetime import datetime
 import hashlib
 import json
 import re
+import threading
 import time
 from zoneinfo import ZoneInfo
 
 from .config import load_policy
 from .matching import FaceError, aggregate, cosine, identify, observations, vector
+
+
+GALLERY_CACHE_MAX_ENTRIES = 10000
+GALLERY_CACHE_TTL = 5
+GALLERY_CACHE_MAX_TOKEN_BYTES = 16384
 
 
 def identifier(value, label='ID', minimum=1, maximum=80):
@@ -26,6 +34,11 @@ class FaceService:
     def __init__(self, repository, config, model, clock=time.time):
         self.repository, self.config, self.model, self.clock = repository, config, model, clock
         load_policy(config, model)
+        self._gallery_cache = OrderedDict()
+        self._gallery_lock = threading.Lock()
+        self._gallery_timer = None
+        self._gallery_deadline = None
+        self._gallery_generation = 0
 
     def policy(self):
         # Revoking or replacing an approval report must affect the next operation.
@@ -166,14 +179,64 @@ class FaceService:
                 raise FaceError('MODEL_MISMATCH', 'Capture model and preprocessing must match this service')
         return observations(payload.get('observations'))
 
+    def _clear_gallery_cache(self, generation):
+        with self._gallery_lock:
+            if generation == self._gallery_generation:
+                self._gallery_cache.clear()
+                self._gallery_timer = self._gallery_deadline = None
+
+    def _schedule_gallery_clear(self, expires_at):
+        deadline = time.monotonic() + min(GALLERY_CACHE_TTL, max(0, expires_at - self.clock()))
+        if self._gallery_deadline is None or deadline < self._gallery_deadline:
+            if self._gallery_timer is not None:
+                self._gallery_timer.cancel()
+            self._gallery_deadline = deadline
+            self._gallery_generation += 1
+            timer = threading.Timer(max(0, deadline - time.monotonic()), self._clear_gallery_cache,
+                                    args=(self._gallery_generation,))
+            timer.daemon = True
+            self._gallery_timer = timer
+            timer.start()
+
     def gallery(self, db, collection, active_only=False):
-        rows = db.execute("SELECT * FROM people WHERE collection_id=? AND encrypted_template IS NOT NULL AND consented_at IS NOT NULL AND expires_at>? AND state IN ('PENDING','ACTIVE')", (collection, self.clock()))
+        now = self.clock()
+        query = "SELECT * FROM people WHERE collection_id=? AND encrypted_template IS NOT NULL AND consented_at IS NOT NULL AND expires_at>? AND state IN ('PENDING','ACTIVE')"
+        rows = list(db.execute(query, (collection, now)))
+        enabled = self.config.get('gallery_cache_enabled', False) is True
+        committed = None
+        # A writing connection can see rolled-back references; only publish committed rows.
+        if enabled and db.total_changes:
+            with closing(self.repository.connect()) as current:
+                committed = {(row['id'], row['encrypted_template'])
+                             for row in current.execute(query, (collection, now))}
         result = []
         for row in rows:
             if row['model_version'] != self.model['model_version'] or row['preprocessing_version'] != self.model['preprocessing_version']:
                 raise FaceError('INCOMPATIBLE_GALLERY', 'Collection contains incompatible references; recapture is required', 409)
             if not active_only or row['state'] == 'ACTIVE':
-                result.append(dict(person_id=row['id'], name=row['name'], state=row['state'], vector=vector(self.repository.decrypt(row['encrypted_template']))))
+                token = row['encrypted_template']
+                # Eligibility and identity come from this transaction, never from the cache.
+                key = (collection, row['id'], token)
+                values = None
+                if enabled:
+                    with self._gallery_lock:
+                        if self._gallery_deadline is not None and time.monotonic() >= self._gallery_deadline:
+                            self._gallery_cache.clear()
+                            self._gallery_generation += 1
+                            self._gallery_timer.cancel()
+                            self._gallery_timer = self._gallery_deadline = None
+                        values = self._gallery_cache.get(key)
+                        if values is not None:
+                            self._schedule_gallery_clear(row['expires_at'])
+                if values is None:
+                    values = vector(self.repository.decrypt(token))
+                    if enabled and len(token) <= GALLERY_CACHE_MAX_TOKEN_BYTES and (committed is None or (row['id'], token) in committed):
+                        with self._gallery_lock:
+                            self._schedule_gallery_clear(row['expires_at'])
+                            self._gallery_cache[key] = values
+                            while len(self._gallery_cache) > GALLERY_CACHE_MAX_ENTRIES:
+                                self._gallery_cache.popitem(last=False)
+                result.append(dict(person_id=row['id'], name=row['name'], state=row['state'], vector=values[:]))
         return result
 
     def activate(self, db, collection, policy):

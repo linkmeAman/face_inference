@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added an OpenAPI 3.1 specification with route and runtime contract coverage tests.
 - Added a Docker image and compose configuration (not yet verified on a live daemon), plus deployment and air-gapped setup documentation.
 - Added CI, release, and models-release workflows, along with maintainer release guidance.
+- Added an opt-in, default-off cache of decrypted templates (`gallery_cache_enabled`), keyed by each template's ciphertext so deleted, expired or re-enrolled records are never served stale; plaintext stays in memory for at most 5 seconds. At 1,000 templates a recognition measured about 142 ms without it and about 44 ms with it. See `docs/guide.md` and `PRIVACY.md`.
+- Added `face-inference backup --output PATH` and `restore --input PATH`: consistent SQLite snapshots that verify integrity and the encryption key, never overwrite, and write files at 0600. A snapshot is unusable without its `config.json` key, so back up both and store them separately (`docs/backup.md`).
 - Added transactional SQLite schema migrations to v2 with indexes and deferred transactions for pure collection and event reads.
 - Added an optional fail-closed PAD provider contract with no liveness model.
 - Added documentation for architecture, troubleshooting, deployment, privacy, security, compliance templates, export safety, deletion, API versioning, browser performance, and performance baselines.
@@ -38,7 +40,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bound recognition session tokens to their subject and returned HTTP 400 for over-deep JSON payloads.
 - Enabled SQLite `secure_delete` and WAL checkpointing after purge and delete operations to reduce retained biometric data exposure.
 - Ensured the face-capture component never imports code from `model-base-url`; that attribute only selects model and WASM asset URLs.
-- Known limitations: in-browser cryptographic hash verification for ONNX/WASM model binaries is still open (SEC-8). No liveness/PAD is provided, and the system is not intended for unattended security gates.
+- The browser worker now verifies the SHA-256 of the YuNet and SFace model bytes against pins shipped with the package before creating inference sessions (SEC-8); a mismatch is fatal.
+- Known limitations: the ONNX Runtime WASM binary and its script glue are not yet hash-verified when served from a configured asset origin. No liveness/PAD is provided, and the system is not intended for unattended security gates.
 
 ### Removed
 

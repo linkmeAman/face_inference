@@ -64,7 +64,7 @@ def measure(operation, samples, prepare=lambda: None, clock=time.perf_counter):
 
 
 @contextmanager
-def synthetic_service(gallery):
+def synthetic_service(gallery, gallery_cache=False):
     if not 1 <= len(gallery) <= 10000:
         raise ValueError('Service fixture must respect the configured 10k limit')
     scratch = Path(__file__).resolve().parents[1] / '.scratch'
@@ -73,6 +73,7 @@ def synthetic_service(gallery):
         path = Path(folder) / 'config.json'
         config = load_config(path)
         config['max_people'] = len(gallery)
+        config['gallery_cache_enabled'] = gallery_cache
         path.write_text(json.dumps(config))
         config = load_config(path)  # Apply the production config bounds to the fixture.
         repo = SQLiteRepository(config['database'], config['encryption_key'])
@@ -138,7 +139,9 @@ def peak_rss_bytes():
     return None
 
 
-def run_scenario(count, samples=5, workers=4, seed=7, pending=1, algorithm_only=False):
+def run_scenario(
+    count, samples=5, workers=4, seed=7, pending=1, algorithm_only=False, gallery_cache=False
+):
     if samples < 1 or workers < 1 or not 1 <= pending <= count:
         raise ValueError('Positive samples/workers and pending in [1, templates] required')
     if count > 10000 and not algorithm_only:
@@ -155,7 +158,7 @@ def run_scenario(count, samples=5, workers=4, seed=7, pending=1, algorithm_only=
             setup_peak = tracemalloc.get_traced_memory()[1]
             tracemalloc.stop()
         else:
-            with synthetic_service(gallery) as service:
+            with synthetic_service(gallery, gallery_cache=gallery_cache) as service:
                 setup_peak = tracemalloc.get_traced_memory()[1]
                 tracemalloc.stop()  # Allocation tracing must not distort latency measurements.
                 keys = itertools.count()
@@ -169,6 +172,9 @@ def run_scenario(count, samples=5, workers=4, seed=7, pending=1, algorithm_only=
                     assert outcome['state'] == 'SUGGESTED'
                     assert outcome['person_id'] == gallery[0]['person_id']
 
+                start = time.perf_counter()
+                recognize()
+                result['service_recognize_cold_ms'] = (time.perf_counter() - start) * 1000
                 result['service_recognize'] = measure(recognize, samples)
                 activation_policy = {**service.policy(), 'ready': True}
 
@@ -209,6 +215,9 @@ def main(argv=None):
     parser.add_argument('--seed', type=int, default=7)
     parser.add_argument('--pending', type=int, default=1,
                         help='Pending references per activation sample; reset outside timing')
+    parser.add_argument(
+        '--gallery-cache', action='store_true', help='Enable the decrypted gallery cache'
+    )
     args = parser.parse_args(argv)
     if args.samples < 1 or args.workers < 1 or not 1 <= args.pending <= min(args.sizes):
         parser.error('positive samples/workers and pending <= smallest size required')
@@ -224,9 +233,15 @@ def main(argv=None):
                          memory='Python setup peak; cumulative process RSS, null if unavailable',
                          activation='Direct method, synthetic ready policy; no approval evidence',
                          contention='Connection + BEGIN IMMEDIATE + evaluation recognize + commit',
-                         service='Full evaluation mutate; no HTTP, browser, or inference'),
-        scenarios=[run_scenario(size, args.samples, args.workers, args.seed, args.pending,
-                                algorithm_only=size > 10000) for size in args.sizes])
+                         service='Full evaluation mutate; no HTTP, browser, or inference',
+                         gallery_cache=args.gallery_cache),
+        scenarios=[
+            run_scenario(
+                size, args.samples, args.workers, args.seed, args.pending,
+                algorithm_only=size > 10000, gallery_cache=args.gallery_cache,
+            )
+            for size in args.sizes
+        ])
     print(json.dumps(report, indent=2, allow_nan=False))
 
 
