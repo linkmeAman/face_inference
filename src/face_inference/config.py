@@ -102,6 +102,8 @@ def load_config(path=None, *, host=None, port=None):
         except ValueError:
             raise RuntimeError('Invalid config: rate_limit_per_minute') from None
     config.setdefault('rate_limit_per_minute', 120)
+    if not isinstance(config.get('gallery_cache_enabled', False), bool):
+        raise RuntimeError('Invalid config: gallery_cache_enabled')
     proxies = os.getenv('FACE_INFERENCE_TRUSTED_PROXIES')
     if proxies is not None:
         config['trusted_proxies'] = [proxy.strip() for proxy in proxies.split(',') if proxy.strip()]

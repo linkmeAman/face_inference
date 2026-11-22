@@ -17,6 +17,11 @@ This system is designed with privacy-by-design principles:
 - **Encryption at Rest:**
   Biometric vectors are encrypted at rest using Fernet authenticated symmetric encryption ([storage.py](src/face_inference/storage.py#L12-L13), [storage.py](src/face_inference/storage.py#L54-L61)) using keys managed in server configuration. SQLite database file permissions are strictly locked to `0600` ([storage.py](src/face_inference/storage.py#L34)).
 
+- **Optional in-memory cache:** The default-off `gallery_cache_enabled` setting can
+  retain decrypted templates in server process memory. Its size, expiry,
+  cross-process behavior, and limits on memory erasure are described in the
+  [configuration guide](docs/guide.md). Encryption at rest is unchanged.
+
 ---
 
 ## 2. Consent Verification

@@ -22,7 +22,7 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 | Medium | SEC-4 | Retention Purge Leaves Biometric Records in SQLite Free Pages and WAL Due to Missing `secure_delete` | `src/face_inference/storage.py:17`, `src/face_inference/service.py:57-64` | `tests/test_security_audit.py::test_sec_4_purge_sqlite_secure_delete_enabled` |
 | Medium | SEC-7 | Session Token Subject Constraint Ignored on Face Recognition Endpoint | `src/face_inference/server.py:249-251` | `tests/test_security_audit.py::test_sec_7_session_token_subject_binding_on_recognition` |
 | Low | SEC-6 | Worker Thread Denial of Service via Deeply Nested JSON Payloads | `src/face_inference/server.py:185`, `src/face_inference/server.py:189-191` | `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos` |
-| Low | SEC-8 | Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries | `src/face_inference/web/browser-face/worker.mjs:9-10` | `tests/test_security_audit.py::test_sec_8_worker_model_hash_verification` |
+| Low (closed) | SEC-8 | Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries | `src/face_inference/web/browser-face/worker.mjs:9-10` | `tests/test_security_audit.py::test_sec_8_worker_model_hash_verification` |
 | Info | SEC-5 (Refuted) | HTTP/1.0 Connection Semantics & Request-Body Framing Note | `src/face_inference/server.py:171-180`, `src/face_inference/server.py:273-274` | N/A (Refuted via live pipelining socket test) |
 | Info | SEC-9 | Client-Side Biometric Embedding Trust (Crafted Templates) | `src/face_inference/service.py:188-190, 224` | N/A (Consistency verified server-side; client embedding trust is architectural) |
 | Info | SEC-10 | Plaintext Biometric Embeddings in Calibration and Research Data Exports | `src/face_inference/cli.py:70-73`, `src/face_inference/service.py:249-261` | N/A (Documentation / Operational guidance) |
@@ -86,7 +86,8 @@ The threat model evaluates a public web page embedding `<face-capture>` communic
 - **Recommended Fix**: Explicitly catch `RecursionError` in `read_json()` and translate it to `FaceError('INVALID_JSON', 'Payload exceeds maximum nesting depth', 400)`, or enforce a maximum parsing depth check before deserialization.
 - **Proof Test**: `tests/test_security_audit.py::test_sec_6_deeply_nested_json_dos`
 
-#### SEC-8: Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries
+#### SEC-8 (closed): Absence of In-Browser Cryptographic Hash Verification for ONNX/WASM Model Binaries
+- **Status**: Closed for the YuNet and SFace model files. The worker fetches each model, verifies its SHA-256 against pins shipped in `model-pins.mjs` (checked against `manifest.json` at build time), and passes the verified bytes to ONNX Runtime; any failure is fatal (`docs/asset-trust.md`). **Residual risk:** the ONNX Runtime `.wasm` binary and its script glue are not yet verified, so a compromised asset origin could still serve a malicious runtime. Regression test: `tests/test_security_audit.py::test_sec_8_worker_verifies_model_bytes_before_creating_sessions`.
 - **Location**: `src/face_inference/web/browser-face/worker.mjs:9-10`
 - **Severity Note**: Rated Low because exploitation requires CDN infrastructure compromise or unauthenticated network modification.
 - **Attack**: The model contract specifies `detector_source_sha256` and `recognizer_source_sha256`. However, in `worker.mjs`, `ort.InferenceSession.create(assets + config.detector_file)` passes the URL directly to the ONNX runtime without computing or checking the file's SHA-256 digest in the browser.
