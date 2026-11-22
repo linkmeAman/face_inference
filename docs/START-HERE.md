@@ -324,11 +324,30 @@ Run the built-in backup command:
   .\.venv\Scripts\face-inference.exe backup --output my-backup.sqlite3
   ```
 
+Now copy `config.json` next to it. The `backup` command saves **only the database**, and the key that unlocks it lives in `config.json`:
+
+- **macOS:**
+  ```bash
+  cp "$HOME/Library/Application Support/face-inference/config.json" my-backup-config.json
+  chmod 600 my-backup-config.json
+  ```
+- **Linux:**
+  ```bash
+  cp "${XDG_DATA_HOME:-$HOME/.local/share}/face-inference/config.json" my-backup-config.json
+  chmod 600 my-backup-config.json
+  ```
+- **Windows PowerShell:**
+  ```powershell
+  Copy-Item "$env:APPDATA\face-inference\config.json" my-backup-config.json
+  ```
+
+(If you set `FACE_INFERENCE_HOME` or use a `.face-inference` folder, copy `config.json` from the `"home"` folder that `face-inference check` printed.)
+
 > [!CAUTION]
 > **Lose config.json = lose all enrolled faces.**  
-> Face templates in `faces.sqlite3` are strongly encrypted with the key in `config.json`. A backup of the SQLite database without its matching `config.json` is completely unreadable ciphertext and cannot be recovered. Always back up both files and store them securely.
+> Face templates in `faces.sqlite3` are strongly encrypted with the key in `config.json`. A database backup without its matching `config.json` is unreadable ciphertext and cannot be recovered. `config.json` also holds your admin token, so keep the pair together in a private, access-controlled place and never share it.
 
-- **You should see:** A clean copy `my-backup.sqlite3` created on disk with restricted read permissions (`0600`).
+- **You should see:** Two files, `my-backup.sqlite3` and `my-backup-config.json`, both readable only by you.
 - **If you do not see that:** see [docs/common-problems.md#lost-config-json](common-problems.md#lost-config-json).
 
 ---
@@ -376,8 +395,8 @@ You can embed face recognition on any web page using the `<face-capture>` custom
    - **macOS / Linux:**
      ```bash
      ADMIN_TOKEN=$(.venv/bin/face-inference token)
-     curl -s -X POST http://127.0.0.1:6122/api/v1/session-tokens \
-       -H "Authorization: Bearer $ADMIN_TOKEN" \
+     printf 'Authorization: Bearer %s\n' "$ADMIN_TOKEN" | curl -s -X POST http://127.0.0.1:6122/api/v1/session-tokens \
+       -H @- \
        -H "Content-Type: application/json" \
        -d '{"collection_id":"team-one","scope":"recognize","ttl":300}'
      ```
@@ -403,7 +422,7 @@ You can embed face recognition on any web page using the `<face-capture>` custom
      <meta charset="utf-8">
      <title>Face Recognition Embed</title>
      <!-- Import the web component module -->
-     <script type="module" src="packages/face-capture/dist/face-capture.js"></script>
+     <script type="module" src="face-capture/face-capture.js"></script>
      <style>
        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px; }
        h1 { font-size: 20px; }
@@ -445,10 +464,16 @@ You can embed face recognition on any web page using the `<face-capture>` custom
    ```
 
 5. **Serve and test the page:**
-   Start a simple web server in your project root:
+   Put the page in its own empty folder and serve only that folder, on your own computer only:
    ```bash
-   python3 -m http.server 8000
+   mkdir embed-demo
+   mv embed.html embed-demo/
+   cp -R packages/face-capture/dist embed-demo/face-capture
+   cd embed-demo
+   python3 -m http.server 8000 --bind 127.0.0.1
    ```
+   > [!WARNING]
+   > Never run this server in your project folder or your data folder. It would publish every file there, which can include `config.json` (your encryption key and admin token). `--bind 127.0.0.1` keeps it reachable from this computer only.
    Open **http://127.0.0.1:8000/embed.html** in your browser.
 
 - **You should see:** The `<face-capture>` element mounts with camera preview controls and communicates with your local service using the session token.
