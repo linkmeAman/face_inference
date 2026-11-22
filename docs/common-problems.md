@@ -265,10 +265,13 @@ Running `.venv/bin/face-inference models verify` reports missing files:
   "status": "FAIL",
   "checked_assets": 6,
   "failures": [
-    {"path": "sface.onnx", "reason": "MISSING_OR_SYMLINK"}
+    {"path": "ORT-LICENSE", "reason": "MISSING_OR_SYMLINK"},
+    {"path": "ort-wasm-simd-threaded.mjs", "reason": "MISSING_OR_SYMLINK"},
+    "... and the other model files ..."
   ]
 }
 ```
+*(You may see all six files listed even if only one is really damaged. That is normal: the program looks for a complete set and reports every missing piece. The fix below is the same.)*
 
 **Plain-English cause:**  
 The neural network weights (`sface.onnx`, `yunet.onnx`) or WebAssembly binaries were deleted, incompletely downloaded, or modified. Normally, all 6 model assets are already pre-bundled inside the downloaded repository clone and inside the installed package under `src/face_inference/web/browser-face` and `src/face_inference/web/vendor/browser-face`, so a beginner never needs to download them separately.
