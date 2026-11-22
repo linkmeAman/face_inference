@@ -66,6 +66,7 @@ jobs:
       - run: npm ci
       - run: npm run build --prefix packages/face-capture
       - run: node --test tests/js/*.test.mjs
+      - run: npm run test:types
 
   build:
     name: build / wheel
