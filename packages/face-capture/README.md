@@ -6,6 +6,7 @@
 - **Privacy by Default**: Sensitive API tokens are read directly from attributes/properties, never stored in `localStorage`, and never logged.
 - **Client-Side Biometrics**: Face detection and feature extraction run locally in the browser via YuNet + SFace using WebAssembly.
 - **Mandatory Consent**: Enrollment requires explicit user confirmation in the interface before any face template is recorded.
+- **Accessible & Resilient**: Accessible names, ARIA live region status announcements, full keyboard navigation, safe i18n text customization, and pending-save retry recovery.
 
 ---
 
@@ -38,11 +39,15 @@
 | `person-id` | `personId` | `string` | Person ID to enroll into collection. Required when `mode="enroll"`. |
 | `model-base-url` | `modelBaseUrl` | `string` | Base URL for YuNet/SFace ONNX models and WASM assets. Defaults to `<api-url>/`. Executable code is always resolved locally from the package and never imported from attribute-controlled origins. |
 | `autostart` | `autostart` | `boolean` | Automatically starts camera stream when attached. Defaults to `false`. |
+| — | `strings` | `FaceCaptureStrings` | Object mapping UI string keys to customized text labels. |
+| — | `hasPendingSave` | `boolean` | Read-only. Returns `true` if an unresolved save request is pending recovery. |
 
 ### Methods
 
-- `start(): Promise<void>`: Validates configuration, checks consent gating, and opens the camera.
-- `stop(): void`: Releases camera tracks, stops worker processing, and resets progress.
+- `start(): Promise<void>`: Validates configuration, checks consent gating, and opens the camera. Blocks starting if an unresolved pending save exists (`PENDING_SAVE_UNRESOLVED`).
+- `stop(): void`: Releases camera tracks, stops worker processing, and resets progress. Preserves any unresolved pending save.
+- `retry(): Promise<FaceResultDetail>`: Retries an unresolved pending save using the original request body and idempotency key. Resumes capture on confirmed resolution and dispatches result or error events.
+- `setStrings(customStrings: Partial<FaceCaptureStrings>): void`: Merges custom text strings for user-facing labels and messages.
 
 ### Events
 
@@ -57,13 +62,57 @@ All events are bubbling and composed (`bubbles: true`, `composed: true`):
     "person_name": "Alice Smith"
   }
   ```
-- **`face-error`**: Fired when validation, camera access, or network requests fail:
+- **`face-error`**: Fired when validation, camera access, network requests, or unresolved saves fail:
   ```json
   {
     "code": "CAMERA_DENIED",
     "message": "Camera access denied. Please allow camera permissions and retry."
   }
   ```
+
+---
+
+## Pending-Save Recovery & Retry
+
+When network requests fail due to transient connection drops or server errors (e.g. 5xx status codes or timeouts), the underlying request is not discarded. `<face-capture>` retains the pending save state and its original idempotency key to prevent duplicate creations:
+
+1. **Unresolved Guard**: While a request is unresolved, starting a new capture is blocked (`code: "PENDING_SAVE_UNRESOLVED"`) to prevent silent data loss or conflicting requests.
+2. **Interactive & Programmatic Retry**: An interactive "Retry save" button becomes visible in the component controls, and consumers can call `await element.retry()` programmatically.
+3. **In-Flight Deduplication**: Duplicate retry clicks or concurrent `retry()` calls reuse the same in-flight promise and disable the retry button while the request is in progress.
+4. **Resolution & Capture Resume**: Upon successful resolution, the pending state clears, `face-result` is dispatched, and recognition capture resumes seamlessly via `resumeAfterRequest()`. In enrollment mode, capture completes after verified enrollment.
+
+---
+
+## Accessibility (a11y) & Keyboard Navigation
+
+The component is structured for screen readers and keyboard users according to WCAG recommendations:
+
+- **Landmark & Regions**: The host container declares `role="region"` and an accessible landmark name (`Face capture`).
+- **Accessible Names**: All visual and control elements (`<video aria-label="Camera preview">`, `<canvas aria-hidden="true">`, `<progress aria-label="Capture progress">`, and action `<button>` elements) expose clear, accessible names.
+- **Live Status Announcements**: The status bar uses `role="status"` and `aria-live="polite"` to announce capture guidance and progress updates, automatically elevating to `aria-live="assertive"` on error states.
+- **Keyboard Navigation**: All interactive elements (consent checkbox, Start, Stop, and Retry buttons) support standard Tab navigation and keyboard activation via Space and Enter.
+
+---
+
+## Language Customization (i18n) & Safe Text Injection
+
+`<face-capture>` provides a lightweight text customization mechanism for all user-facing strings without external dependencies or invented translations:
+
+```javascript
+const captureElement = document.querySelector('face-capture');
+
+// Customize user-facing strings
+captureElement.strings = {
+  start: 'Commencer',
+  stop: 'Arrêter',
+  retry: 'Réessayer',
+  ready: 'Prêt',
+  consentLabel: 'J’autorise l’enregistrement du visage',
+  resultMatched: 'Reconnu: {name}',
+};
+```
+
+All custom strings are strictly assigned to DOM elements via `.textContent` and attribute setters (`setAttribute`), never using `innerHTML`. This guarantees that user-provided or localized text can never inject untrusted HTML or execute malicious scripts.
 
 ---
 
@@ -96,6 +145,9 @@ When `mode="enroll"`, the component automatically renders an accessible consent 
 ```bash
 # Run unit tests (Node.js test runner)
 npm test
+
+# Run real-browser E2E tests (Playwright)
+npm run test:e2e
 
 # Build dist/ bundle and vendor sync
 npm run build
