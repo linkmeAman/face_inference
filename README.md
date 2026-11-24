@@ -12,6 +12,8 @@ A browser-based face enrollment and recognition toolkit with local in-browser in
 - **Encrypted persistence**: 128-dimensional biometric embeddings are encrypted at rest with Fernet in SQLite, with automated retention expiry and consent gating.
 - **Ready to embed**: Standalone web UI, embeddable `<face-capture>` custom element, typed standard-library Python client, and REST JSON API.
 
+For a guided, isolated enroll-and-recognize demo, see [docs/demo.md](docs/demo.md) and its [assessment](docs/demo-assessment.md).
+
 ## Quick Start
 
 > [!NOTE]

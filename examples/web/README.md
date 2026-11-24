@@ -12,7 +12,7 @@ This directory demonstrates embedding the `<face-capture>` web component (from `
 - **Security Notice**:
   > [!WARNING]
   > **Dev only — use session tokens in production.**
-  > The API token input in `index.html` accepts the full operator credential for local testing only. Never expose long-lived operator tokens in public client-side applications. Scoped, short-lived session-token minting lands in upcoming task **A3**.
+  > The API token input in `index.html` accepts the full operator credential for local testing only. Never expose long-lived operator tokens in public client-side applications. Scoped, short-lived session tokens are available; see [the session-token guide](../../docs/guide.md).
 
 ---
 
@@ -36,40 +36,33 @@ Generated dist/face-capture.js (ES module)
 Build complete successfully.
 ```
 
-### 2. Start the local `face_inference` server
+### 2. Start the service with an isolated demo directory
 
-In a terminal, start a temporary local server instance:
-
-```bash
-PYTHONPATH=src FACE_INFERENCE_HOME=$(mktemp -d) python3 -m face_inference
-```
-
-Output:
-```
-Face service: http://127.0.0.1:6122
-Use python -m face_inference token in your terminal to get the private API token.
-```
-
-### 3. Retrieve the API token
-
-In a separate terminal, fetch the generated token:
+From the repository root, install the Python package as described in the [local demo](../../docs/demo.md), then run the following in one terminal:
 
 ```bash
-PYTHONPATH=src python3 -m face_inference token
+export FACE_INFERENCE_HOME="$(mktemp -d "${TMPDIR:-/tmp}/face-inference-demo.XXXXXX")"
+printf 'Demo data directory: %s\n' "$FACE_INFERENCE_HOME"
+export FACE_INFERENCE_ALLOWED_ORIGINS="http://127.0.0.1:8000"
+.venv-demo/bin/face-inference token
+.venv-demo/bin/face-inference serve
 ```
 
-### 4. Serve the examples directory
+Keep the printed path and token private. The token and service must use the same `FACE_INFERENCE_HOME`.
 
-Web camera access (`navigator.mediaDevices.getUserMedia`) and ES module imports require serving the page over HTTP/HTTPS rather than `file://`:
+### 3. Create a collection and a person
+
+Open [http://127.0.0.1:6122](http://127.0.0.1:6122), connect with the token, and create a collection and person as described in the [demo guide](../../docs/demo.md#enroll-and-recognize).
+
+### 4. Serve the example
+
+From the repository root in another terminal:
 
 ```bash
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Open your browser to:
-[http://127.0.0.1:8000/examples/web/index.html](http://127.0.0.1:8000/examples/web/index.html)
-
-Paste the API token into the **API Token** input, select your mode, and click **Apply & Start Camera**.
+Open [http://127.0.0.1:8000/examples/web/index.html](http://127.0.0.1:8000/examples/web/index.html). Paste the token, enter the collection ID, choose enroll mode and enter the person ID. Confirm consent in the component and start capture; then switch to recognize mode. This operator token is for local testing only. After testing, stop both servers and delete only the printed demo directory as described in the [cleanup guide](../../docs/demo.md#troubleshooting-and-cleanup).
 
 ---
 
